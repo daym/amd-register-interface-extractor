@@ -1,0 +1,406 @@
+#!/usr/bin/env python3
+
+from lxml import etree
+import re
+
+fontspec_to_meaning = [
+     ({'size': '10', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "itemization"),
+     ({'size': '11', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, None),
+     ({'size': '12', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, "itemization-register-cell-_inst"),
+     ({'size': '12', 'family': 'BAAAAA+LiberationSerif', 'color': '#000080'}, "memory-map-table"),
+     ({'size': '12', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, "bitfield-description"),
+     ({'size': '12', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, "bitfield-description"),
+     ({'size': '12', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "bitfield-description"),
+     ({'size': '12', 'family': 'IAAAAA+LiberationSans', 'color': '#000000'}, None),
+     ({'size': '14', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, None),
+     ({'size': '16', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, "register-cell-description"),
+     ({'size': '16', 'family': 'BAAAAA+LiberationSerif', 'color': '#000080'}, "h1"),
+     ({'size': '16', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, "table-caption"), # Also in register tables (for first table header line)
+     ({'size': '16', 'family': 'DAAAAA+LiberationSerif', 'color': '#000000'}, "table-caption"), # Table 13
+     ({'size': '16', 'family': 'EAAAAA+LiberationMono', 'color': '#000000'}, "source-code"),
+     ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, "itemizaiton-level2"),
+     ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
+     ({'size': '18', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, None),
+     ({'size': '18', 'family': 'DAAAAA+LiberationSerif', 'color': '#000000'}, None),
+     ({'size': '18', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, None),
+     ({'size': '18', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
+     ({'size': '18', 'family': 'JAAAAA+VL-Gothic', 'color': '#000000'}, None),
+     ({'size': '18', 'family': 'KAAAAA+UMingHK', 'color': '#000000'}, "bitfield"), # etc
+     ({'size': '20', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, None),
+     ({'size': '21', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, None),
+     ({'size': '21', 'family': 'FAAAAA+Carlito', 'color': '#bebebe'}, None),
+     ({'size': '21', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
+     ({'size': '22', 'family': 'FAAAAA+Carlito', 'color': '#bebebe'}, None),
+     ({'size': '22', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
+     ({'size': '23', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, None),
+     ({'size': '23', 'family': 'FAAAAA+Carlito', 'color': '#bebebe'}, None),
+     ({'size': '23', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
+     ({'size': '24', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, "namespace-table"),
+     ({'size': '27', 'family': 'FAAAAA+Carlito', 'color': '#bebebe'}, None),
+     ({'size': '27', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
+     ({'size': '42', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, None),
+     ({'size': '54', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, None),
+     ({'size': '5', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, None),
+     ({'size': '5', 'family': 'HAAAAA+DejaVuSans', 'color': '#000000'}, None),
+     ({'size': '5', 'family': 'HAAAAA+DejaVuSans', 'color': '#ff0000'}, None),
+     ({'size': '6', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, None),
+     ({'size': '8', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, None),
+     ({'size': '9', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, "normal-paragraph-text"),
+     ({'size': '9', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, None),
+     ({'size': '9', 'family': 'IAAAAA+LiberationSans', 'color': '#000000'}, "bitfield-description"),
+]
+
+def hashable_fontspec(d):
+  result = tuple(sorted(d.items()))
+  return result
+
+def xdict(fontspec_to_meaning):
+  return dict([(hashable_fontspec(k),v) for k, v in fontspec_to_meaning])
+
+# Check for dupes
+assert len(xdict(fontspec_to_meaning)) == len(fontspec_to_meaning)
+fontspec_to_meaning = xdict(fontspec_to_meaning)
+
+def table_without_column_header_1_text_P(caption):
+  # Note: Document-specific.  Please adapt.
+  return caption.startswith("Table 19:") or caption.startswith("Table 20:") or caption.startswith("Table 21:") or caption.startswith("Table 22:") or caption.startswith("Table 23:") or caption.startswith("Table 24:") or caption.startswith("Table 82:") or caption.startswith("Table 212:")
+
+#from xml.dom import minidom
+# TODO: Use better xml libraries with XPath (etree)
+
+# Note: a.xml has been created by poppler's pdftohtml via "pdftohtml -xml"
+#dom = minidom.parse("parts/a.xml")
+#../doc/sensitive/CORRECT_54945_ppr_ZP_B2_specl_nda.pdf"
+with open("parts/a.xml") as f:
+  tree = etree.parse(f)
+
+def resolve_fontspec(fontspecs, id):
+  for xid, xfontspec in fontspecs:
+    # fontspec  {'id': '0', 'size': '21', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}
+    if xid == xid:
+      xfontspec = hashable_fontspec(xfontspec)
+      return xfontspec
+  assert False, (id, fontspecs)
+
+re_table_caption = re.compile(r"^(Table [0-9]+: [A-Za-z]|List of Namespaces|Memory Map -)")
+re_section_headline = re.compile(r"^([0-9]+[.][0-9]+([.][0-9]+)*|Table [0-9]+:.*)$")
+re_register_caption = re.compile(r"^[A-Z][]A-Z_n0-9.[]+[^ ]*x|CPUID_Fn[08]00000[0-9A-F][0-9A-F]_E|MSR[0-9A-F_]+")
+# TODO: "XGBEDWAPBI2C Registers".
+re_bitfield_table_starts = re.compile(r"^(HDAx[02]...|USBCONTAINERx....|USBDWCHOSTx........|USBDWCx........|XGBEMMIO0x........|CPUID_Fn.*|PHYLANEx0[[]0...C[]]18|USBPHYCTRLx0|USBLANCTRLx0|ENET[[]0[.][.][.]3[]]BAR0x1D...|ENET[[][0123][.][.][.][0123][]]BAR0x[01].... [(]X?GMACDWCXGMAC[:][:]|[ ]?[(]XGBE[A-Z0-9]*::|ENET[[][0123][.][.][.][0123][]]BAR0x[01]....)") # CPUID_ entry is useless, I think.
+#re_bitfield_headlines = re.compile(r"^XGBEDWAPBI2C Registers$")
+
+# Removed the bitfield table start (because it starts it too early): ENET[[][0123][.][.][.][0123][]]BAR0x[01].... ; Example: ENET[0...3]BAR0x1E000; it's now the .* (XGMACDWC entry)
+
+# Should be two columns.
+re_bits_description_broken_header = re.compile(r"^Bits Description")
+re_bitrange = re.compile(r"^[0-9]+:[0-9]+")
+
+def meaning_of_fontspec(fontspec, xx):
+  meaning = fontspec_to_meaning[fontspec]
+  if meaning == "table-caption":
+    if xx == {"b"}: # misdetected headline
+      meaning = "h1"
+    else:
+      assert xx == {"i"} or xx == set(), xx
+  elif meaning == "headline" and not (xx == {"b"}):
+    meaning = None
+  return meaning
+
+class State(object):
+  def __init__(self):
+    self.result = [("junk", )]
+    self.page = 0
+    self.headline = "junk"
+    self.headline_type = None
+    self.headline_left = 0
+    self.in_table = False
+    self.table_caption_left = 0
+    self.in_table_header = False
+    self.in_table_header_column_left = 0
+    self.in_table_prefix = False
+    self.table_column_starts = []
+    self.table_column_header_texts = []
+  def find_table_column_at(self, position):
+    if not self.in_table:
+      return None
+    for i in range(len(self.table_column_starts) - 1, -1, -1):
+      if position >= self.table_column_starts[i]:
+        return i
+    return None
+  def finish_row(self):
+      headline, cells = self.result[-1]
+      print("// FINISH: %r, %s" % (headline, ",".join(map(repr, cells))))
+      for cell in cells:
+        print("//   cell: %r" % (cell, ))
+  def start_new_cell(self, text, attrib):
+    # Start new thing (headline or not)
+    if True:
+        if self.in_table and self.in_table_prefix:
+          if text == "Bits" or text == "Bits Description":
+            self.in_table_prefix = False
+            print("// TABLE PREFIX ENDS")
+            self.in_table_header = True
+            # prefix is its own row.
+            #? self.result.append((self.in_table, []))
+            # FIXME Often, the column Bits is center-justified.  So don't use its text beginning.
+            if attrib["left"] > self.in_table_header_column_left + 1:
+              attrib["left"] = self.in_table_header_column_left + 1
+            if attrib["left"] > self.in_table_header_column_left: # Next column
+              self.table_column_starts.append(attrib["left"])
+              self.table_column_header_texts.append("Bits")
+              self.in_table_header_column_left = attrib["left"]
+              #if self.in_table_header_column_left < self.table_caption_left:
+              #  self.table_caption_left = self.in_table_header_column_left
+              if self.in_table == "MSR0000_044B...MSRC000_2123":
+                  #self.table_column_starts[0] = 58
+                  self.table_caption_left = self.table_caption_left - 1 # = 58 # self.table_column_starts[0]
+                  #self.headline_left = 58
+                  #self.in_table_header_column_left = 58
+              print("// table_column_starts: Added %d (%s)" % (attrib["left"], text))
+              if text == "Bits Description":
+                self.table_column_starts.append(105)
+                self.table_column_header_texts.append("Description")
+                print("// table_column_starts: Added %d (%s)" % (105, "Description"))
+                self.in_table_header = False
+                print("// not in table header anymore (left = %d, in_table_header_column_left = %d)" % (attrib["left"], self.in_table_header_column_left))
+        elif self.in_table and self.in_table_header and not text.startswith(" "): # If we are in a table header # See Table 19 bold text for why the latter.
+          if attrib["left"] > self.in_table_header_column_left:
+            self.table_column_starts.append(attrib["left"])
+            self.table_column_header_texts.append(text)
+            self.in_table_header_column_left = attrib["left"]
+            print("// table_column_starts: Added %d (%s)" % (attrib["left"], text))
+          elif attrib["left"] == self.in_table_header_column_left: # column title is too long and spread over two lines.
+            pass
+          else:
+            self.in_table_header = False
+            print("// not in table header anymore (left = %d, in_table_header_column_left = %d)" % (attrib["left"], self.in_table_header_column_left))
+        else:
+          #if not self.in_table and re_bits_description_broken_header.match(text):
+          #    self.in_table = True
+          #    self.in_table_prefix = False
+          #    self.in_table_header = True
+          assert not re_bits_description_broken_header.match(text), (text, self.in_table_prefix, self.in_table_header, self.headline)
+    return self.in_table
+  def finish_this_table(self):
+    if self.in_table:
+      self.in_table = False
+      self.in_table_header = False
+      self.in_table_prefix = False
+      self.finish_row()
+      self.result.append(("EOT", [])) # not actually necessary--but nice.
+  def finish_this_headline(self):
+    if self.headline:
+      self.headline = self.headline.strip()
+      import traceback
+      print("// FINISH: %r" % (self.result[-1], ))
+      print("// END OF HEADLINE", self.headline)
+      in_table = re_table_caption.match(self.headline) or re_register_caption.match(self.headline)
+      if in_table: # If the headline we are finishing is a table caption
+        assert not self.in_table # ... and we aren't in a table
+        assert self.headline_left > 0 # ... and we didn't fuck up our internal state
+        self.table_caption_left = self.headline_left
+        self.in_table_header_column_left = self.table_caption_left - 1 # The first table column starts has to start to the right of that
+        print("TABLE_CAPTION_LEFT", self.table_caption_left, self.headline)
+        self.table_column_starts = [] # Remember where all the table columns start
+        self.in_table = self.headline # True
+        if re_register_caption.match(self.headline):
+          self.in_table_header = False
+          self.in_table_prefix = True
+          print("// IN TABLE PREFIX")
+        else:
+          self.in_table_header = True # We expect a table header next
+          self.in_table_prefix = False
+          #self.
+          #self.result.append((self.headline, []))
+          print("// IN TABLE HEADER")
+        print("// TABLE STARTS (in_table_header=%d, in_table_prefix=%d)" % (self.in_table_header, self.in_table_prefix))
+        if table_without_column_header_1_text_P(self.headline.strip()):
+          print("// table_column_starts: Added %d (%s)" % (59, ""))
+          self.table_column_starts.append(59)
+          self.table_column_header_texts.append("")
+      elif self.in_table and self.headline_left < self.table_caption_left: # If there's something that is left to the table caption, the table is done.
+        print("// TABLE ENDS IN HEADLINE")
+        self.finish_this_table()
+        assert False
+        # FIXME
+      self.result.append([self.headline, []])
+      self.headline = ""
+      self.headline_type = None
+  def process_text(self, text, attrib, xx):
+    if self.page >= 27 and attrib["top"] >= 75 and attrib["top"] < 1136: # inside payload area of page
+      if attrib["meaning"]:
+          if text == "Processor Cores and Downcoring" or text == "Downcoring within a Core Complex" or text == "Downcoring within a Processor Die" or text == "Downcoring within a Multi-Node System" or text == "Downcoring within a Multi-Node System" or text == "CPUID Instruction Functions": # bad special case!
+            attrib["meaning"] = "h1"
+          elif attrib["left"] in [54, 58, 59] and re_section_headline.match(text) and xx == {"b"}: # catches a lot of misdetections, like 2.1.10, 2.1.10.1, 2.1.10.2; does not catch 3.8.2 because its still in the table prefix of "Unexpected Completion".
+            #assert text != "3.8.2", attrib
+            attrib["meaning"] = "headline"
+          if text.endswith(".") and len(text) > 15 and attrib["meaning"] in ["headline", "h1"]: # # example: "Soft down core needs to follow the same symmetric guidelines used for fused down core." (not really--that would be a bitfield-description)
+            attrib["meaning"] = None
+          if text == "Soft down core needs to follow the same symmetric guidelines used for fused down core." and attrib["meaning"] == "bitfield-description":
+            attrib["meaning"] = None
+          if attrib["meaning"] == "h1":
+            if attrib["left"] == 54 or attrib["left"] == 59: # The latter for 11.13.2's UMCPMCx1
+              if xx == {"i"}:
+                attrib["meaning"] = "italic-headline"
+              elif xx == {"b"}:
+                attrib["meaning"] = "headline"
+              else:
+                attrib["meaning"] = None
+            else: # h1 headline continuation
+              if xx == {"i"}:
+                attrib["meaning"] = "italic-h1"
+              elif xx == {"b"}:
+                attrib["meaning"] = "h1"
+              else:
+                attrib["meaning"] = None
+      if attrib["meaning"] == "headline" and (text == "Read-only" or text == "Read-write" or text.startswith("doc")):
+        attrib["meaning"] = None
+      if attrib["meaning"] == "namespace-table":
+        if text == "List of Namespaces":
+          #self.finish_this_table()
+          attrib["meaning"] = "headline"
+        else:
+          attrib["meaning"] = "bitfield-description"
+      if attrib["meaning"] == "memory-map-table":
+        if text.startswith("Memory Map - "):
+          #self.finish_this_table()
+          attrib["meaning"] = "headline"
+        else:
+          attrib["meaning"] = "bitfield-description"
+      meaning = attrib.get("meaning")
+      #if self.in_table:
+      #  meaning = None
+      # Note: 'bitfield' (for HDAx[02]..., USBCONTAINERx...., USBDWCHOSTx........, USBDWCx........, XGBEMMIO0x........) and left == 59
+      # TODO: 54 for bitfield-description.
+      #assert not text.startswith("Table 85:"), (meaning, int(attrib["left"]), re_section_headline.match(text))
+      if meaning == "headline" \
+      or meaning == "italic-headline" \
+      or (meaning == "table-caption" and int(attrib["left"]) < 100 and text != "•" and xx == {"i"}) \
+      or (meaning == "bitfield-description" and ((int(attrib["left"]) in [58, 59] and not re_bitrange.match(text)) or (int(attrib["left"]) == 54 and re_section_headline.match(text)))) \
+      or (meaning == "itemization-register-cell-_inst" and (text in ["IOx0CF8", "IOx0CFC"] or re_section_headline.match(text))) \
+      or (meaning in ["bitfield"] and re_bitfield_table_starts.match(text)):
+        #assert text != "IOMUXx000", (meaning, self.in_table, self.in_table_prefix, self.in_table_header, attrib, re_bitrange.match(text))
+        #AssertionError: ('bitfield-description', 'Table 211: IOMUX Function Table', False, False), {'meaning': 'bitfield-description', 'left': 59, 'top': 274, 'width': 92, 'height': 18}
+
+        # TEXT HDTx381 {'meaning': 'bitfield-description', 'left': 59, 'top': 669, 'width': 69, 'height': 18}
+        # TABLE ENDS BECAUSE OF NEW HEADLINE OR TABLE CAPTION 31:16 Reserved. Read-only.  {'meaning': 'bitfield-description', 'left': 59, 'top': 840, 'width': 192, 'height': 18} bitfield-description
+        #assert text != "3.8.2", (self.in_table, self.in_table_prefix, int(attrib["left"]))
+        # FIXME: not self.in_table.startswith("Table 211:")
+
+        # FIXME: Re-add 59 ??? XXX
+        if self.in_table and not self.in_table_prefix and \
+        ((meaning == "bitfield-description" and ((int(attrib["left"]) in [54, 58] and len(text) > 3 and xx == {"b"}) or (int(attrib["left"]) == 59 and xx == {"b"} and (text.find("x") > 1 or text.startswith("CPUID_Fn") or text.startswith("MSR")))) and not self.in_table.startswith("Table 85:") and not re_bitrange.match(text)) \
+         or (meaning != "bitfield-description")):
+          self.finish_this_table()
+          print("// TABLE ENDS BECAUSE OF NEW HEADLINE OR TABLE CAPTION", text, attrib, meaning)
+        self.finish_this_headline() # headline after headline
+        if not self.start_new_cell(text, attrib):
+          self.headline = text
+          self.headline_type = meaning
+          self.headline_left = attrib["left"]
+          return
+      elif meaning == "h1":
+        #if attrib["left"] == self.headline_left + 5 and self.headline_type == "italic-headline": table row
+        if self.headline_type == "headline": # continues the same kind of headline
+          if not self.start_new_cell(text, attrib): # XXX
+            self.headline = (self.headline or "") + " " + text
+            return
+          assert False
+        else: # misdetected--actually a start of a new kind of headline
+          self.finish_this_headline() # headline after headline
+          if re_section_headline.match(text):
+            self.finish_this_table()
+            assert False
+          if not self.start_new_cell(text, attrib):
+            self.headline = text
+            self.headline_type = "headline"
+            self.headline_left = attrib["left"]
+            return
+      elif meaning == "italic-h1":
+        if self.headline_type == "italic-headline":
+          if not self.start_new_cell(text, attrib):
+            self.headline = self.headline + " " + text
+            return
+          assert False
+        else: # misdetected--actually a start of a new kind of headline
+          self.finish_this_headline() # headline after headline
+          if not self.start_new_cell(text, attrib):
+            self.headline = text
+            self.headline_type = "italic-headline"
+            self.headline_left = attrib["left"]
+            return
+          assert False
+      else:
+        #print("// end-of-headline because", meaning, text, attrib)
+        self.finish_this_headline() # end of headline
+        self.start_new_cell(text, attrib) # TODO: Check for "bitfield" 'headlines'.
+      if True:
+        if self.in_table and attrib["left"] < self.table_caption_left and not self.in_table_prefix: # If there's something that is left to the table caption, the table is done.
+          print("// TABLE ENDS BECAUSE {} < {}".format(attrib["left"], self.table_caption_left))
+          self.finish_this_table()
+        column_i = self.find_table_column_at(attrib["left"]) or 0
+        if len(self.result[-1][1]) > 1 and column_i == 0: # new row
+          self.finish_row()
+          self.result.append((self.result[-1][0], []))
+        while column_i >= len(self.result[-1][1]):
+          self.result[-1][1].append("")
+        if self.result[-1][1][column_i]:
+          self.result[-1][1][column_i] = self.result[-1][1][column_i] + " " + text
+        else:
+          self.result[-1][1][column_i] = text
+        #print("PROC", text, attrib, self.headline_type, self.headline)
+
+def traverse(state, root, indent = 0, fontspecs = []): # fontspecs: [(id, node with attribs: size, family, color)]
+  for node in root.iterchildren(): # DFS
+    attrib = node.attrib # filter it!
+    if node.tag == "fontspec":
+      # need to mutate because scoping rules are that way
+      xnode = dict(node.attrib)
+      del xnode["id"]
+      fontspecs.insert(0, (node.attrib["id"], xnode))
+    xx = set(xnode.tag for xnode in node.iterchildren() if xnode.tag != "a")
+    if node.tag == "text":
+      attrib = dict([(k,v) for k, v in attrib.items() if k not in ["top", "left", "width", "height"]])
+      x = list(attrib.keys())
+      assert x == ["font"] or x == []
+      if node.text is None or set(xnode.tag for xnode in node.iterchildren() if xnode.tag == "a"): # for example if there are <a ...>
+        text = "".join(text for text in node.itertext()) # XXX maybe recurse
+      else:
+        text = node.text
+      if "font" in attrib: # resolve reference
+        font_id = attrib["font"]
+        fontspec = resolve_fontspec(fontspecs, font_id)
+        attrib["meaning"] = meaning_of_fontspec(fontspec, xx)
+        if not attrib["meaning"]:
+          attrib["font"] = fontspec
+        else:
+          del attrib["font"]
+      #top, left, width, height, font
+    if "meaning" in attrib and (attrib["meaning"] == None or attrib["meaning"] in ["headline", "bitfield-description"]):
+      if text.strip() in ["This document provides the processor behavioral definition and associated design notes. It is intended for platform",
+                          "designers and for programmers involved in the development of BIOS functions, drivers, and operating system kernel",
+                          "AMD Confidential - Advance Information",
+                          "54945 Rev 1.29 - July 19, 2018",
+                          "PPR for AMD Family 17h Models 01h,08h B2"]:
+        assert len(list([xnode for xnode in node.iterchildren() if xnode.tag != "b"])) == 0, (node.text, list(node.iterchildren()))
+        continue
+    # Node: text, font="<id>"; see fontspec
+    if node.tag == "text":
+      attrib["left"] = int(node.attrib["left"])
+      attrib["top"] = int(node.attrib["top"])
+      attrib["width"] = int(node.attrib["width"])
+      attrib["height"] = int(node.attrib["height"])
+    elif node.tag == "page" and node.attrib["number"]:
+      state.page = int(node.attrib["number"])
+    if node.tag == "text" and state.page >= 27 and int(attrib["top"]) >= 75 and int(attrib["top"]) < 1136: # inside payload area of page
+      print("// %*s" % (indent, ""), "TEXT", text if node.tag == "text" else "", attrib)
+    elif node.tag != "fontspec" and state.page >= 27:
+      print("// %*s" % (indent, ""), node.tag, text if node.tag == "text" else "", attrib)
+    if node.tag == "text":
+      state.process_text(text, attrib, xx)
+    traverse(state, node, indent + 4, fontspecs)
+    # node.tag, node.attrib
+
+root = tree.getroot()
+state = State()
+traverse(state, root)
