@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from lxml import etree
+import sys
 import re
 
 fontspec_to_meaning = [
@@ -374,7 +375,11 @@ def traverse(state, root, indent = 0, fontspecs = []): # fontspecs: [(id, node w
       if "font" in attrib: # resolve reference
         font_id = attrib["font"]
         fontspec = resolve_fontspec(fontspecs, font_id)
-        attrib["meaning"] = meaning_of_fontspec(fontspec, xx)
+        try:
+          attrib["meaning"] = meaning_of_fontspec(fontspec, xx)
+        except KeyError as e:
+          print("Text was: {}".format(text), file=sys.stderr)
+          raise e
         if not attrib["meaning"]:
           attrib["font"] = fontspec
         else:
