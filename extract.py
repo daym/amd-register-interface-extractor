@@ -53,6 +53,11 @@ fontspec_to_meaning = [
      ({'size': '18', 'family': 'KAAAAA+WenQuanYiZenHeiSharp', 'color': '#000000'}, "bitfield-description"),
      ({'size': '11', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, None),
      ({'size': '12', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, "bitfield-description"), # header
+     # Rome:
+     ({'size': '16', 'family': 'CAAAAA+LiberationSerif', 'color': '#000080'}, None), # "AMD Confidential"
+     ({'size': '11', 'family': 'EAAAAA+Carlito', 'color': '#000000'}, None),
+     ({'size': '16', 'family': 'FAAAAA+LiberationMono', 'color': '#000000'}, None),
+     ({'size': '16', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "bitfield-description"),
 ]
 
 def hashable_fontspec(d):
@@ -294,7 +299,7 @@ class State(object):
 
         # FIXME: Re-add 59 ??? XXX
         if self.in_table and not self.in_table_prefix and \
-        ((meaning == "bitfield-description" and ((int(attrib["left"]) in [54, 58] and len(text) > 3 and xx == {"b"}) or (int(attrib["left"]) == 59 and xx == {"b"} and (text.find("x") > 1 or text.startswith("CPUID_Fn") or text.startswith("MSR")))) and not self.in_table.startswith("Table 85:") and not re_bitrange.match(text)) \
+        ((meaning == "bitfield-description" and ((int(attrib["left"]) in [54, 58] and len(text) > 3 and xx == {"b"}) or (int(attrib["left"]) == 59 and xx == {"b"} and ((text.find("x") > 1 and not text.endswith("x")) or text.startswith("CPUID_Fn") or text.startswith("MSR")))) and not self.in_table.startswith("Table 85:") and not re_bitrange.match(text)) \
          or (meaning != "bitfield-description")):
           self.finish_this_table()
           print("// TABLE ENDS BECAUSE OF NEW HEADLINE OR TABLE CAPTION", text, attrib, meaning)
