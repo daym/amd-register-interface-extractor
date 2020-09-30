@@ -18,7 +18,7 @@ fontspec_to_meaning = [
      ({'size': '16', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, "table-caption"), # Also in register tables (for first table header line)
      ({'size': '16', 'family': 'DAAAAA+LiberationSerif', 'color': '#000000'}, "table-caption"), # Table 13
      ({'size': '16', 'family': 'EAAAAA+LiberationMono', 'color': '#000000'}, "source-code"),
-     ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, "itemizaiton-level2"),
+     ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, "itemization-level2"),
      ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
      ({'size': '18', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, None),
      ({'size': '18', 'family': 'DAAAAA+LiberationSerif', 'color': '#000000'}, None),
