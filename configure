@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+make clean
+if [ -f ppr_SSP_B0_nda_1.pdfx ] # Rome
+then
+	cat > config.mk << EOF
+PPRVOL1 := ppr_SSP_B0_nda_1.pdf
+PPRVOL2 := ppr_SSP_B0_nda_2.pdf
+PPRVOL3 := ppr_SSP_B0_nda_3.pdf
+EOF
+else # Naples
+  for s in "$1" ppr_ZP_B2_3.04_nda.pdf ppr_ZP_B2_specl_nda.pdf
+  do
+    if [ -f "$s" ]
+    then
+     cat > config.mk << EOF
+PPRVOL1 := ${s}
+EOF
+      exit 0
+    fi
+  done
+  echo "Error: missing input file">&2
+  echo "Note: Please please either ppr_SSP_B0_nda_[123].pdf or ppr_ZP_B2_specl_nda.pdf or another PPR pdf into the current working directory and retry.">&2
+  exit 1
+fi

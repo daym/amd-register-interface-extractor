@@ -81,7 +81,7 @@ def table_without_column_header_1_text_P(caption):
 # Note: a.xml has been created by poppler's pdftohtml via "pdftohtml -xml"
 #dom = minidom.parse("parts/a.xml")
 #../doc/sensitive/CORRECT_54945_ppr_ZP_B2_specl_nda.pdf"
-with open("parts/a.xml") as f:
+with open(sys.argv[1]) as f:
   tree = etree.parse(f)
 
 def resolve_fontspec(fontspecs, id):

@@ -1,22 +1,15 @@
 
-.PHONY: clean distclean
+.PHONY: all clean distclean
 
 all: phase3_result.svd
 
-parts/a.xml: ppr.pdf
-	mkdir -p parts
-	pdftohtml -xml $< parts/a
+include config.mk
+include compiler.mk
 
-result.txt: extract.py parts/a.xml
-	./extract.py > result.txt.new && mv result.txt.new result.txt
-
-phase2_result.py: result.txt phase2.py
-	./phase2.py $< > $@.new && mv $@.new $@
-
-phase3_result.svd: phase3.py phase2_result.py
-	./phase3.py $< > $@.new && mv $@.new $@
+result.txt: $(if $(PPRVOL1),resultvol1.txt,) $(if $(PPRVOL2),resultvol2.txt,) $(if $(PPRVOL3),resultvol3.txt,)
+	cat $^ > "$@.new" && mv "$@.new" "$@"
 
 clean:
-	rm -rf result.txt phase2_result.py phase3_result.svd parts
+	rm -rf result.txt resultvol1.txt resultvol2.txt resultvol3.txt phase2_result.py phase3_result.svd partsvol1 partsvol2 partsvol3
 
 distclean: clean
