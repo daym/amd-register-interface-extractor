@@ -3,7 +3,7 @@
 
 all: phase3_result.svd
 
-parts/a.xml: CORRECT_54945_ppr_ZP_B2_specl_nda.pdf
+parts/a.xml: ppr.pdf
 	mkdir -p parts
 	pdftohtml -xml $< parts/a
 

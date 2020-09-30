@@ -18,7 +18,7 @@ fontspec_to_meaning = [
      ({'size': '16', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, "table-caption"), # Also in register tables (for first table header line)
      ({'size': '16', 'family': 'DAAAAA+LiberationSerif', 'color': '#000000'}, "table-caption"), # Table 13
      ({'size': '16', 'family': 'EAAAAA+LiberationMono', 'color': '#000000'}, "source-code"),
-     ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, "itemization-level2"),
+     ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, "itemization-register-cell-_inst"),
      ({'size': '16', 'family': 'FAAAAA+Carlito', 'color': '#ffffff'}, None),
      ({'size': '18', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, None),
      ({'size': '18', 'family': 'DAAAAA+LiberationSerif', 'color': '#000000'}, None),
@@ -48,6 +48,10 @@ fontspec_to_meaning = [
      ({'size': '9', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, "normal-paragraph-text"),
      ({'size': '9', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, None),
      ({'size': '9', 'family': 'IAAAAA+LiberationSans', 'color': '#000000'}, "bitfield-description"),
+     # TODO: Check using ZP B2 (Naples) from Mar 20, 2020
+     ({'size': '18', 'family': 'KAAAAA+WenQuanYiZenHeiSharp', 'color': '#000000'}, "bitfield-description"),
+     ({'size': '11', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, None),
+     ({'size': '12', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, "bitfield-description"), # header
 ]
 
 def hashable_fontspec(d):
