@@ -262,7 +262,7 @@ svd_root.append(text_element("vendorID", "AMD"))
 svd_root.append(text_element("name", __model))
 svd_root.append(text_element("series", "AMD Epyc"))
 svd_root.append(text_element("version", "0.1")) # FIXME: version of this description, adding CMSIS-SVD 1.1 tags
-svd_root.append(text_element("description", "AMD Epyc Naples (Family 17h, Models 01h,08h, Revision B2), 54945 Rev 1.29 - July 19, 2018"))
+svd_root.append(text_element("description", __model))
 svd_root.append(text_element("licenseText", "AMD devhub under NDA\nDo not distribute"))
 # TODO: <cpu> with: <name>, <revision>, <endian>little</endian>, <mpuPresent>, <fpuPresent>, <nvicPrioBits>, <vendorSystickConfig>
 svd_root.append(text_element("addressUnitBits", 8)) # min. addressable
