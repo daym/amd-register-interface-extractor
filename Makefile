@@ -17,6 +17,6 @@ phase3_result.svd: phase3.py phase2_result.py
 	./phase3.py $< > $@.new && mv $@.new $@
 
 clean:
-	rm -f result.txt phase2_result.py phase3_result.svd
+	rm -rf result.txt phase2_result.py phase3_result.svd parts
 
 distclean: clean
