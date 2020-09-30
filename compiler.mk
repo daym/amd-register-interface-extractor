@@ -24,5 +24,5 @@ resultvol3.txt: partsvol3/a.xml extract.py
 phase2_result.py: result.txt phase2.py
 	./phase2.py $< > $@.new && mv $@.new $@
 
-phase3_result.svd: phase3.py phase2_result.py
+phase3_result.svd: phase2_result.py phase3.py
 	./phase3.py $< > $@.new && mv $@.new $@
