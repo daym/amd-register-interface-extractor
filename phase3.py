@@ -5,7 +5,7 @@ import sys
 import re
 import shutil
 import phase2_result
-from phase2_result import __names
+from phase2_result import __names, __model
 import os
 import pprint
 
@@ -259,8 +259,8 @@ def text_element(key, text):
 svd_root = etree.Element("device")
 svd_root.append(text_element("vendor", "Advanced Micro Devices"))
 svd_root.append(text_element("vendorID", "AMD"))
-svd_root.append(text_element("name", "AMD Epyc Naples (Family 17h, Models 01h,08h, Revision B2)"))
-svd_root.append(text_element("series", "AMD Epyc Naples"))
+svd_root.append(text_element("name", __model))
+svd_root.append(text_element("series", "AMD Epyc"))
 svd_root.append(text_element("version", "0.1")) # FIXME: version of this description, adding CMSIS-SVD 1.1 tags
 svd_root.append(text_element("description", "AMD Epyc Naples (Family 17h, Models 01h,08h, Revision B2), 54945 Rev 1.29 - July 19, 2018"))
 svd_root.append(text_element("licenseText", "AMD devhub under NDA\nDo not distribute"))

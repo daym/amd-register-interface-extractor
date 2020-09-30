@@ -56,8 +56,14 @@ def process_table_row(current_table, cells):
 
 current_table = None
 name_to_nice_name_table_references = {}
+model = None
 for line in open("result.txt", "r"):
 	line = line.strip()
+	if model is None and line.startswith("//      text PPR for "):
+		model = line[len("//      text PPR for "):].strip()
+		model, *rest = model.split("{", 1)
+		model = model.strip()
+		print("__model = {!r}".format(model))
 	if line.startswith("// FINISH:"): # or line.startswith("//   cell:"):
 		row = eval(line[len("// FINISH:"):])
 		if len(row) == 1:
