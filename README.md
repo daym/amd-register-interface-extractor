@@ -10,5 +10,5 @@ Download 54945_ppr_ZP_B2_specl_nda.pdf from AMD devhub and place it into working
 
 Then invoke:
 
-    ./cofigure 54945_ppr_ZP_B2_specl_nda.pdf
+    ./configure 54945_ppr_ZP_B2_specl_nda.pdf
     make
