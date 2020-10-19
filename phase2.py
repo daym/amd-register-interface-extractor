@@ -25,7 +25,7 @@ re_mistaken_pattern_reserved = re.compile(r"^([0-9]+:[0-9]+)[ ]+(Reserved[.]( Re
 
 re_table_prefix = re.compile(r"^(.*) (Bits Description.*)$")
 re_table_prefix_nice_names = re.compile(r"^[ ]*([[][^(]* []])[ ]+([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
-re_table_prefix_nice_name = re.compile(r"^([ ]*)([(][A-Za-z]+::[A-Za-z0-9:_]+[)])(.*)$")
+re_table_prefix_nice_name = re.compile(r"^([ ]*)([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
 re_deparen = re.compile(r"[(]([^]:]+)[)]")
 
 re_bit_ranges = re.compile(r"([0-9]+(:[0-9]+)?) ")
