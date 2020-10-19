@@ -64,6 +64,11 @@ for line in open("result.txt", "r"):
 		model, *rest = model.split("{", 1)
 		model = model.strip()
 		print("__model = {!r}".format(model))
+	elif model is None and line.startswith("//      text PPR Vol 1 for "):
+		model = line[len("//      text PPR Vol 1 for "):].strip()
+		model, *rest = model.split("{", 1)
+		model = model.strip()
+		print("__model = {!r}".format(model))
 	if line.startswith("// FINISH:"): # or line.startswith("//   cell:"):
 		row = eval(line[len("// FINISH:"):])
 		if len(row) == 1:
