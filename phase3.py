@@ -75,7 +75,8 @@ def extract_nice_name(spec, nuke_pattern=True):
 				spec = "{} ({}".format(spec, nice_name[0])
 	#if spec.startswith("ENET") and spec.find("::") == -1:
 	#FIXME	assert False, spec
-	if spec.find("::") != -1 and spec.find(".") == -1 and spec.find("[") == -1 and spec.count("(") <= spec.count(")"):
+	if spec.find("::") != -1 and spec.find(".") == -1 and spec.find("[") == -1 and spec.count("(") <= spec.count(")") and spec.count("(") > 0:
+		#print("SPEC", spec, file=sys.stderr)
 		_, name = spec.split("(", 1)
 		name, *_ = name.split(")", 1)
 		assert name.find("::") != -1
