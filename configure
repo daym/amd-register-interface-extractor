@@ -3,7 +3,7 @@
 set -e
 
 make clean
-if [ -f ppr_SSP_B0_nda_1.pdfx ] # Rome
+if [ -f ppr_SSP_B0_nda_1.pdf ] # Rome
 then
 	cat > config.mk << EOF
 PPRVOL1 := ppr_SSP_B0_nda_1.pdf

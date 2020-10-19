@@ -93,10 +93,11 @@ def resolve_fontspec(fontspecs, id):
   assert False, (id, fontspecs)
 
 re_table_caption = re.compile(r"^(Table [0-9]+: [A-Za-z]|List of Namespaces|Memory Map -)")
-re_section_headline = re.compile(r"^([0-9]+[.][0-9]+([.][0-9]+)*|Table [0-9]+:.*)$")
+re_section_headline = re.compile(r"^([0-9]+[.][0-9]+([.][0-9]+)*|Table [0-9]+:.*|LEGACYIOx00.*)$")
 re_register_caption = re.compile(r"^[A-Z][]A-Z_n0-9.[]+[^ ]*x|CPUID_Fn[08]00000[0-9A-F][0-9A-F]_E|MSR[0-9A-F_]+")
 # TODO: "XGBEDWAPBI2C Registers".
 re_bitfield_table_starts = re.compile(r"^(HDAx[02]...|USBCONTAINERx....|USBDWCHOSTx........|USBDWCx........|XGBEMMIO0x........|CPUID_Fn.*|PHYLANEx0[[]0...C[]]18|USBPHYCTRLx0|USBLANCTRLx0|ENET[[]0[.][.][.]3[]]BAR0x1D...|ENET[[][0123][.][.][.][0123][]]BAR0x[01].... [(]X?GMACDWCXGMAC[:][:]|[ ]?[(]XGBE[A-Z0-9]*::|ENET[[][0123][.][.][.][0123][]]BAR0x[01]....)") # CPUID_ entry is useless, I think.
+re_rome_vol2_misdetected_table_header = re.compile(r"^([A-Z]+.*[(].*::.*[)]|NBIO0NBIFGDCRAS0x00000...[.][.][.]|IOx00C01_x0|ABx0000[04]|FCHSDPx00000_|IOAPICx00000010_indirectaddressoffset.*|I2Cx[[]2[.][.][.]B[]]0[0-9A-F][0-9A-F]|UARTx[[][0-9A-F][0-9A-F]*[.][.][.][0-9A-F][0-9A-F]*[]][0-F]|PMx5F_x|USBCONTAINER[[][0-9A-F][0-9A-F]*[.][.][.][0-9A-F][0-9A-F]*[]]x)")
 #re_bitfield_headlines = re.compile(r"^XGBEDWAPBI2C Registers$")
 
 # Removed the bitfield table start (because it starts it too early): ENET[[][0123][.][.][.][0123][]]BAR0x[01].... ; Example: ENET[0...3]BAR0x1E000; it's now the .* (XGMACDWC entry)
@@ -237,7 +238,9 @@ class State(object):
       self.headline = ""
       self.headline_type = None
   def process_text(self, text, attrib, xx):
-    if self.page >= 27 and attrib["top"] >= 75 and attrib["top"] < 1136: # inside payload area of page
+    print("XXTEXT", text, attrib)
+    # Naples: page >= 27
+    if attrib["top"] >= 75 and attrib["top"] < 1136: # inside payload area of page
       if attrib["meaning"]:
           if text == "Processor Cores and Downcoring" or text == "Downcoring within a Core Complex" or text == "Downcoring within a Processor Die" or text == "Downcoring within a Multi-Node System" or text == "Downcoring within a Multi-Node System" or text == "CPUID Instruction Functions": # bad special case!
             attrib["meaning"] = "h1"
@@ -278,26 +281,13 @@ class State(object):
         else:
           attrib["meaning"] = "bitfield-description"
       meaning = attrib.get("meaning")
-      #if self.in_table:
-      #  meaning = None
-      # Note: 'bitfield' (for HDAx[02]..., USBCONTAINERx...., USBDWCHOSTx........, USBDWCx........, XGBEMMIO0x........) and left == 59
-      # TODO: 54 for bitfield-description.
-      #assert not text.startswith("Table 85:"), (meaning, int(attrib["left"]), re_section_headline.match(text))
       if meaning == "headline" \
       or meaning == "italic-headline" \
       or (meaning == "table-caption" and int(attrib["left"]) < 100 and text != "•" and xx == {"i"}) \
       or (meaning == "bitfield-description" and ((int(attrib["left"]) in [58, 59] and not re_bitrange.match(text)) or (int(attrib["left"]) == 54 and re_section_headline.match(text)))) \
-      or (meaning == "itemization-register-cell-_inst" and (text in ["IOx0CF8", "IOx0CFC"] or re_section_headline.match(text))) \
+      or (meaning == "itemization-register-cell-_inst" and (text in ["IOx0CF8", "IOx0CFC"] or text.startswith("BXXD0") or re_rome_vol2_misdetected_table_header.match(text) or re_section_headline.match(text))) \
+      or (meaning in ["normal-paragraph-text", "register-cell-description"] and re_rome_vol2_misdetected_table_header.match(text) and xx == {"b"}) \
       or (meaning in ["bitfield"] and re_bitfield_table_starts.match(text)):
-        #assert text != "IOMUXx000", (meaning, self.in_table, self.in_table_prefix, self.in_table_header, attrib, re_bitrange.match(text))
-        #AssertionError: ('bitfield-description', 'Table 211: IOMUX Function Table', False, False), {'meaning': 'bitfield-description', 'left': 59, 'top': 274, 'width': 92, 'height': 18}
-
-        # TEXT HDTx381 {'meaning': 'bitfield-description', 'left': 59, 'top': 669, 'width': 69, 'height': 18}
-        # TABLE ENDS BECAUSE OF NEW HEADLINE OR TABLE CAPTION 31:16 Reserved. Read-only.  {'meaning': 'bitfield-description', 'left': 59, 'top': 840, 'width': 192, 'height': 18} bitfield-description
-        #assert text != "3.8.2", (self.in_table, self.in_table_prefix, int(attrib["left"]))
-        # FIXME: not self.in_table.startswith("Table 211:")
-
-        # FIXME: Re-add 59 ??? XXX
         if self.in_table and not self.in_table_prefix and \
         ((meaning == "bitfield-description" and ((int(attrib["left"]) in [54, 58] and len(text) > 3 and xx == {"b"}) or (int(attrib["left"]) == 59 and xx == {"b"} and ((text.find("x") > 1 and not text.endswith("x")) or text.startswith("CPUID_Fn") or text.startswith("MSR")))) and not self.in_table.startswith("Table 85:") and not re_bitrange.match(text)) \
          or (meaning != "bitfield-description")):
