@@ -238,7 +238,7 @@ class State(object):
       self.headline = ""
       self.headline_type = None
   def process_text(self, text, attrib, xx):
-    print("XXTEXT", text, attrib)
+    #print("XXTEXT", text, attrib)
     # Naples: page >= 27
     if attrib["top"] >= 75 and attrib["top"] < 1136: # inside payload area of page
       if attrib["meaning"]:
