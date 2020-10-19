@@ -408,3 +408,4 @@ def traverse(state, root, indent = 0, fontspecs = []): # fontspecs: [(id, node w
 root = tree.getroot()
 state = State()
 traverse(state, root)
+state.finish_this_table()
