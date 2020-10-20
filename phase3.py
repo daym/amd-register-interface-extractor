@@ -310,10 +310,10 @@ peripheral.append(addressBlock)
 peripheral.append(svd_registers)
 svd_peripherals.append(peripheral)
 
-def create_register(table_definition, name):
+def create_register(table_definition, name, description=None):
   result = etree.Element("register")
   result.append(text_element("name", name))
-  result.append(text_element("description", name))
+  result.append(text_element("description", description or name))
   result.append(text_element("addressOffset", "FIXME"))
   result.append(text_element("size", table_definition.size))
   # FIXME: access.
@@ -336,7 +336,7 @@ def traverse1(tree, path):
     if isinstance(v, TableDefinition):
       name = "_".join(path + [k])
       if v.bits:
-        svd_register = create_register(v, name)
+        svd_register = create_register(v, name, description="::".join(path + [k]))
         svd_registers.append(svd_register)
       pass
     else:
