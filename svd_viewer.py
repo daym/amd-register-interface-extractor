@@ -26,6 +26,7 @@ tree = Gtk.TreeView()
 tree.props.model = model
 tree.props.tooltip_column = 2
 tree.props.headers_visible = False
+tree.props.search_column = 1
 #tree.props.has_tooltip = True
 tree.append_column(col0)
 #tree.expand_all()
