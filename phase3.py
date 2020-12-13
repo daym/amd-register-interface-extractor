@@ -283,8 +283,9 @@ class TableDefinition(object):
         # context_string is a really complete spec, so use it to extract instance information, if possible.
         items = list(unroll_pattern(context_string))
         instance_specs = parse_RegisterInstanceSpecs(prefix, context_string)
-        #print("TABLE_DEFINITION", context_string, instance_specs)
-        #print("ITEMS", items)
+        print("TABLE_DEFINITION", context_string, instance_specs)
+        print("TABLE_DEFINITION {} ITEMS", items)
+        assert instance_specs != {} or (instance_specs == {} and (items is None or len(items) == 0)), context_string
     def __repr__(self):
         return ";".join(["{}={}".format("{}:{}".format(*bits) if bits[1] != bits[0] else bits[0], name) for bits, name, description in self.bits]) if self.bits is not None else ""
     def __lt__(self, other):
