@@ -31,7 +31,7 @@ re_deparen = re.compile(r"[(]([^]:]+)[)]")
 
 re_bit_ranges = re.compile(r"([0-9]+(:[0-9]+)?) ")
 
-def start_table(current_table):
+def start_table(current_table, prefix):
 	print("# %s" % (current_table, ))
 	name = current_table
 	# Simplify name (use end-user-friendly name, not address).
@@ -43,7 +43,7 @@ def start_table(current_table):
 	# FIXME: Fix those.
 	assert escaped_name not in resulting_name_to_full_name_map or escaped_name in ["D18F0x050", "D18F1x200"] or escaped_name.startswith("UARTx_9___F_"), (escaped_name, name)
 	resulting_name_to_full_name_map[escaped_name] = current_table
-	print("%s = [" % (escaped_name, ))
+	print("%s = %r, [" % (escaped_name, prefix))
 
 def finish_table(current_table):
 	if current_table:
@@ -85,12 +85,14 @@ for line in open("result.txt", "r"):
 			finish_table(current_table)
 			current_table = table_reference
 			if len(cells) > 1:
+				prefix_metadata = ""
 				if len(cells) >= 1 and cells[0].find("\n") and cells[0].find("Bits Description") != -1:
 					assert re_table_prefix.match(cells[0]), repr(cells[0])
 				if len(cells) >= 1 and re_table_prefix.match(cells[0]):
 					x = re_table_prefix.match(cells[0])
 					prefix = x.group(1)
 					suffix = x.group(2)
+					prefix_metadata = prefix
 					# work around limitation of regexes (recursive nesting not supported)
 					prefix = re_deparen.sub(", \\1", prefix)
 					prefix = prefix.replace("(ASCII Bytes ", ", ASCII Bytes").replace("(Bytes ", ", Bytes ")
@@ -117,7 +119,7 @@ for line in open("result.txt", "r"):
 						cells[0] = suffix
 					#print(prefix, file=sys.stderr)
 					#sys.exit(1)
-				start_table(current_table)
+				start_table(current_table, prefix_metadata.replace("\u00b6", "\n"))
 			else: # ignore trivial "tables"
 				current_table = None
 		if current_table:

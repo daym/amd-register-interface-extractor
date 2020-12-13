@@ -161,7 +161,8 @@ def extract_nice_name(spec, nuke_pattern=True):
 re_bit_range = re.compile(r"^([0-9]+):([0-9]+)$")
 
 class TableDefinition(object):
-    def __init__(self, spec, context_string=None):
+    def __init__(self, spectuple, context_string=None):
+        prefix, spec = spectuple
         if spec[-1:] == [[]]:
           spec = spec[:-1]
         self.spec = spec
