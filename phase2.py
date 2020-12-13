@@ -23,9 +23,10 @@ re_mistaken_pattern_4 = re.compile(r"^([0-9]+:[0-9]+)[ ]+([^.]*[.].*)()$")
 # "10:3 Reserved.  <whatever>"
 re_mistaken_pattern_reserved = re.compile(r"^([0-9]+:[0-9]+)[ ]+(Reserved[.]( Read-[a-zA-Z0-9-,]+[.] (Reset: [^.]*[.])?)?) (.*)")
 
-re_table_prefix = re.compile(r"^(.*) (Bits Description.*)$")
-re_table_prefix_nice_names = re.compile(r"^[ ]*([[][^(]* []])[ ]+([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
-re_table_prefix_nice_name = re.compile(r"^([ ]*)([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
+# Note: \u00b6 is the paragraph sign, used in place of "\n" (because re handles the latter really badly).
+re_table_prefix = re.compile(r"^(.*)[ \u00b6](Bits Description.*)$")
+re_table_prefix_nice_names = re.compile(r"^[ ]*([[][^(]* []])[ \u00b6]+([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
+re_table_prefix_nice_name = re.compile(r"^([ \u00b6]*)([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
 re_deparen = re.compile(r"[(]([^]:]+)[)]")
 
 re_bit_ranges = re.compile(r"([0-9]+(:[0-9]+)?) ")
@@ -40,7 +41,7 @@ def start_table(current_table):
 		assert name.find("::") != -1
 	escaped_name = "".join(c if c in string.ascii_letters + string.digits else "_" for c in name.replace(" ", "_"))
 	# FIXME: Fix those.
-	assert escaped_name not in resulting_name_to_full_name_map or escaped_name in ["D18F0x050", "D18F1x200"] or escaped_name.startswith("UARTx_9___F_"), escaped_name
+	assert escaped_name not in resulting_name_to_full_name_map or escaped_name in ["D18F0x050", "D18F1x200"] or escaped_name.startswith("UARTx_9___F_"), (escaped_name, name)
 	resulting_name_to_full_name_map[escaped_name] = current_table
 	print("%s = [" % (escaped_name, ))
 
@@ -84,6 +85,8 @@ for line in open("result.txt", "r"):
 			finish_table(current_table)
 			current_table = table_reference
 			if len(cells) > 1:
+				if len(cells) >= 1 and cells[0].find("\n") and cells[0].find("Bits Description") != -1:
+					assert re_table_prefix.match(cells[0]), repr(cells[0])
 				if len(cells) >= 1 and re_table_prefix.match(cells[0]):
 					x = re_table_prefix.match(cells[0])
 					prefix = x.group(1)

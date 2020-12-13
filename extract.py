@@ -217,7 +217,7 @@ class State(object):
         if re_register_caption.match(self.headline):
           self.in_table_header = False
           self.in_table_prefix = True
-          print("// IN TABLE PREFIX")
+          print("// IN TABLE PREFIX of %r" % (self.in_table, ))
         else:
           self.in_table_header = True # We expect a table header next
           self.in_table_prefix = False
@@ -345,7 +345,12 @@ class State(object):
         while column_i >= len(self.result[-1][1]):
           self.result[-1][1].append("")
         if self.result[-1][1][column_i]:
-          self.result[-1][1][column_i] = self.result[-1][1][column_i] + " " + text
+          separator = " "
+          if self.in_table and self.in_table_prefix and int(attrib["left"]) in [54, 59]:
+            assert column_i == 0
+            #assert text.startswith("_") or text.startswith("Read-write."), text
+            separator = "\u00b6" # paragraph sign
+          self.result[-1][1][column_i] = self.result[-1][1][column_i] + separator + text
         else:
           self.result[-1][1][column_i] = text
         #print("PROC", text, attrib, self.headline_type, self.headline)
