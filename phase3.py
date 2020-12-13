@@ -8,12 +8,16 @@ import phase2_result
 from phase2_result import __names, __model
 import os
 import pprint
+from collections import namedtuple
 
 re_pattern = re.compile(r"^([0-9A-F]+[_0-9A-Fa-f]*)[.][.][.]([0-9A-F]+[_0-9A-Fa-f]*)$")
 
 def unroll_pattern(spec):
-	# TODO: "BXXD01F1x27C...BXXD04F1x29A"
-	# TODO: "MSR0000_0400...MSRC000_2000"
+	""" Note: Can return None """
+	# TODO: UARTx[2E...3F]8
+	if spec.startswith("Table "):
+		return [spec]
+	#print("SPEC", spec)
 	i = spec.find("[")
 	if i != -1:
 		j = spec.find("]")
@@ -26,7 +30,7 @@ def unroll_pattern(spec):
 		assert suffix.count("]") == 0
 		pattern = spec[i + 1 : j]
 		match = re_pattern.match(pattern)
-		assert match
+		assert match, (spec, pattern)
 		i = len(match.group(1))
 		assert i == len(match.group(2))
 		fmt = "{:0%dX}" % (i, ) # as many digits as the original had
@@ -36,9 +40,8 @@ def unroll_pattern(spec):
 			yield prefix + fmt.format(i) + suffix
 	elif spec.find("...") != -1:
 		beginning_string, end_string = spec.split("...")
-		assert False, "not implemented"
+		return None
 	else:
-		# TODO: "UMC0CTLx00000804_address00090001...UMC1CTLx00000804_address000900D6" ???
 		# TODO: Sometimes, a hex digit can be mistaken for a character.
 		return [spec]
 
@@ -160,6 +163,82 @@ def extract_nice_name(spec, nuke_pattern=True):
 
 re_bit_range = re.compile(r"^([0-9]+):([0-9]+)$")
 
+RegisterInstanceSpec = namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic", "variable_definitions"])
+re_alias = re.compile(r"(_alias[A-Za-z]+)")
+re_direct_instance_number = re.compile(r"^_n[0-9]+$")
+def prefix_remove_fake_newlines(prefix):
+    """ A lot of lines were hard-word-wrapped.  Remove the hard word wraps. """
+    # Not a good idea because of hard word wrap in IOHC::IOHC_Bridge_CNTL:
+    #           .replace("\n_aliasSMN;", "\u00b6_aliasSMN;")
+    #       .replace("\n_alias", "\u00b6_alias", 1) \
+    return prefix \
+           .replace("\n_", "\u00b6_", 1) \
+           .replace("\n_aliasHOSTLEGACY;", "\u00b6_aliasHOSTLEGACY;") \
+           .replace("\n_aliasIO;", "\u00b6_aliasIO;") \
+           .replace("\n_nbio", "\u00b6_nbio") \
+           .replace("\n_inst", "\u00b6_inst") \
+           .replace("\n_ccd", "\u00b6_ccd") \
+           .replace("\n", "") \
+           .replace("\u00b6", "\n")
+
+def parse_RegisterInstanceSpecs(prefix, context_string):
+        """
+        $ grep _alias prefix |sed -e 's@^.*\(_alias[^;: []*\)[;: [].*$@\1@' |sort |uniq
+        _alias
+        _aliasHOST
+        _aliasHOSTLEGACY
+        _aliasHOSTPRI
+        _aliasHOSTSEC
+        _aliasHOSTSWUS
+        _aliasIO
+        _aliasMSR
+        _aliasMSRLEGACY
+        _aliasMSRLSLEGACY
+        _aliasSMN
+        _aliasSMNCCD
+        _aliasSMNPCI
+        """
+        prefix = prefix_remove_fake_newlines(prefix).split("\n")
+        instances = {} # alias kind -> list of RegisterInstanceSpec
+        in_instance_part = False
+        for row in prefix:
+            if not in_instance_part:
+                if row.startswith("_"):
+                    in_instance_part = True
+                else:
+                    continue
+            parts = row.split(";", 2)
+            if len(parts) == 3:
+                logical_mnemonic, physical_mnemonic, variable_definitions = parts
+            elif len(parts) == 2:
+                logical_mnemonic, physical_mnemonic = parts
+                variable_definitions = ""
+            else:
+                assert False, (parts, context_string)
+            #else:
+            #  logical_mnemonic, = parts
+            #  physical_mnemonic = None
+            #  variable_definitions = ""
+            logical_mnemonic = logical_mnemonic.strip()
+            if logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]_n") or logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_n") or logical_mnemonic == "_ccd[7:0]_lthree[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_n") or re_direct_instance_number.match(logical_mnemonic): # implicit core reference etc
+                aliaskind = None
+            elif context_string and context_string.startswith("SBRMIx"):
+                aliaskind = None # FIXME: AMD does not specify which it is.
+            elif context_string and context_string.startswith("DFPMCx"):
+                aliaskind = None # FIXME: AMD does not specify which it is.
+            else:
+                assert logical_mnemonic.find("_alias") != -1, (logical_mnemonic, context_string)
+                aliaskinds = re_alias.findall(logical_mnemonic)
+                assert len(aliaskinds) == 1, logical_mnemonic
+                aliaskind, = aliaskinds
+            physical_mnemonic = physical_mnemonic.strip() if physical_mnemonic is not None else None
+            variable_definitions = variable_definitions.strip()
+            #print("PREFIX", aliaskind, logical_mnemonic, physical_mnemonic, variable_definitions)
+            if aliaskind not in instances:
+                instances[aliaskind] = []
+            instances[aliaskind].append(RegisterInstanceSpec(logical_mnemonic, physical_mnemonic, variable_definitions))
+        return instances
+
 class TableDefinition(object):
     def __init__(self, spectuple, context_string=None):
         prefix, spec = spectuple
@@ -201,6 +280,11 @@ class TableDefinition(object):
               # * MSRC001_023[0...A] (subtable)
               # * MSRC001_0294 (subtables)
               print("warning: {}: bits {} not specified.".format(context_string, unused_bits), file=sys.stderr)
+        # context_string is a really complete spec, so use it to extract instance information, if possible.
+        items = list(unroll_pattern(context_string))
+        instance_specs = parse_RegisterInstanceSpecs(prefix, context_string)
+        #print("TABLE_DEFINITION", context_string, instance_specs)
+        #print("ITEMS", items)
     def __repr__(self):
         return ";".join(["{}={}".format("{}:{}".format(*bits) if bits[1] != bits[0] else bits[0], name) for bits, name, description in self.bits]) if self.bits is not None else ""
     def __lt__(self, other):
@@ -218,6 +302,12 @@ def resolve_path(tree, path, create=False):
 
 # TODO: Unroll the names if specified like "[...]"; also provide one of the things WITHOUT the patterns in it.
 # TODO: Autogenerate accessors--if possible--for each of those.
+# UARTx[2E...3F]8 [DLL] (FCH::UART::DLL)
+#  dim=number of elements
+#  dimIncrement=address increment per element
+#  dimIndex=? "0-9"|"A-F"|"foo,bar,baz"
+#  dimName=? (only valid in <cluster> context)
+#  dimArrayIndex=?
 
 names = sorted([((extract_nice_name(v) or v).split("::"), TableDefinition(getattr(phase2_result, k), v)) for k, v in __names.items()])
 #print(names)
@@ -243,8 +333,6 @@ for path, table_definition in names:
 for toplevel in tree.keys():
 	if toplevel.find("x") != -1:
 		print("Warning: {} is toplevel.".format(toplevel), file=sys.stderr)
-
-#pprint.pprint(tree)
 
 #sys.stdout.reconfigure(encoding='utf-8')
 #sys.stdin = sys.stdin.detach()
@@ -311,11 +399,15 @@ peripheral.append(addressBlock)
 peripheral.append(svd_registers)
 svd_peripherals.append(peripheral)
 
+offset = 0
+
 def create_register(table_definition, name, description=None):
+  global offset
   result = etree.Element("register")
   result.append(text_element("name", name))
   result.append(text_element("description", description or name))
-  result.append(text_element("addressOffset", "FIXME"))
+  result.append(text_element("addressOffset", str(offset))) # FIXME
+  offset += 4
   result.append(text_element("size", table_definition.size))
   # FIXME: access.
   # FIXME: resetValue, resetMask.
