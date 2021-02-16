@@ -19,9 +19,16 @@ PPRVOL1 := ${base}_1.pdf
 PPRVOL2 := ${base}_2.pdf
 PPRVOL3 := ${base}_3.pdf
 EOF
+
+	if [ -f "${base}_5.pdf" ]
+	then
+		cat >> config.mk << EOF
+PPRVOL4 := ${base}_4.pdf
+PPRVOL5 := ${base}_5.pdf
+EOF
+	fi
 else
-  cat > config.mk << EOF
+	cat > config.mk << EOF
 PPRVOL1 := ${input}
 EOF
-  exit 0
 fi

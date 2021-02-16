@@ -12,6 +12,14 @@ partsvol3/a.xml: $(PPRVOL3)
 	mkdir -p partsvol3
 	pdftohtml -xml $< partsvol3/a
 
+partsvol4/a.xml: $(PPRVOL4)
+	mkdir -p partsvol4
+	pdftohtml -xml $< partsvol4/a
+
+partsvol5/a.xml: $(PPRVOL5)
+	mkdir -p partsvol5
+	pdftohtml -xml $< partsvol5/a
+
 resultvol1.txt: partsvol1/a.xml extract.py
 	./extract.py $< > "$@".new && mv "$@".new "$@"
 
@@ -19,6 +27,12 @@ resultvol2.txt: partsvol2/a.xml extract.py
 	./extract.py $< > "$@".new && mv "$@".new "$@"
 
 resultvol3.txt: partsvol3/a.xml extract.py
+	./extract.py $< > "$@".new && mv "$@".new "$@"
+
+resultvol4.txt: partsvol4/a.xml extract.py
+	./extract.py $< > "$@".new && mv "$@".new "$@"
+
+resultvol5.txt: partsvol5/a.xml extract.py
 	./extract.py $< > "$@".new && mv "$@".new "$@"
 
 phase2_result.py: result.txt phase2.py
