@@ -55,6 +55,20 @@ def process_table_row(current_table, cells):
 	print(cells, end="")
 	print(",")
 
+def remove_cosmetic_line_breaks(header):
+    """ Accessor lists are often so long that they have a line wrap in it in the middle of a number.  That line wrap is virtual.  Remove it. """
+    if header.find("\n") == -1:
+        return header
+    for j in range(10):
+        header = header.replace(",\n{:X}".format(j), ",{:X}".format(j))
+        for i in range(16):
+            header = header.replace(",{:X}\n{:X}".format(i, j), ",{:X}{:X}".format(i, j))
+    for i in range(16):
+        for j in range(16):
+            for k in range(10):
+                header = header.replace(",{:X}\n{:X}{:X}".format(i, j, k), ",{:X}{:X}{:X}".format(i, j, k))
+    return header
+
 current_table = None
 name_to_nice_name_table_references = {}
 model = None
@@ -119,7 +133,7 @@ for line in open("result.txt", "r"):
 						cells[0] = suffix
 					#print(prefix, file=sys.stderr)
 					#sys.exit(1)
-				start_table(current_table, prefix_metadata.replace("\u00b6", "\n"))
+				start_table(current_table, remove_cosmetic_line_breaks(prefix_metadata.replace("\u00b6", "\n")))
 			else: # ignore trivial "tables"
 				current_table = None
 		if current_table:
