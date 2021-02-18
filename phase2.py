@@ -67,6 +67,34 @@ def remove_cosmetic_line_breaks(header):
         for j in range(16):
             for k in range(10):
                 header = header.replace(",{:X}\n{:X}{:X}".format(i, j, k), ",{:X}{:X}{:X}".format(i, j, k))
+    header = header.replace("_aliasSMN; \nD", "_aliasSMN; D")
+    header = header.replace("_aliasHOST; \nD", "_aliasHOST; D")
+    header = header.replace("_aliasHOSTLEGACY; \nD", "_aliasHOSTLEGACY; D")
+    header = header.replace("_aliasIO; \nD", "_aliasIO; D")
+    #assert header.find("_aliasHOST;\nD18F0x3F8_x[") == -1
+    #header = header.replace("_aliasHOST; \nD18F0x3F8_x[", "_aliasHOST; D18F0x3F8_x[")
+    #assert header.find("_aliasSMN;\nDFF0x000003F8_x[") == -1
+    #header = header.replace("_aliasSMN; \nDFF0x000003F8_x[", "_aliasSMN; DFF0x000003F8_x[")
+    #assert header.find("_aliasHOST;\nD18F0x044_x[") == -1
+    #header = header.replace("_aliasHOST; \nD18F0x044_x[", "_aliasHOST; D18F0x044_x[")
+    #assert header.find("_aliasSMN;\nDFF0x00000044") == -1
+    #header = header.replace("_aliasSMN; \nDFF0x00000044", "_aliasSMN; DFF0x00000044")
+    def replace_ul(header):
+        # Replace "\n_alias..." by "_alias..." as long as one of the header lines before that starts with an underline
+        j = 0
+        while True:
+            i = header.find("\n_alias", j)
+            if i == -1:
+                break
+            if header.find("\n_") != -1 and header.find("\n_") < i or header.startswith("_"):
+                tail = header[i + len("\n"):]
+                assert tail.startswith("_aliasSMN;") or tail.startswith("_aliasHOST;") or tail.startswith("_aliasHOSTLEGACY;") or tail.startswith("_aliasIO;"), header
+                header = header[:i] + tail
+                j = i
+            else:
+                j = i + 1
+        return header
+    header = replace_ul(header)
     return header
 
 current_table = None
