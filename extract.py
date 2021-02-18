@@ -274,8 +274,8 @@ class State(object):
           attrib["meaning"] = "headline"
         else:
           attrib["meaning"] = "bitfield-description"
-      if attrib["meaning"] == "memory-map-table":
-        if text.startswith("Memory Map - "):
+      if attrib["meaning"] == "memory-map-table" or (attrib["meaning"] == "bitfield-description" and int(attrib["left"]) == 76):
+        if text.startswith("Memory Map - ") or text.strip() == "List of Definitions":
           #self.finish_this_table()
           attrib["meaning"] = "headline"
         else:
