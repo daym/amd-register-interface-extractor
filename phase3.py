@@ -314,9 +314,11 @@ def text_element(key, text):
   return result
 
 svd_root = etree.Element("device")
+svd_root.attrib["schemaVersion"] = "1.3"
+
 svd_root.append(text_element("vendor", "Advanced Micro Devices"))
 svd_root.append(text_element("vendorID", "AMD"))
-svd_root.append(text_element("name", __model))
+svd_root.append(text_element("name", __model.replace(" ", "_")))
 svd_root.append(text_element("series", "AMD Epyc"))
 svd_root.append(text_element("version", "0.1")) # FIXME: version of this description, adding CMSIS-SVD 1.1 tags
 svd_root.append(text_element("description", __model))
@@ -406,6 +408,15 @@ traverse1(tree, [])
 
 sys.stdout.flush()
 et = etree.ElementTree(svd_root)
+#etree.register_namespace("", "urn:iso:std:iso:20022:tech:xsd:CMSIS-SVD.xsd")
+#etree.register_namespace("xs", "http://www.w3.org/2001/XMLSchema-instance")
+XS = "http://www.w3.org/2001/XMLSchema-instance"
+svd_root.set("{%s}noNamespaceSchemaLocation" % XS, "CMSIS-SVD.xsd")
+#svd_root.attrib["xmlns:xs"] = "http://www.w3.org/2001/XMLSchema-instance"
+#svd_root.attrib["xs:noNamespaceSchemaLocation"] = "CMSIS-SVD.xsd"
+#svd_root.set("xmlns", "urn:iso:std:iso:20022:tech:xsd:CMSIS-SVD.xsd")
+#svd_root.set("xmlns:xs", "http://www.w3.org/2001/XMLSchema-instance")
+
 et.write(sys.stdout.buffer, pretty_print=True)
 sys.stdout.flush()
 
