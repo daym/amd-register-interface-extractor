@@ -385,7 +385,7 @@ def create_register(table_definition, name, description=None):
   bits = table_definition.bits
   for (max_bit, min_bit), name, description in bits:
     field = etree.Element("field")
-    field.append(text_element("name", name))
+    field.append(text_element("name", name.replace("[", "_").replace(":", "_").replace("]", "_")))
     field.append(text_element("description", name))
     field.append(text_element("bitRange", "[{}:{}]".format(max_bit, min_bit)))
     # FIXME: access
