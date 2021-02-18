@@ -11,11 +11,13 @@ rwops = {"Read-write",
          "Write-1-to-clear",
          "Read-only,Volatile",
          "Read-write,Read,Write-1-to-clear",
+         "Read,Write-1-to-clear,Volatile",
          "Read-write,Reserved"}
 
 def strip_off_rwops(item):
     ops = {
     }
+    item = item.strip()
     for rwop in rwops:
         if item.startswith(rwop + "."):
             item = item[len(rwop + "."):].strip()

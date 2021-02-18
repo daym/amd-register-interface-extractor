@@ -67,10 +67,13 @@ def remove_cosmetic_line_breaks(header):
         for j in range(16):
             for k in range(10):
                 header = header.replace(",{:X}\n{:X}{:X}".format(i, j, k), ",{:X}{:X}{:X}".format(i, j, k))
-    header = header.replace("_aliasSMN; \nD", "_aliasSMN; D")
-    header = header.replace("_aliasHOST; \nD", "_aliasHOST; D")
-    header = header.replace("_aliasHOSTLEGACY; \nD", "_aliasHOSTLEGACY; D")
-    header = header.replace("_aliasIO; \nD", "_aliasIO; D")
+    #header = header.replace("_aliasSMN; \nD", "_aliasSMN; D")
+    #header = header.replace("_aliasHOST; \nD", "_aliasHOST; D")
+    #header = header.replace("_aliasHOSTLEGACY; \nD", "_aliasHOSTLEGACY; D")
+    #header = header.replace("_aliasIO; \nD", "_aliasIO; D")
+    #FIXME: "_aliasSMN; ¶IOAPICMMIOINDEX0x0000_0["
+
+    header = header.replace(" \n", " ")
     #assert header.find("_aliasHOST;\nD18F0x3F8_x[") == -1
     #header = header.replace("_aliasHOST; \nD18F0x3F8_x[", "_aliasHOST; D18F0x3F8_x[")
     #assert header.find("_aliasSMN;\nDFF0x000003F8_x[") == -1
@@ -86,7 +89,16 @@ def remove_cosmetic_line_breaks(header):
             i = header.find("\n_alias", j)
             if i == -1:
                 break
-            if header.find("\n_") != -1 and header.find("\n_") < i or header.startswith("_"):
+            if header.find("\n_") != -1 and (header.find("\n_") < i or header.startswith("_")):
+                k = header.find("\n_")
+                if k != -1:
+                    if header[k:].startswith("\n_alias"): # not two aliases in one line!
+                         j = i + 1
+                         continue
+                else:
+                    if header.startswith("_alias"): # not two aliases in one line!
+                         j = i + 1
+                         continue
                 tail = header[i + len("\n"):]
                 assert tail.startswith("_aliasSMN;") or tail.startswith("_aliasHOST;") or tail.startswith("_aliasHOSTLEGACY;") or tail.startswith("_aliasIO;"), header
                 header = header[:i] + tail

@@ -4,6 +4,27 @@ import sys
 import pdb
 import sys
 from io import StringIO
+from collections import namedtuple
+
+RegisterInstanceSpec = namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic"])
+
+"""
+TODO:
+            logical_mnemonic = logical_mnemonic.strip()
+            if logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]_n"
+) or logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_n") or logical_mnemonic == "_ccd[7:0
+]_lthree[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_n") or re_direct_instance_number.match(logical_mnemonic): # implicit core reference etc
+                aliaskind = None
+            elif context_string and context_string.startswith("SBRMIx"):
+                aliaskind = None # FIXME: AMD does not specify which it is.
+            elif context_string and context_string.startswith("DFPMCx"):
+                aliaskind = None # FIXME: AMD does not specify which it is.
+            else:
+                assert logical_mnemonic.find("_alias") != -1, (logical_mnemonic, context_string)
+                aliaskinds = re_alias.findall(logical_mnemonic)
+                assert len(aliaskinds) == 1, logical_mnemonic
+                aliaskind, = aliaskinds
+"""
 
 def unroll_inst_item_pattern(spec):
 	"""
@@ -93,7 +114,7 @@ def unroll_inst_pattern(spec):
 	#"""
 	variable_definitions = []
 	insts = []
-	accesses = []
+	physs = []
 	for item in spec.split(";"):
 		item = item.strip()
 		if item.find("=") != -1: # local variable definition
@@ -106,24 +127,21 @@ def unroll_inst_pattern(spec):
 				raise
 			while len(x) > 0 and x[-1] == "": # TODO: Be nicer about this.
 				x = x[:-1]
-			if item.find("_alias") != -1: # alias beginning
+			if item.startswith("_"): # find("_alias") != -1 or item.find(": # alias beginning
 				insts += x
 			else: # expression
-				accesses += x
-	#print(variable_definitions)
-	#print(insts)
-	#print(accesses)
+				physs += x
 	#FIXME: assert len(insts) == len(accesses), (insts, accesses)
-	if len(insts) != len(accesses):
-		if insts == [] and accesses != []:
+	if len(insts) != len(physs):
+		if insts == [] and physs != []:
 			pass
-		elif insts != [] and accesses == []:
+		elif insts != [] and physs == []:
 			pass
 		else:
-			print("ERROR", insts, accesses)
+			print("ERROR", insts, physs, file=sys.stderr)
                 # else who knows
 
-	return insts, accesses
+	return RegisterInstanceSpec(logical_mnemonic=insts, physical_mnemonic=physs)
 
 if __name__ == "__main__":
 	import doctest

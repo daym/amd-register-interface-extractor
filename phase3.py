@@ -9,6 +9,8 @@ from phase2_result import __names, __model
 import os
 import pprint
 from collections import namedtuple
+from rwops import strip_off_rwops
+from unroller import unroll_inst_pattern, RegisterInstanceSpec
 
 re_pattern = re.compile(r"^([0-9A-F]+[_0-9A-Fa-f]*)[.][.][.]([0-9A-F]+[_0-9A-Fa-f]*)$")
 
@@ -166,20 +168,6 @@ re_bit_range = re.compile(r"^([0-9]+):([0-9]+)$")
 RegisterInstanceSpec = namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic", "variable_definitions"])
 re_alias = re.compile(r"(_alias[A-Za-z]+)")
 re_direct_instance_number = re.compile(r"^_n[0-9]+$")
-def prefix_remove_fake_newlines(prefix):
-    """ A lot of lines were hard-word-wrapped.  Remove the hard word wraps. """
-    # Not a good idea because of hard word wrap in IOHC::IOHC_Bridge_CNTL:
-    #           .replace("\n_aliasSMN;", "\u00b6_aliasSMN;")
-    #       .replace("\n_alias", "\u00b6_alias", 1) \
-    return prefix \
-           .replace("\n_", "\u00b6_", 1) \
-           .replace("\n_aliasHOSTLEGACY;", "\u00b6_aliasHOSTLEGACY;") \
-           .replace("\n_aliasIO;", "\u00b6_aliasIO;") \
-           .replace("\n_nbio", "\u00b6_nbio") \
-           .replace("\n_inst", "\u00b6_inst") \
-           .replace("\n_ccd", "\u00b6_ccd") \
-           .replace("\n", "") \
-           .replace("\u00b6", "\n")
 
 def parse_RegisterInstanceSpecs(prefix, context_string):
         """
@@ -198,45 +186,23 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
         _aliasSMNCCD
         _aliasSMNPCI
         """
-        prefix = prefix_remove_fake_newlines(prefix).split("\n")
+        prefix = prefix.split("\n")
         instances = {} # alias kind -> list of RegisterInstanceSpec
         in_instance_part = False
         for row in prefix:
+            _, row = strip_off_rwops(row) # TODO: check that rwops is only given once
             if not in_instance_part:
                 if row.startswith("_"):
                     in_instance_part = True
                 else:
                     continue
-            parts = row.split(";", 2)
-            if len(parts) == 3:
-                logical_mnemonic, physical_mnemonic, variable_definitions = parts
-            elif len(parts) == 2:
-                logical_mnemonic, physical_mnemonic = parts
-                variable_definitions = ""
-            else:
-                assert False, (parts, context_string)
-            #else:
-            #  logical_mnemonic, = parts
-            #  physical_mnemonic = None
-            #  variable_definitions = ""
-            logical_mnemonic = logical_mnemonic.strip()
-            if logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]_n") or logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_n") or logical_mnemonic == "_ccd[7:0]_lthree[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_n") or re_direct_instance_number.match(logical_mnemonic): # implicit core reference etc
-                aliaskind = None
-            elif context_string and context_string.startswith("SBRMIx"):
-                aliaskind = None # FIXME: AMD does not specify which it is.
-            elif context_string and context_string.startswith("DFPMCx"):
-                aliaskind = None # FIXME: AMD does not specify which it is.
-            else:
-                assert logical_mnemonic.find("_alias") != -1, (logical_mnemonic, context_string)
-                aliaskinds = re_alias.findall(logical_mnemonic)
-                assert len(aliaskinds) == 1, logical_mnemonic
-                aliaskind, = aliaskinds
-            physical_mnemonic = physical_mnemonic.strip() if physical_mnemonic is not None else None
-            variable_definitions = variable_definitions.strip()
-            #print("PREFIX", aliaskind, logical_mnemonic, physical_mnemonic, variable_definitions)
+            x = unroll_inst_pattern(row)
+            aliaskind = row.split(";")[0].strip()
+            if aliaskind.find("_alias") != -1:
+                aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
             if aliaskind not in instances:
                 instances[aliaskind] = []
-            instances[aliaskind].append(RegisterInstanceSpec(logical_mnemonic, physical_mnemonic, variable_definitions))
+            instances[aliaskind].append(x)
         return instances
 
 class TableDefinition(object):
@@ -285,7 +251,7 @@ class TableDefinition(object):
         instance_specs = parse_RegisterInstanceSpecs(prefix, context_string)
         print("TABLE_DEFINITION", context_string, instance_specs)
         print("TABLE_DEFINITION {} ITEMS", items)
-        assert instance_specs != {} or (instance_specs == {} and (items is None or len(items) == 0)), context_string
+        assert instance_specs != {} or (instance_specs == {} and (items is None or len(items) == 0)), (context_string, instance_specs, items)
     def __repr__(self):
         return ";".join(["{}={}".format("{}:{}".format(*bits) if bits[1] != bits[0] else bits[0], name) for bits, name, description in self.bits]) if self.bits is not None else ""
     def __lt__(self, other):
