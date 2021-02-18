@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import pdb
 import sys
 from io import StringIO
@@ -21,7 +22,7 @@ def unroll_inst_item_pattern(spec):
 	scanner = Scanner("[{}]".format(spec))
 	def parse_item(): # "02432432foo[2:1] -> [02432432foo2, 02432432foo1]",  "5:[2,1]"
 		item = StringIO("")
-		while scanner.c and scanner.c not in ":,]":
+		while scanner.c and scanner.c not in ":,]=":
 			if scanner.c == "[":
 				prefix = item.getvalue()      # "foo[..." => "foo"
 				scanner.consume()
@@ -37,6 +38,10 @@ def unroll_inst_item_pattern(spec):
 				assert not (scanner.c and scanner.c not in ":,]"), "would stop anyway"
 				return result
 			else:
+				item.write(scanner.c)
+				scanner.consume()
+		if scanner.c == "=": # after that, none of the stuff is supposed to do anything special!
+			while scanner.c and scanner.c not in ":,]":
 				item.write(scanner.c)
 				scanner.consume()
 		return [item.getvalue()]
@@ -55,6 +60,10 @@ def unroll_inst_item_pattern(spec):
 					radix = 10
 					if spec.find("x") != -1:
 						radix = 16
+						assert not spec.startswith("_")
+					else:
+						assert spec.startswith("_"), spec
+
 					beginning = int(beginning, radix)
 					end = int(end, radix)
 					assert beginning >= end
@@ -76,7 +85,7 @@ def unroll_inst_item_pattern(spec):
 			a = a + b
 		return a
 	#pdb.set_trace()
-	return parse_item()
+	return [choice for choice in parse_item()]
 
 def unroll_inst_pattern(spec):
 	#"""
@@ -93,7 +102,7 @@ def unroll_inst_pattern(spec):
 			try:
 				x = list(unroll_inst_item_pattern(item))
 			except:
-				print("ITEM", item)
+				print("ITEM", item, file=sys.stderr)
 				raise
 			while len(x) > 0 and x[-1] == "": # TODO: Be nicer about this.
 				x = x[:-1]
