@@ -20,7 +20,6 @@ def unroll_inst_item_pattern(spec):
 			self.c = self.input_data[0] if self.input_data != "" else None
 	scanner = Scanner("[{}]".format(spec))
 	def parse_item(): # "02432432foo[2:1] -> [02432432foo2, 02432432foo1]",  "5:[2,1]"
-		result = []
 		item = StringIO("")
 		while scanner.c and scanner.c not in ":,]":
 			if scanner.c == "[":
@@ -30,16 +29,16 @@ def unroll_inst_item_pattern(spec):
 				assert scanner.c == "]", scanner.input_data
 				scanner.consume()
 				suffixes = parse_item()
+				result = []
 				for v in values:
 					for x in suffixes:
 						result.append("{}{}{}".format(prefix, v, x))
 				#item = StringIO("")
-				assert not (scanner.c and scanner.c not in ":,]")
+				assert not (scanner.c and scanner.c not in ":,]"), "would stop anyway"
 				return result
 			else:
 				item.write(scanner.c)
 				scanner.consume()
-		assert len(result) == 0
 		return [item.getvalue()]
 	def parse_range(): # "a:b" or "a";   a*b   [3+2]*8
 		a_s = parse_item()
@@ -50,13 +49,53 @@ def unroll_inst_item_pattern(spec):
 			for a in a_s:
 				for b in b_s:
 					beginning, end = a, b
-					assert len(beginning) == len(end)
-					beginning = int(beginning, 16)
-					end = int(end, 16)
+					radix = 10
+					short = len(beginning) == 1 and len(end) == 1 # cannot be misinterpreted
+					# The idea is to prefer to interpret things as decimal, but fall back to hexadecimal if we must.
+					# But these special cases we know to be hexadecimal.
+					if (beginning == "A" and end == "8") \
+					or (beginning == "B" and end == "0") \
+					or (beginning == "B" and end == "8") \
+					or (beginning == "F" and end == "0") \
+					or (beginning == "B3" and end == "A4") \
+					or (beginning == "C3" and end == "B4") \
+					or (beginning == "24" and end == "1F") \
+					or (beginning == "24" and end == "1E") \
+					or (beginning == "30" and end == "1E") \
+					or (beginning == "30" and end == "1F") \
+					or (beginning == "000200F7" and end == "000200F0") \
+					or (beginning == "00090013" and end == "0009000C") \
+					or (spec.startswith("UMC") and spec.find("x") != -1 and beginning == "26" and end == "17"):
+						# Verified: (B3, A4) range is radix 16.
+						radix = 16
+						beginning = int(beginning, 16)
+						end = int(end, 16)
+					else: # prefer decimal
+						try:
+							beginning = int(beginning, 10)
+							radix = 10
+						except ValueError:
+							print("WARNING: {!r} probably has radix 16 but is unknown ({!r}:{!r})".format(spec, beginning, end))
+							assert len(beginning) == 1
+							beginning = int(beginning, 16)
+							assert beginning < 50
+							radix = 16
+						end = int(end, radix)
+						if radix == 10:
+							assert end < 50
+					if radix == 16:
+						assert spec.find("x") != -1, (spec, beginning, end)
+					elif not short:
+						assert spec.find("x") == -1, (spec, beginning, end)
+					#assert len(beginning) == len(end), (beginning, end, scanner.input_data)
 					assert beginning >= end
 					for i in range(beginning, end - 1, -1):
-						v = hex(i).replace("0x", "")
-						result.append(v)
+						if radix == 16:
+							result.append("{:X}h".format(i)) # h is by me
+						elif radix == 10:
+							result.append("{}d".format(i))
+						else:
+							assert False
 			return result
 		else:
 			return a_s
@@ -82,14 +121,31 @@ def unroll_inst_pattern(spec):
 		if item.find("=") != -1: # local variable definition
 			variable_definitions.append(item)
 		else:
-			x = list(unroll_inst_item_pattern(item))
+			try:
+				x = list(unroll_inst_item_pattern(item))
+			except:
+				print("ITEM", item)
+				raise
+			while len(x) > 0 and x[-1] == "": # TODO: Be nicer about this.
+				x = x[:-1]
 			if item.find("_alias") != -1: # alias beginning
-				insts.append(x)
+				insts += x
 			else: # expression
-				accesses.append(x)
-	print(variable_definitions)
-	print(insts)
-	print(accesses)
+				accesses += x
+	#print(variable_definitions)
+	#print(insts)
+	#print(accesses)
+	#FIXME: assert len(insts) == len(accesses), (insts, accesses)
+	if len(insts) != len(accesses):
+		if insts == [] and accesses != []:
+			pass
+		elif insts != [] and accesses == []:
+			pass
+		else:
+			print("ERROR", insts, accesses)
+                # else who knows
+
+	return insts, accesses
 
 if __name__ == "__main__":
 	import doctest
