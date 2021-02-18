@@ -333,11 +333,17 @@ svd_root.append(text_element("access", "read-write"))
 #svd_root.append(text_element("resetValue", "0"))
 svd_root.append(text_element("resetMask", "0xFFFFFFFF"))
 
+
 svd_peripherals = etree.Element("peripherals")
 svd_root.append(svd_peripherals)
 
 # TODO: Read "Memory Map - MSR" in tree.
 # TODO: Read "Memory Map - Main Memory" in tree.
+# Memory_Map___MSR
+# Memory_Map___Main_Memory
+# Memory_Map___PCICFG
+# Memory_Map___SMN
+# Memory_Map___SMNCCD
 #  It has: IOAPIC, SPI, ESPI, HPET, HCE, SMI, PM, RTCHOST, ASF, SMBUS, WDT, IOIMUX, MISC, GPIO, ACDC, AOAC, I2C, UART, EMMCHC, EMMCCFG
 # TODO: Read "Memory Map - PCICFG" in tree.
 # TODO: Read "Memory Map - SMN" in tree.
