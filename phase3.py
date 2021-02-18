@@ -252,6 +252,7 @@ class TableDefinition(object):
         #print("TABLE_DEFINITION", context_string, instance_specs)
         #print("TABLE_DEFINITION {} ITEMS", items)
         assert instance_specs != {} or (instance_specs == {} and (items is None or len(items) == 0)), (context_string, instance_specs, items)
+        self.instances = instance_specs
     def __repr__(self):
         return ";".join(["{}={}".format("{}:{}".format(*bits) if bits[1] != bits[0] else bits[0], name) for bits, name, description in self.bits]) if self.bits is not None else ""
     def __lt__(self, other):
@@ -366,14 +367,6 @@ def create_addressBlock(offset, size, usage="registers"):
   result.append(text_element("usage", usage))
   return result
 
-svd_registers = etree.Element("registers")
-peripheral = create_peripheral("everything", "1.0", 0, 100, "read-write")
-addressBlock = create_addressBlock(0, 100, "registers")
-# TODO: <interrupt> as child of peripheral.
-peripheral.append(addressBlock)
-peripheral.append(svd_registers)
-svd_peripherals.append(peripheral)
-
 offset = 0
 
 def create_register(table_definition, name, description=None):
@@ -399,14 +392,48 @@ def create_register(table_definition, name, description=None):
     fields.append(field)
   return result
 
+svd_peripherals_by_path = {}
+
+#import pprint
+#pprint.pprint(tree)
+
 def traverse1(tree, path):
   for k, v in tree.items():
-    if isinstance(v, TableDefinition):
-      name = "_".join(path + [k])
-      if v.bits:
-        svd_register = create_register(v, name, description="::".join(path + [k]))
-        svd_registers.append(svd_register)
-      pass
+    if isinstance(v, TableDefinition): # assume already processed
+      continue
+    if k.startswith("Table "): # skip for now
+      continue
+
+    # traverse so far down that one of the children is a tabledefinition.  That then is (at least) a peripheral.
+
+    has_peripheral = False
+    has_non_peripheral = False
+    for kk, vv in v.items():
+      if isinstance(vv, TableDefinition):
+        has_peripheral = True
+      else:
+        has_non_peripheral = True
+
+    if has_peripheral:
+      peripheral_path = tuple(path + [k])
+      if peripheral_path not in svd_peripherals_by_path:
+        svd_peripheral = create_peripheral("_".join(peripheral_path), "1.0", 0, 100, "read-write") # FIXME
+        svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
+        # TODO: <interrupt> as child of peripheral.
+        svd_peripheral.append(svd_addressBlock)
+        svd_peripherals.append(svd_peripheral)
+        svd_registers = etree.Element("registers")
+        svd_peripheral.append(svd_registers)
+        svd_peripherals_by_path[peripheral_path] = svd_peripheral, svd_addressBlock, svd_registers
+      else:
+        svd_peripheral, svd_addressBlock, svd_registers = svd_peripherals_by_path[peripheral_path]
+      for kk, vv in v.items():
+        if isinstance(vv, TableDefinition):
+          name = kk # "_".join(path + [k, kk])
+          if vv.bits:
+            svd_register = create_register(vv, name, description="::".join(path + [k]))
+            svd_registers.append(svd_register)
+          pass
     else:
       traverse1(v, path + [k])
 
