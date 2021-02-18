@@ -52,48 +52,17 @@ def unroll_inst_item_pattern(spec):
 					radix = 10
 					short = len(beginning) == 1 and len(end) == 1 # cannot be misinterpreted
 					# The idea is to prefer to interpret things as decimal, but fall back to hexadecimal if we must.
-					# But these special cases we know to be hexadecimal.
-					if (beginning == "A" and end == "8") \
-					or (beginning == "B" and end == "0") \
-					or (beginning == "B" and end == "8") \
-					or (beginning == "F" and end == "0") \
-					or (beginning == "B3" and end == "A4") \
-					or (beginning == "C3" and end == "B4") \
-					or (beginning == "24" and end == "1F") \
-					or (beginning == "24" and end == "1E") \
-					or (beginning == "30" and end == "1E") \
-					or (beginning == "30" and end == "1F") \
-					or (beginning == "000200F7" and end == "000200F0") \
-					or (beginning == "00090013" and end == "0009000C") \
-					or (spec.startswith("UMC") and spec.find("x") != -1 and beginning == "26" and end == "17"):
-						# Verified: (B3, A4) range is radix 16.
+					radix = 10
+					if spec.find("x") != -1:
 						radix = 16
-						beginning = int(beginning, 16)
-						end = int(end, 16)
-					else: # prefer decimal
-						try:
-							beginning = int(beginning, 10)
-							radix = 10
-						except ValueError:
-							print("WARNING: {!r} probably has radix 16 but is unknown ({!r}:{!r})".format(spec, beginning, end))
-							assert len(beginning) == 1
-							beginning = int(beginning, 16)
-							assert beginning < 50
-							radix = 16
-						end = int(end, radix)
-						if radix == 10:
-							assert end < 50
-					if radix == 16:
-						assert spec.find("x") != -1, (spec, beginning, end)
-					elif not short:
-						assert spec.find("x") == -1, (spec, beginning, end)
-					#assert len(beginning) == len(end), (beginning, end, scanner.input_data)
+					beginning = int(beginning, radix)
+					end = int(end, radix)
 					assert beginning >= end
 					for i in range(beginning, end - 1, -1):
 						if radix == 16:
-							result.append("{:X}h".format(i)) # h is by me
+							result.append("{:X}".format(i))
 						elif radix == 10:
-							result.append("{}d".format(i))
+							result.append("{}".format(i))
 						else:
 							assert False
 			return result
