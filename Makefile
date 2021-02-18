@@ -15,4 +15,4 @@ clean:
 distclean: clean
 
 validate: phase3_result.svd
-	xmllint --schema cmsis-svd.xsd phase3_result.svd
+	xmllint --schema CMSIS-SVD.xsd phase3_result.svd
