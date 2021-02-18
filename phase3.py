@@ -409,6 +409,8 @@ def create_register(peripheral_path, table_definition, name, description=None):
 #import pprint
 #pprint.pprint(tree)
 
+selected_access_method = "HOST"
+
 def traverse1(tree, path):
   for k, v in tree.items():
     if isinstance(v, TableDefinition): # assume already processed
@@ -419,21 +421,20 @@ def traverse1(tree, path):
     # traverse so far down that one of the children is a tabledefinition.  That then is (at least) a peripheral.
 
     has_peripheral = False
-    has_non_peripheral = False
     for kk, vv in v.items():
       if isinstance(vv, TableDefinition):
         has_peripheral = True
-      else:
-        has_non_peripheral = True
 
     if has_peripheral:
       peripheral_path = tuple(path + [k])
       for kk, vv in v.items():
         if isinstance(vv, TableDefinition):
-          name = kk # "_".join(path + [k, kk])
-          if vv.bits:
-            svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k]))
-          pass
+          if selected_access_method in vv.instances:
+            instances = vv.instances[selected_access_method]
+            print("INSTANCES", instances, file=sys.stderr)
+            name = kk # "_".join(path + [k, kk])
+            if vv.bits:
+              svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]))
     else:
       traverse1(v, path + [k])
 
