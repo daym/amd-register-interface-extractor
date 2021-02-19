@@ -75,12 +75,6 @@ def table_without_column_header_1_text_P(caption):
   # Note: Document-specific.  Please adapt.
   return caption.startswith("Table 19:") or caption.startswith("Table 20:") or caption.startswith("Table 21:") or caption.startswith("Table 22:") or caption.startswith("Table 23:") or caption.startswith("Table 24:") or caption.startswith("Table 82:") or caption.startswith("Table 212:")
 
-#from xml.dom import minidom
-# TODO: Use better xml libraries with XPath (etree)
-
-# Note: a.xml has been created by poppler's pdftohtml via "pdftohtml -xml"
-#dom = minidom.parse("parts/a.xml")
-#../doc/sensitive/CORRECT_54945_ppr_ZP_B2_specl_nda.pdf"
 with open(sys.argv[1]) as f:
   tree = etree.parse(f)
 
