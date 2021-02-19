@@ -10,7 +10,7 @@ Tested with ZP B2 (Naples) and SSP B0 (Rome) PPR PDFs.
 
 Download the PPR PDFs for your CPU from AMD devhub and place them into the working directory (or a subdirectory of it).
 
-Then invoke something like:
+Then invoke something like (using the name of the first PDF file as argument):
 
     ./configure 54945_ppr_ZP_B2_specl_nda.pdf
     make
