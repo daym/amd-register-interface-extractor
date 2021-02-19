@@ -385,14 +385,6 @@ def traverse(state, root, indent = 0, fontspecs = []): # fontspecs: [(id, node w
         else:
           del attrib["font"]
       #top, left, width, height, font
-    if "meaning" in attrib and (attrib["meaning"] == None or attrib["meaning"] in ["headline", "bitfield-description"]):
-      if text.strip() in ["This document provides the processor behavioral definition and associated design notes. It is intended for platform",
-                          "designers and for programmers involved in the development of BIOS functions, drivers, and operating system kernel",
-                          "AMD Confidential - Advance Information",
-                          "54945 Rev 1.29 - July 19, 2018",
-                          "PPR for AMD Family 17h Models 01h,08h B2"]:
-        assert len(list([xnode for xnode in node.iterchildren() if xnode.tag != "b"])) == 0, (node.text, list(node.iterchildren()))
-        continue
     # Node: text, font="<id>"; see fontspec
     if node.tag == "text":
       attrib["left"] = int(node.attrib["left"])
