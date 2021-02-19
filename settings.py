@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+This file is there in order to avoid an register access needing another register access somewhere else.
+The settings here are a lookup table and the assumption is that the firmware set up those values and thus
+and left them at that--so we don't need to look them up.
+"""
+
 settings = {
 # Note: Keep value in sync with IOHCMISC?x000002F4(IOHC::IOAPIC_BASE_ADDR_HI); _nbio0_aliasSMN; IOHCMISC0x000002F4; IOHCMISC0=13B1_0000h
 # Note: Keep value in sync with IOHCMISC?x000002F0(IOHC::IOAPIC_BASE_ADDR_LO); _nbio0_aliasSMN; IOHCMISC0x000002F0; IOHCMISC0=13B1_0000h
