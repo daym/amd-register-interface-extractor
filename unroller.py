@@ -303,11 +303,18 @@ def unroll_inst_pattern(spec):
 			physs.append(item)
 			#variable_definitions.append(item)
 		else:
+			if item.startswith("_ccd[7:0]_lthree0_core[7:0]_thread[1:0]"): # According to AMD this does not count as a pattern for us
+				item = item.replace("_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd7.0_lthree0_core7.0_thread1.0")
+			elif item.startswith("_ccd[7:0]_lthree0_core[7:0]"): # According to AMD this does not count as a pattern for us
+				item = item.replace("_ccd[7:0]_lthree0_core[7:0]", "_ccd7.0_lthree0_core7.0")
+			elif item.startswith("_ccd[7:0]_lthree0"): # According to AMD this does not count as a pattern for us
+				item = item.replace("_ccd[7:0]_lthree0", "_ccd7.0_lthree0")
 			try:
 				x = list(unroll_inst_item_pattern(item))
 			except:
 				print("ITEM", item, file=sys.stderr)
 				raise
+			x = [c.replace("_ccd7.0_lthree0_core7.0_thread1.0", "_ccd[7:0]_lthree0_core[7:0]_thread[1:0]").replace("_ccd7.0_lthree0_core7.0", "_ccd[7:0]_lthree0_core[7:0]").replace("_ccd7.0_lthree0", "_ccd[7:0]_lthree0") for c in x]
 			while len(x) > 0 and x[-1] == "": # TODO: Be nicer about this.
 				x = x[:-1]
 			if item.startswith("_"): # find("_alias") != -1 or item.find(": # alias beginning
