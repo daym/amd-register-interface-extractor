@@ -4,7 +4,7 @@ This project provides a tool to extract register definitions in a machine-readab
 
 The result can be used by `svd2rust` or similar SVD tools to generate source (header) code.
 
-Tested with ZP B2 (Naples) and SSP B0 (Rome) PPR PDFs.
+Tested with ZP B2 (Naples), SSP B0 (Rome) and GN B1 (Milan) PPR PDFs.
 
 # Usage
 
