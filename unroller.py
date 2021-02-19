@@ -118,7 +118,8 @@ def unroll_inst_pattern(spec):
 	for item in spec.split(";"):
 		item = item.strip()
 		if item.find("=") != -1: # local variable definition
-			variable_definitions.append(item)
+			physs.append(item)
+			#variable_definitions.append(item)
 		else:
 			try:
 				x = list(unroll_inst_item_pattern(item))
@@ -132,10 +133,11 @@ def unroll_inst_pattern(spec):
 			else: # expression
 				physs += x
 	#FIXME: assert len(insts) == len(accesses), (insts, accesses)
-	if len(insts) != len(physs):
-		if insts == [] and physs != []:
+	ps = [p for p in physs if p.find("=") == -1]
+	if len(insts) != len(ps):
+		if insts == [] and ps != []:
 			pass
-		elif insts != [] and physs == []:
+		elif insts != [] and ps == []:
 			pass
 		else:
 			print("ERROR", insts, physs, file=sys.stderr)
