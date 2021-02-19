@@ -433,8 +433,8 @@ def traverse1(tree, path):
         if isinstance(vv, TableDefinition):
           if selected_access_method in vv.instances:
             instances = vv.instances[selected_access_method]
-            for instance in instances:
-              print("INSTANCE", instance, instance.resolved_physical_mnemonic, file=sys.stderr)
+            #for instance in instances:
+            #  print("INSTANCE", instance, instance.resolved_physical_mnemonic, file=sys.stderr)
             name = kk # "_".join(path + [k, kk])
             if vv.bits:
               svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]) + "\n" + "\n".join(instance.resolved_physical_mnemonic for instance in instances))
