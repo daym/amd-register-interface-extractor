@@ -123,7 +123,7 @@ settings = {
 "BXXD00F3x": "PCI{Bus: BXX, Device: 0x00, Function: 0x3}", # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
 "BXXD00F4x": "PCI{Bus: BXX, Device: 0x00, Function: 0x4}", # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
 "BXXD01F0x": "PCI{Bus: BXX, Device: 0x01, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]; see IOHCMISC[0...3]x00000044 (IOHC::NB_BUS_NUM_CNTL) [_nbio[3:0]_aliasSMN; IOHCMISC[3:0]x00000044; IOHCMISC[3:0]=13[E:B]1_0000h]
-"BXXD01F1x": "PCI{Bus: BXX, Device: 0x01, Function: 0x1|", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F1x": "PCI{Bus: BXX, Device: 0x01, Function: 0x1}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
 "BXXD01F2x": "PCI{Bus: BXX, Device: 0x01, Function: 0x2}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
 "BXXD01F3x": "PCI{Bus: BXX, Device: 0x01, Function: 0x3}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
 "BXXD01F4x": "PCI{Bus: BXX, Device: 0x01, Function: 0x4}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
