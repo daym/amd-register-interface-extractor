@@ -167,18 +167,24 @@ def unroll_inst_pattern(spec):
 			physs.append(item)
 			#variable_definitions.append(item)
 		else:
-			if item.startswith("_ccd[7:0]_lthree0_core[7:0]_thread[1:0]"): # According to AMD this does not count as a pattern for us
-				item = item.replace("_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd7.0_lthree0_core7.0_thread1.0")
-			elif item.startswith("_ccd[7:0]_lthree0_core[7:0]"): # According to AMD this does not count as a pattern for us
-				item = item.replace("_ccd[7:0]_lthree0_core[7:0]", "_ccd7.0_lthree0_core7.0")
-			elif item.startswith("_ccd[7:0]_lthree0"): # According to AMD this does not count as a pattern for us
-				item = item.replace("_ccd[7:0]_lthree0", "_ccd7.0_lthree0")
+			implicit_patterns = ["_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd[7:0]_lthree0_core[7:0]", "_ccd[7:0]_lthree0",
+			"_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]"] # Ryzen 7
+			for implicit_pattern in implicit_patterns:
+				if item.startswith(implicit_pattern):
+					new_pattern = implicit_pattern.replace("[", "").replace(":", ".")
+					item = new_pattern + item[len(implicit_pattern):]
 			try:
 				x = list(unroll_inst_item_pattern(item))
 			except:
 				print("ITEM", item, file=sys.stderr)
 				raise
-			x = [c.replace("_ccd7.0_lthree0_core7.0_thread1.0", "_ccd[7:0]_lthree0_core[7:0]_thread[1:0]").replace("_ccd7.0_lthree0_core7.0", "_ccd[7:0]_lthree0_core[7:0]").replace("_ccd7.0_lthree0", "_ccd[7:0]_lthree0") for c in x]
+			def reinstate_implicit_patterns(item):
+				for implicit_pattern in implicit_patterns:
+					new_pattern = implicit_pattern.replace("[", "").replace(":", ".")
+					if item.startswith(new_pattern):
+						item = implicit_pattern + item[len(new_pattern):]
+				return item
+			x = [reinstate_implicit_patterns(c) for c in x]
 			while len(x) > 0 and x[-1] == "": # TODO: Be nicer about this.
 				x = x[:-1]
 			if item.startswith("_"): # find("_alias") != -1 or item.find(": # alias beginning
