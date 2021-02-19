@@ -1,14 +1,16 @@
 # amd-register-interface-extractor
 
-Extracts register descriptions from AMD PPR PDFs (data sheet) and generates accessors for them.
+This project provides a tool to extract register definitions in a machine-readable form from AMD PPR (datasheet) PDFs.
 
-Tested with ZP B2 (Naples) and SSP B0 (Rome).
+The result can be used by `svd2rust` or similar SVD tools to generate source (header) code.
+
+Tested with ZP B2 (Naples) and SSP B0 (Rome) PPR PDFs.
 
 # Usage
 
-Download 54945_ppr_ZP_B2_specl_nda.pdf from AMD devhub and place it into working directory.
+Download the PPR PDFs for your CPU from AMD devhub and place them into the working directory (or a subdirectory of it).
 
-Then invoke:
+Then invoke something like:
 
     ./configure 54945_ppr_ZP_B2_specl_nda.pdf
     make
