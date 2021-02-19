@@ -1,8 +1,8 @@
 # amd-register-interface-extractor
 
-Extracts register descriptions from an AMD PPR PDF (data sheet) and generates accessors for them.
+Extracts register descriptions from AMD PPR PDFs (data sheet) and generates accessors for them.
 
-Tested with ZP B2 (Naples).
+Tested with ZP B2 (Naples) and SSP B0 (Rome).
 
 # Usage
 
