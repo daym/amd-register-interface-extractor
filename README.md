@@ -16,3 +16,4 @@ Then invoke something like (using the name of the first PDF file as argument):
     make
 
 The result is in `phase3_result.svd`.
+It's also useful to `import phase2_result` in a Python interpreter and look around.
