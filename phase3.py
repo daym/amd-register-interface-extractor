@@ -191,6 +191,7 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
         in_instance_part = False
         for row in prefix:
             _, row = strip_off_rwops(row) # TODO: check that rwops is only given once
+            #print("ROW", row, file=sys.stderr)
             if not in_instance_part:
                 if row.startswith("_"):
                     in_instance_part = True
@@ -251,6 +252,7 @@ class TableDefinition(object):
         instance_specs = parse_RegisterInstanceSpecs(prefix, context_string)
         #print("TABLE_DEFINITION", context_string, instance_specs)
         #print("TABLE_DEFINITION {} ITEMS", items)
+        #print("PREFIX {}".format(prefix), file=sys.stderr)
         assert instance_specs != {} or (instance_specs == {} and (items is None or len(items) == 0)), (context_string, instance_specs, items)
         self.instances = instance_specs
     def __repr__(self):
@@ -398,7 +400,7 @@ def create_register(peripheral_path, table_definition, name, description=None):
   for (max_bit, min_bit), name, description in bits:
     field = etree.Element("field")
     field.append(text_element("name", name.replace("[", "_").replace(":", "_").replace("]", "_")))
-    field.append(text_element("description", name))
+    field.append(text_element("description", description))
     field.append(text_element("bitRange", "[{}:{}]".format(max_bit, min_bit)))
     # FIXME: access
     # TODO: enumeratedValues, enumeratedValue
