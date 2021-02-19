@@ -196,13 +196,13 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
                     in_instance_part = True
                 else:
                     continue
-            x = unroll_inst_pattern(row)
+            x = list(unroll_inst_pattern(row))
             aliaskind = row.split(";")[0].strip()
             if aliaskind.find("_alias") != -1:
                 aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
             if aliaskind not in instances:
                 instances[aliaskind] = []
-            instances[aliaskind].append(x)
+            instances[aliaskind] += x #.append(x)
         return instances
 
 class TableDefinition(object):
@@ -431,10 +431,11 @@ def traverse1(tree, path):
         if isinstance(vv, TableDefinition):
           if selected_access_method in vv.instances:
             instances = vv.instances[selected_access_method]
-            print("INSTANCES", instances, file=sys.stderr)
+            for instance in instances:
+              print("INSTANCE", instance, instance.resolved_physical_mnemonic, file=sys.stderr)
             name = kk # "_".join(path + [k, kk])
             if vv.bits:
-              svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]))
+              svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]) + "\n" + "\n".join(instance.resolved_physical_mnemonic for instance in instances))
     else:
       traverse1(v, path + [k])
 

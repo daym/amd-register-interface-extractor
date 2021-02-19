@@ -6,7 +6,105 @@ import sys
 from io import StringIO
 from collections import namedtuple
 
-RegisterInstanceSpec = namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic"])
+#RegisterInstanceSpec = namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic", "variable_definitions"])
+
+settings = {
+"{IOHC::IOAPIC_BASE_ADDR_HI_nbio0_aliasSMN[IOAPIC_BASE_ADDR_HI] , IOHC::IOAPIC_BASE_ADDR_LO_nbio0_aliasSMN[IOAPIC_BASE_ADDR_LO] , 00h}": "FIXME",
+"{IOHC::IOAPIC_BASE_ADDR_HI_nbio1_aliasSMN[IOAPIC_BASE_ADDR_HI] , IOHC::IOAPIC_BASE_ADDR_LO_nbio1_aliasSMN[IOAPIC_BASE_ADDR_LO] , 00h}": "FIXME",
+"{IOHC::IOAPIC_BASE_ADDR_HI_nbio2_aliasSMN[IOAPIC_BASE_ADDR_HI] , IOHC::IOAPIC_BASE_ADDR_LO_nbio2_aliasSMN[IOAPIC_BASE_ADDR_LO] , 00h}": "FIXME",
+"{IOHC::IOAPIC_BASE_ADDR_HI_nbio3_aliasSMN[IOAPIC_BASE_ADDR_HI] , IOHC::IOAPIC_BASE_ADDR_LO_nbio3_aliasSMN[IOAPIC_BASE_ADDR_LO] , 00h}": "FIXME",
+"{IOMMUL2::IOMMU_CAP_BASE_HI_nbio0_aliasHOST[IOMMU_BASE_ADDR_HI] , IOMMUL2::IOMMU_CAP_BASE_LO_nbio0_aliasHOST[IOMMU_BASE_ADDR_LO] , 19'h0_0000}": "FIXME",
+"{IOMMUL2::IOMMU_CAP_BASE_HI_nbio1_aliasHOST[IOMMU_BASE_ADDR_HI] , IOMMUL2::IOMMU_CAP_BASE_LO_nbio1_aliasHOST[IOMMU_BASE_ADDR_LO] , 19'h0_0000}": "FIXME",
+"{IOMMUL2::IOMMU_CAP_BASE_HI_nbio2_aliasHOST[IOMMU_BASE_ADDR_HI] , IOMMUL2::IOMMU_CAP_BASE_LO_nbio2_aliasHOST[IOMMU_BASE_ADDR_LO] , 19'h0_0000}": "FIXME",
+"{IOMMUL2::IOMMU_CAP_BASE_HI_nbio3_aliasHOST[IOMMU_BASE_ADDR_HI] , IOMMUL2::IOMMU_CAP_BASE_LO_nbio3_aliasHOST[IOMMU_BASE_ADDR_LO] , 19'h0_0000}": "FIXME",
+"{NBIFEPFNCFG::BASE_ADDR_2_nbio0_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR] , NBIFEPFNCFG::BASE_ADDR_1_nbio0_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR]}": "FIXME",
+"{NBIFEPFNCFG::BASE_ADDR_2_nbio1_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR] , NBIFEPFNCFG::BASE_ADDR_1_nbio1_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR]}": "FIXME",
+"{NBIFEPFNCFG:: BASE_ADDR_2 _nbio2_instNBIF1_dev0_func3_aliasHOST[ BASE_ADDR ] , NBIFEPFNCFG:: BASE_ADDR_1 _nbio2_instNBIF1_dev0_func3_aliasHOST[ BASE_ADDR ]}": "FIXME",
+"{NBIFEPFNCFG::BASE_ADDR_2_nbio2_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR] , NBIFEPFNCFG::BASE_ADDR_1_nbio2_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR]}": "FIXME",
+"{NBIFEPFNCFG:: BASE_ADDR_2 _nbio3_instNBIF1_dev0_func3_aliasHOST[ BASE_ADDR ] , NBIFEPFNCFG:: BASE_ADDR_1 _nbio3_instNBIF1_dev0_func3_aliasHOST[ BASE_ADDR ]}": "FIXME",
+"{NBIFEPFNCFG::BASE_ADDR_2_nbio3_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR] , NBIFEPFNCFG::BASE_ADDR_1_nbio3_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR]}": "FIXME",
+"IOHC::NB_BUS_NUM_CNTL_nbio0_aliasSMN[NB_BUS_NUM]": "FIXME",
+"IOHC::NB_BUS_NUM_CNTL_nbio1_aliasSMN[NB_BUS_NUM]": "FIXME",
+"IOHC::NB_BUS_NUM_CNTL_nbio2_aliasSMN[NB_BUS_NUM]": "FIXME",
+"IOHC::NB_BUS_NUM_CNTL_nbio3_aliasSMN[NB_BUS_NUM]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio0_instNBIF0_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio0_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio1_instNBIF0_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio1_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio1_instNBIF1_dev1_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio1_instNBIF1_dev2_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF0_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF1_dev1_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF1_dev2_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio3_instNBIF0_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio3_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio0_instNBIF2_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio1_instNBIF2_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF2_aliasSMN[SECONDARY_BUS]": "FIXME",
+"NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio3_instNBIF2_aliasSMN[SECONDARY_BUS]": "FIXME",
+"PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio0_instPCIE0_func0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio1_instPCIE0_func0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instPCIE0_func0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio3_instPCIE0_func0_aliasSMN[SECONDARY_BUS]": "FIXME",
+"D18F0x": "PCI{Bus: 0, Device: 0x18, Function: 0}",
+"D18F1x": "PCI{Bus: 0, Device: 0x18, Function: 1}",
+"D18F2x": "PCI{Bus: 0, Device: 0x18, Function: 2}",
+"D18F3x": "PCI{Bus: 0, Device: 0x18, Function: 3}",
+"D18F4x": "PCI{Bus: 0, Device: 0x18, Function: 4}",
+"D18F5x": "PCI{Bus: 0, Device: 0x18, Function: 5}",
+"D18F6x": "PCI{Bus: 0, Device: 0x18, Function: 6}",
+"D18F7x": "PCI{Bus: 0, Device: 0x18, Function: 7}",
+# TODO: D19 ?
+"BXXD00F0x": "PCI{Bus: BXX, Device: 0x00, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM] or BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev?_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[PRIMARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[SECONDARY_BUS]
+"BXXD00F1x": "PCI{Bus: BXX, Device: 0x00, Function: 0x1}", # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev0_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS]
+"BXXD00F2x": "PCI{Bus: BXX, Device: 0x00, Function: 0x2}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM] or BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev0_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS]
+"BXXD00F3x": "PCI{Bus: BXX, Device: 0x00, Function: 0x3}", # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
+"BXXD00F4x": "PCI{Bus: BXX, Device: 0x00, Function: 0x4}", # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
+"BXXD01F0x": "PCI{Bus: BXX, Device: 0x01, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F1x": "PCI{Bus: BXX, Device: 0x01, Function: 0x1|", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F2x": "PCI{Bus: BXX, Device: 0x01, Function: 0x2}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F3x": "PCI{Bus: BXX, Device: 0x01, Function: 0x3}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F4x": "PCI{Bus: BXX, Device: 0x01, Function: 0x4}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F5x": "PCI{Bus: BXX, Device: 0x01, Function: 0x5}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F6x": "PCI{Bus: BXX, Device: 0x01, Function: 0x6}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD01F7x": "PCI{Bus: BXX, Device: 0x01, Function: 0x7}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD02F0x": "PCI{Bus: BXX, Device: 0x02, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD02F1x": "PCI{Bus: BXX, Device: 0x02, Function: 0x1}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD03F0x": "PCI{Bus: BXX, Device: 0x03, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD04F0x": "PCI{Bus: BXX, Device: 0x04, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD04F1x": "PCI{Bus: BXX, Device: 0x04, Function: 0x1}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD05F1x": "PCI{Bus: BXX, Device: 0x05, Function: 0x1}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio0_aliasSMN[NB_BUS_NUM]
+"BXXD05F2x": "PCI{Bus: BXX, Device: 0x05, Function: 0x2}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio0_aliasSMN[NB_BUS_NUM]
+"BXXD07F0x": "PCI{Bus: BXX, Device: 0x07, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD07F1x": "PCI{Bus: BXX, Device: 0x07, Function: 0x1}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD08F0x": "PCI{Bus: BXX, Device: 0x08, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD08F1x": "PCI{Bus: BXX, Device: 0x08, Function: 0x1}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD08F2x": "PCI{Bus: BXX, Device: 0x08, Function: 0x2}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+"BXXD08F3x": "PCI{Bus: BXX, Device: 0x08, Function: 0x3}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+}
+
+class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic", "variable_definitions"])):
+	@property
+	def resolved_physical_mnemonic(self):
+		physical_mnemonic = self.physical_mnemonic
+		for definition in self.variable_definitions:
+			lhs_spec, rhs_spec = definition.split("=", 1)
+			lhs = unroll_inst_item_pattern(lhs_spec.replace("::", "**"))
+			rhs = unroll_inst_item_pattern("=" + rhs_spec.replace("::", "**"))
+			assert len(lhs) == len(rhs), (self.physical_mnemonic, lhs_spec, rhs_spec, lhs, rhs)
+			for l, r in zip(lhs, rhs):
+				l = l.replace("**", "::")
+				r = r.replace("**", "::").lstrip("=")
+				if physical_mnemonic.startswith(l + "x"):
+					physical_mnemonic = r + " + " + physical_mnemonic[len(l + "x"):]
+					break
+				elif physical_mnemonic.startswith(l):
+					physical_mnemonic = r + " + " + physical_mnemonic[len(l):]
+					break
+		for k, v in settings.items():
+			physical_mnemonic = physical_mnemonic.replace(k, v)
+		return physical_mnemonic
 
 """
 TODO:
@@ -40,7 +138,9 @@ def unroll_inst_item_pattern(spec):
 		def consume(self):
 			self.input_data = self.input_data[1:]
 			self.c = self.input_data[0] if self.input_data != "" else None
-	scanner = Scanner("[{}]".format(spec))
+	if not spec:
+		return []
+	scanner = Scanner("{}".format(spec))
 	def parse_item(): # "02432432foo[2:1] -> [02432432foo2, 02432432foo1]",  "5:[2,1]"
 		item = StringIO("")
 		while scanner.c and scanner.c not in ":,]=":
@@ -48,7 +148,7 @@ def unroll_inst_item_pattern(spec):
 				prefix = item.getvalue()      # "foo[..." => "foo"
 				scanner.consume()
 				values = parse_alternatives()
-				assert scanner.c == "]", scanner.input_data
+				assert scanner.c == "]", (scanner.input_data, spec)
 				scanner.consume()
 				suffixes = parse_item()
 				result = []
@@ -62,9 +162,17 @@ def unroll_inst_item_pattern(spec):
 				item.write(scanner.c)
 				scanner.consume()
 		if scanner.c == "=": # after that, none of the stuff is supposed to do anything special!
-			while scanner.c and scanner.c not in ":,]":
-				item.write(scanner.c)
-				scanner.consume()
+			while scanner.c: # and scanner.c not in ":,]":
+				if scanner.c == "{": # quote everything
+					while scanner.c and scanner.c != "}":
+						item.write(scanner.c)
+						scanner.consume()
+					if scanner.c:
+						item.write(scanner.c)
+						scanner.consume()
+				else:
+					item.write(scanner.c)
+					scanner.consume()
 		return [item.getvalue()]
 	def parse_range(): # "a:b" or "a";   a*b   [3+2]*8
 		a_s = parse_item()
@@ -105,8 +213,21 @@ def unroll_inst_item_pattern(spec):
 			b = parse_range()
 			a = a + b
 		return a
+	def parse_toplevel():
+		result = []
+		prefix = ""
+		values = parse_alternatives()
+		suffixes = parse_item()
+		result = []
+		for v in values:
+			for x in suffixes:
+				result.append("{}{}{}".format(prefix, v, x))
+		#item = StringIO("")
+		assert not (scanner.c and scanner.c not in ":,]"), "would stop anyway"
+		return result
+
 	#pdb.set_trace()
-	return [choice for choice in parse_item()]
+	return [choice for choice in parse_toplevel()]
 
 def unroll_inst_pattern(spec):
 	#"""
@@ -132,8 +253,9 @@ def unroll_inst_pattern(spec):
 				insts += x
 			else: # expression
 				physs += x
+	#result = RegisterInstanceSpec(logical_mnemonic=insts, physical_mnemonic_and_variables=physs)
 	#FIXME: assert len(insts) == len(accesses), (insts, accesses)
-	ps = [p for p in physs if p.find("=") == -1]
+	ps = [c for c in physs if c.find("=") == -1]
 	if len(insts) != len(ps):
 		if insts == [] and ps != []:
 			pass
@@ -141,9 +263,21 @@ def unroll_inst_pattern(spec):
 			pass
 		else:
 			print("ERROR", insts, physs, file=sys.stderr)
-                # else who knows
-
-	return RegisterInstanceSpec(logical_mnemonic=insts, physical_mnemonic=physs)
+		# else who knows
+	#print("PHYSS", physs, file=sys.stderr)
+	phys_i = 0
+	for logical_mnemonic in insts:
+		physical_mnemonic_and_variables = []
+		if phys_i < len(physs):
+			assert physs[phys_i].find("=") == -1
+			physical_mnemonic = physs[phys_i]
+			phys_i += 1
+			variable_definitions = [c for c in physs[phys_i:] if c.find("=") != -1]
+			while phys_i < len(physs) and physs[phys_i].find("=") != -1:
+				phys_i += 1
+			yield RegisterInstanceSpec(logical_mnemonic=logical_mnemonic, physical_mnemonic=physical_mnemonic, variable_definitions=variable_definitions)
+		else:
+			print("WARNING: Not enough phys entries, log={!r}; Note: all_physs={!r}".format(logical_mnemonic, physs), file=sys.stderr)
 
 if __name__ == "__main__":
 	import doctest
