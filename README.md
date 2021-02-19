@@ -14,3 +14,5 @@ Then invoke something like:
 
     ./configure 54945_ppr_ZP_B2_specl_nda.pdf
     make
+
+The result is in `phase3_result.svd`.
