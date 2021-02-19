@@ -17,6 +17,8 @@ This takes the concatenation of multiple `txt` files from the previous phase and
 
 The resulting Python source code is called `phase2_result.py`.
 
+It is very useful to import this `phase2_result` from your own Python programs (and/or from the Python interpreter) and explore those.
+
 ## Phase 3: phase3.py
 
 This imports a `phase2_result.py`, uses reflection to find all the tables, collects them into a tree-shaped namespace and then emits actual CMSIS SVD XML nodes for each of the peripherals in the tree.  Note that it only keeps entries with the access method specified in selected_access_method (usually `HOST`).
