@@ -107,6 +107,36 @@ settings = {
 # Note: Keep value in sync with BXXD0???x018 (PCIERCCFG::SUB_BUS_NUMBER_LATENCY); _nbio3_instPCIE0_func[7:0]_aliasSMN; NBIO3PCIECORE0P[7:0]CFGx00000018; NBIO3PCIECORE0P[7:0]CFG=1140_[7:0]000h
 "PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio3_instPCIE0_func0_aliasSMN[SECONDARY_BUS]": "FIXME", # No default available
 
+"D00F0x": "PCI{Bus: 0, Device: 0x00, Function: 0}",
+"D00F1x": "PCI{Bus: 0, Device: 0x00, Function: 1}",
+"D00F2x": "PCI{Bus: 0, Device: 0x00, Function: 2}",
+"D00F3x": "PCI{Bus: 0, Device: 0x00, Function: 3}",
+"D00F4x": "PCI{Bus: 0, Device: 0x00, Function: 4}",
+
+"D01F0x": "PCI{Bus: 0, Device: 0x01, Function: 0}",
+"D01F1x": "PCI{Bus: 0, Device: 0x01, Function: 1}",
+"D01F2x": "PCI{Bus: 0, Device: 0x01, Function: 2}",
+"D01F3x": "PCI{Bus: 0, Device: 0x01, Function: 3}",
+"D01F4x": "PCI{Bus: 0, Device: 0x01, Function: 4}",
+"D01F5x": "PCI{Bus: 0, Device: 0x01, Function: 5}",
+"D01F6x": "PCI{Bus: 0, Device: 0x01, Function: 6}",
+"D01F7x": "PCI{Bus: 0, Device: 0x01, Function: 7}",
+
+"D02F0x": "PCI{Bus: 0, Device: 0x02, Function: 0}",
+"D02F1x": "PCI{Bus: 0, Device: 0x02, Function: 1}",
+"D03F0x": "PCI{Bus: 0, Device: 0x03, Function: 0}",
+"D04F0x": "PCI{Bus: 0, Device: 0x04, Function: 0}",
+"D04F1x": "PCI{Bus: 0, Device: 0x04, Function: 1}",
+"D05F1x": "PCI{Bus: 0, Device: 0x05, Function: 1}",
+"D05F2x": "PCI{Bus: 0, Device: 0x05, Function: 2}",
+"D07F0x": "PCI{Bus: 0, Device: 0x07, Function: 0}",
+"D07F1x": "PCI{Bus: 0, Device: 0x07, Function: 1}",
+"D08F0x": "PCI{Bus: 0, Device: 0x08, Function: 0}",
+"D08F1x": "PCI{Bus: 0, Device: 0x08, Function: 1}",
+"D08F2x": "PCI{Bus: 0, Device: 0x08, Function: 2}",
+"D08F3x": "PCI{Bus: 0, Device: 0x08, Function: 3}",
+"D14F3x": "PCI{Bus: 0, Device: 0x14, Function: 3}",
+
 "D18F0x": "PCI{Bus: 0, Device: 0x18, Function: 0}",
 "D18F1x": "PCI{Bus: 0, Device: 0x18, Function: 1}",
 "D18F2x": "PCI{Bus: 0, Device: 0x18, Function: 2}",
