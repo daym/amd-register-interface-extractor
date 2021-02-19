@@ -12,7 +12,8 @@ rwops = {"Read-write",
          "Read-only,Volatile",
          "Read-write,Read,Write-1-to-clear",
          "Read,Write-1-to-clear,Volatile",
-         "Read-write,Reserved"}
+         "Read-write,Reserved",
+         "Read,Error-on-write-1"}
 
 def strip_off_rwops(item):
     ops = {
