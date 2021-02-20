@@ -209,6 +209,7 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
 class TableDefinition(object):
     def __init__(self, spectuple, context_string=None):
         prefix, spec = spectuple
+        self.description = ("\n".join(line for line in prefix.split("\n") if not line.strip().startswith("_"))).lstrip()
         if spec[-1:] == [[]]:
           spec = spec[:-1]
         self.spec = spec
@@ -437,7 +438,7 @@ def traverse1(tree, path):
             #  print("INSTANCE", instance, instance.resolved_physical_mnemonic, file=sys.stderr)
             name = kk # "_".join(path + [k, kk])
             if vv.bits:
-              svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]) + "\n" + "\n".join(instance.resolved_physical_mnemonic for instance in instances))
+              svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]) + "\n" + vv.description + "\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances)))
     else:
       traverse1(v, path + [k])
 
