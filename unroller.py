@@ -171,7 +171,7 @@ def unroll_inst_pattern(spec):
 			"_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]"] # Ryzen 7
 			for implicit_pattern in implicit_patterns:
 				if item.startswith(implicit_pattern):
-					new_pattern = implicit_pattern.replace("[", "").replace(":", ".")
+					new_pattern = implicit_pattern.replace("[", "").replace(":", ".").replace("]", "")
 					item = new_pattern + item[len(implicit_pattern):]
 			try:
 				x = list(unroll_inst_item_pattern(item))
@@ -180,7 +180,7 @@ def unroll_inst_pattern(spec):
 				raise
 			def reinstate_implicit_patterns(item):
 				for implicit_pattern in implicit_patterns:
-					new_pattern = implicit_pattern.replace("[", "").replace(":", ".")
+					new_pattern = implicit_pattern.replace("[", "").replace(":", ".").replace("]", "")
 					if item.startswith(new_pattern):
 						item = implicit_pattern + item[len(new_pattern):]
 				return item
