@@ -168,7 +168,7 @@ def unroll_inst_pattern(spec):
 			#variable_definitions.append(item)
 		else:
 			implicit_patterns = ["_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd[7:0]_lthree0_core[7:0]", "_ccd[7:0]_lthree0",
-			"_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]"] # Ryzen 7
+			"_ccd[1:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]"] # Ryzen 7
 			for implicit_pattern in implicit_patterns:
 				if item.startswith(implicit_pattern):
 					new_pattern = implicit_pattern.replace("[", "").replace(":", ".").replace("]", "")
