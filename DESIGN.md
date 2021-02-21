@@ -23,7 +23,7 @@ It is very useful to import this `phase2_result` from your own Python programs (
 
 This imports a `phase2_result.py`, uses reflection to find all the tables, collects them into a tree-shaped namespace and then emits actual CMSIS SVD XML nodes for each of the peripherals in the tree.  Note that it only keeps entries with the access method specified in selected_access_method (usually `HOST`).
 
-The output is usually called `phase3_result.svd`.
+The outputs are usually called `phase3_host.svd` for the HOST access method, and `phase3_io.svd` for the IO access method.
 
 After that, you can use `svd2rust` or similar tools to generate header files or similar files that allow you to access those registers using human-readable constructs.
 

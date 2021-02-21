@@ -1,4 +1,4 @@
-# Given result.txt, makes a phase3_result.svd out of it.
+# Given result.txt, makes a phase3_host.svd out of it.
 
 partsvol1/a.xml: $(PPRVOL1)
 	mkdir -p partsvol1
@@ -38,5 +38,8 @@ resultvol5.txt: partsvol5/a.xml extract.py
 phase2_result.py: result.txt phase2.py
 	./phase2.py $< > $@.new && mv $@.new $@
 
-phase3_result.svd: phase2_result.py phase3.py unroller.py rwops.py settings.py
-	./phase3.py $< > $@.new && mv $@.new $@
+phase3_host.svd: phase2_result.py phase3.py unroller.py rwops.py settings.py
+	./phase3.py -m HOST $< > $@.new && mv $@.new $@
+
+phase3_io.svd: phase2_result.py phase3.py unroller.py rwops.py settings.py
+	./phase3.py -m IO $< > $@.new && mv $@.new $@

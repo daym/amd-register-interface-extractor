@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-
+import getopt
 import re
 import shutil
 import phase2_result
@@ -441,6 +441,11 @@ def traverse1(tree, path):
               svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]) + "\n" + vv.description + "\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances)))
     else:
       traverse1(v, path + [k])
+
+opts, args = getopt.getopt(sys.argv[1:], "m:", ["mode="])
+for k,v in opts:
+	if k == "-m" or k == "--mode":
+		selected_access_method = v
 
 traverse1(tree, [])
 
