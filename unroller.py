@@ -16,7 +16,11 @@ class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic
 		for definition in self.variable_definitions:
 			lhs_spec, rhs_spec = definition.split("=", 1)
 			lhs = unroll_inst_item_pattern(lhs_spec.replace("::", "**"))
-			rhs = unroll_inst_item_pattern("=" + rhs_spec.replace("::", "**"))
+			if rhs_spec.find("::") != -1 or rhs_spec.find("{") != -1:
+				rhs = unroll_inst_item_pattern("=" + rhs_spec.replace("::", "**"))
+			else:
+				# Rome PPR _aliasSMN likes to use patterns in values of variables, so we need to resolve those--if possible.
+				rhs = ["=" + c for c in unroll_inst_item_pattern(rhs_spec.replace("::", "**"))]
 			assert len(lhs) == len(rhs), (self.physical_mnemonic, lhs_spec, rhs_spec, lhs, rhs)
 			for l, r in zip(lhs, rhs):
 				l = l.replace("**", "::")
@@ -111,12 +115,13 @@ def unroll_inst_item_pattern(spec):
 					radix = 10
 					short = len(beginning) == 1 and len(end) == 1 # cannot be misinterpreted
 					# The idea is to prefer to interpret things as decimal, but fall back to hexadecimal if we must.
-					radix = 10
-					if spec.find("x") != -1:
-						radix = 16
-						assert not spec.startswith("_")
+					radix = 16
+					if spec.startswith("_"):
+						radix = 10
 					else:
-						assert spec.startswith("_"), spec
+						radix = 16
+						#if spec.find("x") != -1:
+						#elif spec.startswith("15[E:B]0_0000h") or spec.startswith("IOAGR[") or spec.startswith("IOAPICMMIO[3:0]") or spec.startswith("02[B:8]0_0000h") or spec.startswith("IOAPIC[3:0]") or spec.startswith("14[6:3]0_0000h") or spec.startswith("IOAPICMMIOINDEX[3:0]") or spec.startswith("02[B:8]0_1000h"): # Seriously, Rome PPR?
 
 					beginning = int(beginning, radix)
 					end = int(end, radix)

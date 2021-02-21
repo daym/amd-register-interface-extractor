@@ -43,3 +43,9 @@ phase3_host.svd: phase2_result.py phase3.py unroller.py rwops.py settings.py
 
 phase3_io.svd: phase2_result.py phase3.py unroller.py rwops.py settings.py
 	./phase3.py -m IO $< > $@.new && mv $@.new $@
+
+phase3_msr.svd: phase2_result.py phase3.py unroller.py rwops.py settings.py
+	./phase3.py -m MSR $< > $@.new && mv $@.new $@
+
+phase3_smn.svd: phase2_result.py phase3.py unroller.py rwops.py settings.py
+	./phase3.py -m SMN $< > $@.new && mv $@.new $@
