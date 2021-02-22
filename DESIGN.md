@@ -15,6 +15,8 @@ The things it does is the identification of headlines, the collection of data fo
 
 This takes the concatenation of multiple `txt` files from the previous phase and emits Python source code that provides variables that have all the register definitions spelled out in nice actual tables (Python lists).  It also includes all the non-register tables from the PPR.
 
+It also removes virtual newlines from lists of numbers, fixes up a few table row matching problems.
+
 The resulting Python source code is called `phase2_result.py`.
 
 It is very useful to import this `phase2_result` from your own Python programs (and/or from the Python interpreter) and explore those.
