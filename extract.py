@@ -63,8 +63,10 @@ fontspec_to_meaning = [
      ({'size': '27', 'family': 'FAAAAA+Carlito', 'color': '#bfbfbf'}, None), # very rare and useless
 
      # Rome:
-     ({'size': '16', 'family': 'CAAAAA+LiberationSerif', 'color': '#000080'}, None), # "AMD Confidential"
+     ({'size': '12', 'family': 'CAAAAA+LiberationSerif', 'color': '#000080'}, None), # very rare and useless
      ({'size': '11', 'family': 'EAAAAA+Carlito', 'color': '#000000'}, None),
+     ({'size': '16', 'family': 'CAAAAA+LiberationSerif', 'color': '#000080'}, None), # very rare and useless
+     ({'size': '16', 'family': 'EAAAAA+Carlito', 'color': '#000000'}, None), # very rare and useless
      ({'size': '16', 'family': 'FAAAAA+LiberationMono', 'color': '#000000'}, None),
      ({'size': '16', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "bitfield-description"),
      # Ryzen:
@@ -97,6 +99,7 @@ with open(sys.argv[1]) as f:
   tree = etree.parse(f)
 
 def resolve_fontspec(fontspecs, id):
+  # Note: Would work completely: just return (('color', '#000080'), ('family', 'BAAAAA+LiberationSerif'), ('size', '12'))
   for xid, xfontspec in fontspecs:
     # fontspec  {'id': '0', 'size': '21', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}
     if xid == id:
@@ -106,7 +109,7 @@ def resolve_fontspec(fontspecs, id):
 
 re_table_caption = re.compile(r"^(Table [0-9]+: [A-Za-z]|List of Namespaces|Memory Map -)")
 re_section_headline = re.compile(r"^([0-9]+[.][0-9]+([.][0-9]+)*|Table [0-9]+:.*|LEGACYIOx00.*|GPUF0REGx[0-9A-F]+.* [(])$")
-re_register_caption = re.compile(r"^[A-Z][]A-Z_n0-9.[]+[^ ]*x|CPUID_Fn[08]00000[0-9A-F][0-9A-F]_E|MSR[0-9A-F_]+")
+re_register_caption = re.compile(r"^[A-Z][]A-Z_n0-9.[]+[^ ]*x.|CPUID_Fn[08]00000[0-9A-F][0-9A-F]_E|MSR[0-9A-F_]+")
 # TODO: "XGBEDWAPBI2C Registers".
 re_bitfield_table_starts = re.compile(r"^(HDAx[02]...|USBCONTAINERx....|USBDWCHOSTx........|USBDWCx........|XGBEMMIO0x........|CPUID_Fn.*|PHYLANEx0[[]0...C[]]18|USBPHYCTRLx0|USBLANCTRLx0|ENET[[]0[.][.][.]3[]]BAR0x1D...|ENET[[][0123][.][.][.][0123][]]BAR0x[01].... [(]X?GMACDWCXGMAC[:][:]|[ ]?[(]XGBE[A-Z0-9]*::|ENET[[][0123][.][.][.][0123][]]BAR0x[01]....)") # CPUID_ entry is useless, I think.
 # Note: Now also Milan, Ryzen 7
@@ -215,7 +218,6 @@ class State(object):
   def finish_this_headline(self):
     if self.headline:
       self.headline = self.headline.strip()
-      import traceback
       print("// FINISH: %r" % (self.result[-1], ))
       print("// END OF HEADLINE", self.headline)
       in_table = re_table_caption.match(self.headline) or re_register_caption.match(self.headline)
@@ -268,7 +270,7 @@ class State(object):
             if attrib["left"] == 54 or attrib["left"] == 59: # The latter for 11.13.2's UMCPMCx1
               if xx == {"i"}:
                 attrib["meaning"] = "italic-headline"
-              elif xx == {"b"}:
+              elif xx == {"b"} and (len(text) > 0 and (text[0] == text[0].upper() or text.find(" ") != -1)):
                 attrib["meaning"] = "headline"
               else:
                 attrib["meaning"] = None
