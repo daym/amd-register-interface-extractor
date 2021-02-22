@@ -6,7 +6,6 @@ import re
 
 fontspec_to_meaning = [
      ({'size': '10', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "itemization"),
-     ({'size': '11', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, None),
      ({'size': '12', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, "itemization-register-cell-_inst"),
      ({'size': '12', 'family': 'BAAAAA+LiberationSerif', 'color': '#000080'}, "memory-map-table"),
      ({'size': '12', 'family': 'CAAAAA+LiberationSerif', 'color': '#000000'}, "bitfield-description"),
@@ -58,6 +57,15 @@ fontspec_to_meaning = [
      ({'size': '11', 'family': 'EAAAAA+Carlito', 'color': '#000000'}, None),
      ({'size': '16', 'family': 'FAAAAA+LiberationMono', 'color': '#000000'}, None),
      ({'size': '16', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "bitfield-description"),
+     # Ryzen:
+     ({'size': '6', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, None), # "some" headlines
+     ({'size': '11', 'family': 'JAAAAA+LiberationSans', 'color': '#000000'}, None), # ?
+     ({'size': '11', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, "headline"),
+#     ({'size': '15', 'family': 'Arial', 'color': '#ffaa00'}, None), # Ryzen 7
+     ({'size': '15', 'family': 'JAAAAA+LiberationSans', 'color': '#000000'}, None), # "AMD Confidential"
+     ({'size': '15', 'family': 'Arial', 'color': '#ffaa00'}, None), # Ryzen 7
+     ({'size': '16', 'family': 'QIKLDH+LiberationSerif', 'color': '#000000'}, "headline"),
+     ({'size': '18', 'family': 'IAAAAA+UMingHK', 'color': '#000000'}, "headline"), # N
 ]
 
 def hashable_fontspec(d):
@@ -88,11 +96,11 @@ def resolve_fontspec(fontspecs, id):
 
 re_table_caption = re.compile(r"^(Table [0-9]+: [A-Za-z]|List of Namespaces|Memory Map -)")
 re_section_headline = re.compile(r"^([0-9]+[.][0-9]+([.][0-9]+)*|Table [0-9]+:.*|LEGACYIOx00.*)$")
-re_register_caption = re.compile(r"^[A-Z][]A-Z_n0-9.[]+[^ ]*x|CPUID_Fn[08]00000[0-9A-F][0-9A-F]_E|MSR[0-9A-F_]+")
+re_register_caption = re.compile(r"^[A-Z][]A-Z_n0-9.[]+[^ ]*x|CPUID_Fn[08]00000[0-9A-F][0-9A-F]_E|MSR[0-9A-F_]+|GPUF0REGx[0-9A-F]+")
 # TODO: "XGBEDWAPBI2C Registers".
 re_bitfield_table_starts = re.compile(r"^(HDAx[02]...|USBCONTAINERx....|USBDWCHOSTx........|USBDWCx........|XGBEMMIO0x........|CPUID_Fn.*|PHYLANEx0[[]0...C[]]18|USBPHYCTRLx0|USBLANCTRLx0|ENET[[]0[.][.][.]3[]]BAR0x1D...|ENET[[][0123][.][.][.][0123][]]BAR0x[01].... [(]X?GMACDWCXGMAC[:][:]|[ ]?[(]XGBE[A-Z0-9]*::|ENET[[][0123][.][.][.][0123][]]BAR0x[01]....)") # CPUID_ entry is useless, I think.
-# Note: Now also Milan
-re_rome_vol2_misdetected_table_header = re.compile(r"^([A-Z]+.*[(].*::.*[)].*|NBIO0NBIFGDCRAS0x00000...[.][.][.].*|IOx00C01_x0.*|ABx0000[04].*|FCHSDPx00000_.*|IOAPICx00000010_indirectaddressoffset.*|I2Cx[[]2[.][.][.]B[]]0[0-9A-F][0-9A-F].*|UARTx[[][0-9A-F][0-9A-F]*[.][.][.][0-9A-F][0-9A-F]*[]][0-F].*|PMx5F_x.*|USBCONTAINER[[][0-9A-F][0-9A-F]*[.][.][.][0-9A-F][0-9A-F]*[]]x.*|MSR[0-9A-F][0-9A-F][0-9A-F][0-9A-F]_[0-9A-F][0-9A-F][0-9A-F][0-9A-F][.][.][.]MSR[0-9A-F][0-9A-F][0-9A-F][0-9A-F]_[0-9A-F][0-9A-F][0-9A-F][0-9A-F].*|MSR[0-9A-F][0-9A-F][0-9A-F][0-9A-F]_[0-9A-F][0-9A-F][][0-9A-F.]*)$")
+# Note: Now also Milan, Ryzen 7
+re_rome_vol2_misdetected_table_header = re.compile(r"^([A-Z]+.*[(].*::.*[)].*|NBIO0NBIFGDCRAS0x00000...[.][.][.].*|IOx00C01_x0.*|ABx0000[04].*|FCHSDPx00000_.*|IOAPICx00000010_indirectaddressoffset.*|I2Cx[[]2[.][.][.]B[]]0[0-9A-F][0-9A-F].*|UARTx[[][0-9A-F][0-9A-F]*[.][.][.][0-9A-F][0-9A-F]*[]][0-F].*|PMx5F_x.*|USBCONTAINER[[][0-9A-F][0-9A-F]*[.][.][.][0-9A-F][0-9A-F]*[]]x.*|MSR[0-9A-F][0-9A-F][0-9A-F][0-9A-F]_[0-9A-F][0-9A-F][0-9A-F][0-9A-F][.][.][.]MSR[0-9A-F][0-9A-F][0-9A-F][0-9A-F]_[0-9A-F][0-9A-F][0-9A-F][0-9A-F].*|MSR[0-9A-F][0-9A-F][0-9A-F][0-9A-F]_[0-9A-F][0-9A-F][][0-9A-F.]*|HDTx[0-9A-F]*|HDTx[0-9A-F]*_hdtcmd[0-9]*|SMMx[0-9A-F]*|APICx[][0-9A-F.]*|CPUID_Fn[08]00000[0-9A-F][0-9A-F]_E[A-Zx_0-9]*|PMCx[0-9A-F]+|L3PMCx[0-9A-F]*|IOHCMISC3x[0-9A-F]*|MCAPCIEx[0-9A-F]*[.][.][.]NBIO3PCIMCA0x[0-9A-F]*|IOx0[0-9A-F]*)$")
 #re_bitfield_headlines = re.compile(r"^XGBEDWAPBI2C Registers$")
 
 # Removed the bitfield table start (because it starts it too early): ENET[[][0123][.][.][.][0123][]]BAR0x[01].... ; Example: ENET[0...3]BAR0x1E000; it's now the .* (XGMACDWC entry)
