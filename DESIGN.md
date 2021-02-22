@@ -9,7 +9,12 @@ This uses poppler's `pdftohtml -xml` tool in order to convert a PDF to XML in pd
 ## Phase 1: extract.py
 
 This takes a pdftohtml-xml format file and outputs an intermediate `txt` file for later phases.
-The things it does is the identification of headlines, the collection of data for each table into a single data item in the output.  It also drops a lot of useless information that was still in the pdftohtml-xml input.
+
+It does:
+
+* Identify headlines and table headers (using the font used, the "left" coordinate or special keywords)
+* Collect each table row into a single data item in the output
+* Drop a lot of useless information that was still in the pdftohtml-xml input
 
 ## Phase 2: phase2.py
 
