@@ -122,9 +122,12 @@ def unroll_inst_item_pattern(spec):
 						radix = 16
 						#if spec.find("x") != -1:
 						#elif spec.startswith("15[E:B]0_0000h") or spec.startswith("IOAGR[") or spec.startswith("IOAPICMMIO[3:0]") or spec.startswith("02[B:8]0_0000h") or spec.startswith("IOAPIC[3:0]") or spec.startswith("14[6:3]0_0000h") or spec.startswith("IOAPICMMIOINDEX[3:0]") or spec.startswith("02[B:8]0_1000h"): # Seriously, Rome PPR?
-
-					beginning = int(beginning, radix)
-					end = int(end, radix)
+					try:
+						beginning = int(beginning, radix)
+						end = int(end, radix)
+					except ValueError:
+						print("spec: {}".format(spec), file=sys.stderr)
+						raise
 					assert beginning >= end
 					for i in range(beginning, end - 1, -1):
 						if radix == 16:
@@ -173,7 +176,8 @@ def unroll_inst_pattern(spec):
 			#variable_definitions.append(item)
 		else:
 			implicit_patterns = ["_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd[7:0]_lthree0_core[7:0]", "_ccd[7:0]_lthree0",
-			"_ccd[1:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]"] # Ryzen 7
+			"_ccd[1:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]", # Ryzen 7
+			"_lthree[1:0]_core[3:0]_thread[1:0]", "_lthree[1:0]_core[3:0]", "_lthree[1:0]"] # Naples
 			for implicit_pattern in implicit_patterns:
 				if item.startswith(implicit_pattern):
 					new_pattern = implicit_pattern.replace("[", "").replace(":", ".").replace("]", "")
