@@ -48,10 +48,20 @@ fontspec_to_meaning = [
      ({'size': '9', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}, "normal-paragraph-text"),
      ({'size': '9', 'family': 'FAAAAA+Carlito', 'color': '#000000'}, None),
      ({'size': '9', 'family': 'IAAAAA+LiberationSans', 'color': '#000000'}, "bitfield-description"),
-     # TODO: Check using ZP B2 (Naples) from Mar 20, 2020
-     ({'size': '18', 'family': 'KAAAAA+WenQuanYiZenHeiSharp', 'color': '#000000'}, "bitfield-description"),
+
+     # Naples:
      ({'size': '11', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, None),
      ({'size': '12', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, "bitfield-description"), # header
+     ({'size': '14', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, None), # very rare and useless
+     ({'size': '18', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, None), # very rare and useless
+     ({'size': '18', 'family': 'KAAAAA+WenQuanYiZenHeiSharp', 'color': '#000000'}, "bitfield-description"),
+     ({'size': '20', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, None), # very rare and useless
+     ({'size': '21', 'family': 'FAAAAA+Carlito', 'color': '#bfbfbf'}, None), # very rare and useless
+     ({'size': '22', 'family': 'FAAAAA+Carlito', 'color': '#bfbfbf'}, None), # very rare and useless
+     ({'size': '23', 'family': 'FAAAAA+Carlito', 'color': '#0070c0'}, None), # very rare and useless
+     ({'size': '23', 'family': 'FAAAAA+Carlito', 'color': '#bfbfbf'}, None), # very rare and useless
+     ({'size': '27', 'family': 'FAAAAA+Carlito', 'color': '#bfbfbf'}, None), # very rare and useless
+
      # Rome:
      ({'size': '16', 'family': 'CAAAAA+LiberationSerif', 'color': '#000080'}, None), # "AMD Confidential"
      ({'size': '11', 'family': 'EAAAAA+Carlito', 'color': '#000000'}, None),
