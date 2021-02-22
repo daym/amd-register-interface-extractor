@@ -59,14 +59,25 @@ def remove_cosmetic_line_breaks(header):
     """ Accessor lists are often so long that they have a line wrap in it in the middle of a number.  That line wrap is virtual.  Remove it. """
     if header.find("\n") == -1:
         return header
-    for j in range(10):
-        header = header.replace(",\n{:X}".format(j), ",{:X}".format(j))
-        for i in range(16):
-            header = header.replace(",{:X}\n{:X}".format(i, j), ",{:X}{:X}".format(i, j))
+
+    if header.find("UMC0CTLx00000804_address0009_00[D6") != -1:
+        pass
+    # First, remove newlines inside hex numerals and in lists of numbers
+
+    for i in range(16):
+        for j in range(10):
+            header = header.replace("{:X}\n{}".format(i, j), "{:X}{}".format(i, j))
+            header = header.replace("{:X}\n,{}".format(i, j), "{:X},{}".format(i, j))
+            header = header.replace("{:X},\n{}".format(i, j), "{:X},{}".format(i, j))
+            header = header.replace(",\n{:X}{}".format(i, j), ",{:X}{}".format(i, j))
+    for i in range(10):
+        for j in range(16):
+            header = header.replace("{}\n{:X},".format(i, j), "{}{:X},".format(i, j))
     for i in range(16):
         for j in range(16):
             for k in range(10):
-                header = header.replace(",{:X}\n{:X}{:X}".format(i, j, k), ",{:X}{:X}{:X}".format(i, j, k))
+                header = header.replace("{:X}\n{:X}{}".format(i, j, k), "{:X}{:X}{}".format(i, j, k))
+    header = header.replace("\n,", ",")
     #header = header.replace("_aliasSMN; \nD", "_aliasSMN; D")
     #header = header.replace("_aliasHOST; \nD", "_aliasHOST; D")
     #header = header.replace("_aliasHOSTLEGACY; \nD", "_aliasHOSTLEGACY; D")
