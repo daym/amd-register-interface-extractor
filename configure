@@ -2,7 +2,6 @@
 
 set -e
 
-make clean
 input="$1"
 if [ -z "${input}" -o ! -f "${input}" ]
 then
@@ -32,3 +31,4 @@ else
 PPRVOL1 := ${input}
 EOF
 fi
+make clean
