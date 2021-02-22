@@ -89,7 +89,7 @@ with open(sys.argv[1]) as f:
 def resolve_fontspec(fontspecs, id):
   for xid, xfontspec in fontspecs:
     # fontspec  {'id': '0', 'size': '21', 'family': 'BAAAAA+LiberationSerif', 'color': '#000000'}
-    if xid == xid:
+    if xid == id:
       xfontspec = hashable_fontspec(xfontspec)
       return xfontspec
   assert False, (id, fontspecs)
