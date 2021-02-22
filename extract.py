@@ -71,13 +71,15 @@ fontspec_to_meaning = [
      ({'size': '16', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "bitfield-description"),
      # Ryzen:
      ({'size': '6', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "itemization-register-cell-_inst"), # "some" headlines
+     ({'size': '7', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, None), # rare
      ({'size': '11', 'family': 'JAAAAA+LiberationSans', 'color': '#000000'}, None), # ?
      ({'size': '11', 'family': 'FAAAAA+Carlito', 'color': '#006fc0'}, "headline"),
-#     ({'size': '15', 'family': 'Arial', 'color': '#ffaa00'}, None), # Ryzen 7
      ({'size': '15', 'family': 'JAAAAA+LiberationSans', 'color': '#000000'}, None), # "AMD Confidential"
      ({'size': '15', 'family': 'Arial', 'color': '#ffaa00'}, None), # Ryzen 7
+     ({'size': '16', 'family': 'GHJJRM+LiberationSerif', 'color': '#000000'}, None), # rare
      ({'size': '16', 'family': 'QIKLDH+LiberationSerif', 'color': '#000000'}, "headline"),
      ({'size': '18', 'family': 'IAAAAA+UMingHK', 'color': '#000000'}, "headline"), # N
+     ({'size': '18', 'family': 'HAAAAA+VL-Gothic', 'color': '#000000'}, None), # rare and useless
 ]
 
 def hashable_fontspec(d):
