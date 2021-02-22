@@ -125,7 +125,11 @@ re_bits_description_broken_header = re.compile(r"^Bits Description")
 re_bitrange = re.compile(r"^[0-9]+:[0-9]+")
 
 def meaning_of_fontspec(fontspec, xx):
-  meaning = fontspec_to_meaning[fontspec]
+  try:
+    meaning = fontspec_to_meaning[fontspec]
+  except KeyError:
+    print("WARNING: font {!r} was unknown.  Assuming it's uninteresting.".format(dict(fontspec)), file=sys.stderr)
+    meaning = None
   if meaning == "table-caption":
     if xx == {"b"}: # misdetected headline
       meaning = "h1"
