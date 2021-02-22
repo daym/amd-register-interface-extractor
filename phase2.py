@@ -19,9 +19,9 @@ re_mistaken_pattern_2 = re.compile(r"^([0-9]+)[ ]+([^.]*[.])  ([0-9]+(:[0-9]+)?)
 # "10:3 <one-word>. <whatever> 5:2".
 re_mistaken_pattern_3 = re.compile(r"^([0-9]+:[0-9]+)[ ]+([^.]*[.].*) ([0-9]+(:[0-9]+)?)$")
 # "10:3 <one-word>. <whatever>"
-re_mistaken_pattern_4 = re.compile(r"^([0-9]+:[0-9]+)[ ]+([^.]*[.].*)()$")
+re_mistaken_pattern_4 = re.compile(r"^([0-9]+:[0-9]+)[ ]+([^.:]*[.:].*)()$")
 # "10:3 Reserved.  <whatever>"
-re_mistaken_pattern_reserved = re.compile(r"^([0-9]+:[0-9]+)[ ]+(Reserved[.]( Read-[a-zA-Z0-9-,]+[.] (Reset: [^.]*[.])?)?) (.*)")
+re_mistaken_pattern_reserved = re.compile(r"^([0-9]+:[0-9]+)[ ]+(Reserved[ ]*[.:]( Read-[a-zA-Z0-9-,]+[.] (Reset: [^.]*[.])?)?) (.*)")
 
 # Note: \u00b6 is the paragraph sign, used in place of "\n" (because re handles the latter really badly).
 re_table_prefix = re.compile(r"^(.*)[ \u00b6](Bits Description.*)$")
