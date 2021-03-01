@@ -11,6 +11,7 @@ import pprint
 from collections import namedtuple
 from rwops import strip_off_rwops
 from unroller import unroll_inst_pattern, RegisterInstanceSpec
+from hexcalculator import calculate_hex_instance_value
 
 re_pattern = re.compile(r"^([0-9A-F]+[_0-9A-Fa-f]*)[.][.][.]([0-9A-F]+[_0-9A-Fa-f]*)$")
 
@@ -197,7 +198,7 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
                     in_instance_part = True
                 else:
                     continue
-            x = list(unroll_inst_pattern(row))
+            x = reversed(list(unroll_inst_pattern(row)))
             aliaskind = row.split(";")[0].strip()
             if aliaskind.find("_alias") != -1:
                 aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
@@ -374,8 +375,7 @@ offset = 0
 
 svd_peripherals_by_path = {}
 
-def create_register(peripheral_path, table_definition, name, description=None):
-  global offset
+def create_register(peripheral_path, table_definition, name, addressOffset, description=None):
   if peripheral_path not in svd_peripherals_by_path:
         svd_peripheral = create_peripheral("_".join(peripheral_path), "1.0", 0, 100, "read-write") # FIXME
         svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
@@ -390,8 +390,7 @@ def create_register(peripheral_path, table_definition, name, description=None):
   result = etree.Element("register")
   result.append(text_element("name", name))
   result.append(text_element("description", description or name))
-  result.append(text_element("addressOffset", str(offset))) # FIXME
-  offset += 4
+  result.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
   result.append(text_element("size", table_definition.size))
   # FIXME: access.
   # FIXME: resetValue, resetMask.
@@ -415,6 +414,7 @@ def create_register(peripheral_path, table_definition, name, description=None):
 selected_access_method = "HOST"
 
 def traverse1(tree, path):
+  global offset
   for k, v in tree.items():
     if isinstance(v, TableDefinition): # assume already processed
       continue
@@ -438,7 +438,14 @@ def traverse1(tree, path):
             #  print("INSTANCE", instance, instance.resolved_physical_mnemonic, file=sys.stderr)
             name = kk # "_".join(path + [k, kk])
             if vv.bits:
-              svd_register = create_register(peripheral_path, vv, name, description="::".join(path + [k, kk]) + "\n" + vv.description + "\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances)))
+              first_instance = instances[0]
+              try:
+                  addressOffset = calculate_hex_instance_value(first_instance.resolved_physical_mnemonic)
+              except:
+                  print("Error: Could not calculate address of register {}--defaulting to nonsense (very low) value.".format(name), file=sys.stderr)
+                  offset += 4
+                  addressOffset = offset
+              svd_register = create_register(peripheral_path, vv, name, addressOffset, description="::".join(path + [k, kk]) + "\n" + vv.description + "\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances)))
     else:
       traverse1(v, path + [k])
 
