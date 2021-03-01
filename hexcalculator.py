@@ -18,8 +18,8 @@ def calculate_hex_instance_value(expression_string):
             if self.input_LL != "":
                 while self.input_LL != "" and self.input_LL == " ":
                     self.consume_LL()
-                if self.input_LL in "0123456789ABCDEF":
-                    while self.input_LL != "" and self.input_LL in "0123456789ABCDEF_":
+                if self.input_LL in "0123456789ABCDEFabcdef":
+                    while self.input_LL != "" and self.input_LL in "0123456789ABCDEFabcdef_":
                         self.input = self.input + self.consume_LL()
                     if self.input_LL == "h":
                         self.consume_LL()
