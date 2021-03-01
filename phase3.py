@@ -378,15 +378,15 @@ svd_peripherals_by_path = {}
 def create_register(peripheral_path, table_definition, name, addressOffset, description=None):
   if peripheral_path not in svd_peripherals_by_path:
         svd_peripheral = create_peripheral("_".join(peripheral_path), "1.0", 0, 100, "read-write") # FIXME
-        svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
+        #svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
         # TODO: <interrupt> as child of peripheral.
-        svd_peripheral.append(svd_addressBlock)
+        #svd_peripheral.append(svd_addressBlock)
         svd_peripherals.append(svd_peripheral)
         svd_registers = etree.Element("registers")
         svd_peripheral.append(svd_registers)
-        svd_peripherals_by_path[peripheral_path] = svd_peripheral, svd_addressBlock, svd_registers
+        svd_peripherals_by_path[peripheral_path] = svd_peripheral, svd_registers
   else:
-        svd_peripheral, svd_addressBlock, svd_registers = svd_peripherals_by_path[peripheral_path]
+        svd_peripheral, svd_registers = svd_peripherals_by_path[peripheral_path]
   result = etree.Element("register")
   result.append(text_element("name", name))
   result.append(text_element("description", description or name))
