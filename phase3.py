@@ -445,7 +445,49 @@ def traverse1(tree, path):
                   print("Error: Could not calculate address of register {}--defaulting to nonsense (very low) value.".format(name), file=sys.stderr)
                   offset += 4
                   addressOffset = offset
+              try:
+                  addresses = [calculate_hex_instance_value(instance.resolved_physical_mnemonic) for instance in instances]
+                  previous_address = addresses[0]
+                  previous_step = None
+                  for address in addresses[1:]:
+                      step = address - previous_address
+                      if previous_step is None:
+                          previous_step = step
+                      else:
+                          assert step == previous_step, name
+                  if len(addresses) > 1:
+                      if step >= 0:
+                          name = name + "[%s]"
+                      else: # Note: svd2rust can't handle it--but it's better to fix it in svd2rust
+                          name = name + "%s"
+                          # Reverse addresses so they are in increasing order.
+                          # But that means that the logical order is now all messed up.  So we will also create a "dimIndex" node (with the actual names)--otherwise it would be very confusing.
+                          addresses.reverse()
+                          addressOffset = addresses[0]
+                          instances.reverse()
+                          step = -step
+              except:
+                  import traceback
+                  traceback.print_exc()
+                  print("Error: Could not calculate all instances' addresses of register {}--only the first register will be able to be accessed".format(name), file=sys.stderr)
+                  addresses = []
+                  step = 0
               svd_register = create_register(peripheral_path, vv, name, addressOffset, description="::".join(path + [k, kk]) + "\n" + vv.description + "\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances)))
+              if len(addresses) > 1:
+                  # Create array of registers
+                  svd_register.append(text_element("dim", len(instances)))
+                  if step == 0:
+                      print("Error: step is 0 for register {} instances--only the first register will be able to be accessed".format(name), file=sys.stderr)
+                  if name.find("[") == -1:
+                      assert step > 0
+                      def clean_up(s):
+                          if s.startswith("_inst"):
+                              s = s[len("_inst"):]
+                          if s.endswith("_alias" + selected_access_method):
+                              s = s[: -len("_alias" + selected_access_method)]
+                          return s
+                      svd_register.append(text_element("dimIndex", ",".join(clean_up(instance.logical_mnemonic) for instance in instances)))
+                  svd_register.append(text_element("dimIncrement", "0x{:X}".format(step)))
     else:
       traverse1(v, path + [k])
 
