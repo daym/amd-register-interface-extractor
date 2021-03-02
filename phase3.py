@@ -257,6 +257,7 @@ class TableDefinition(object):
                 else:
                   bitspecs.append(((max_bit, min_bit), name, description))
             self.bits = bitspecs
+            assert self.size in [8, 16, 32, 64], (self.size, context_string, prefix)
             self.resetMask = (2 ** self.size - 1) - self.resetMask
             if unused_bits:
               # Problems:
