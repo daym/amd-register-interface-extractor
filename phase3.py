@@ -210,7 +210,8 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
 class TableDefinition(object):
     def __init__(self, spectuple, context_string=None):
         prefix, spec = spectuple
-        self.description = ("\n".join(line for line in prefix.split("\n") if not line.strip().startswith("_"))).lstrip()
+        # Note: strip_off_rwops also strips off the access mode and reset value.  If that bothers you, retain strip_off_rwops(...)[0].
+        self.description = ("\n".join(line for line in prefix.split("\n") if not strip_off_rwops(line.strip())[1].strip().startswith("_"))).lstrip()
         if spec[-1:] == [[]]:
           spec = spec[:-1]
         self.spec = spec
@@ -271,15 +272,6 @@ def resolve_path(tree, path, create=False):
 		if key not in tree and create:
 			tree[key] = {}
 		return resolve_path(tree[key], path[1:], create=create)
-
-# TODO: Unroll the names if specified like "[...]"; also provide one of the things WITHOUT the patterns in it.
-# TODO: Autogenerate accessors--if possible--for each of those.
-# UARTx[2E...3F]8 [DLL] (FCH::UART::DLL)
-#  dim=number of elements
-#  dimIncrement=address increment per element
-#  dimIndex=? "0-9"|"A-F"|"foo,bar,baz"
-#  dimName=? (only valid in <cluster> context)
-#  dimArrayIndex=?
 
 names = sorted([((extract_nice_name(v) or v).split("::"), TableDefinition(getattr(phase2_result, k), v)) for k, v in __names.items()])
 #print(names)
