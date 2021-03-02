@@ -224,6 +224,7 @@ class TableDefinition(object):
         self.spec = spec
         self.bits = None
         self.size = None
+        self.resetMask = 0
         if spec[0] == ["Bits", "Description"]: # and (context_string or "").find("D18F0x050") == -1 and context_string.find("D18F1x200") == -1:
             self.bits = []
             bitspecs = []
@@ -250,9 +251,13 @@ class TableDefinition(object):
                 for bit in range(min_bit, max_bit + 1):
                   assert bit in unused_bits, context_string
                   unused_bits.remove(bit)
-                if name != "Reserved":
+                if name == "Reserved":
+                  for bit in range(min_bit, max_bit + 1):
+                    self.resetMask |= 1 << bit
+                else:
                   bitspecs.append(((max_bit, min_bit), name, description))
             self.bits = bitspecs
+            self.resetMask = (2 ** self.size - 1) - self.resetMask
             if unused_bits:
               # Problems:
               # * MSRC001_023[0...A] (subtable)
@@ -431,7 +436,7 @@ def create_register(peripheral_path, table_definition, name, addressOffset, desc
     if resetValue.endswith("h"):
         resetValue = "0x" + resetValue[:-len("h")]
     result.append(text_element("resetValue", resetValue.replace("_", "")))
-  # FIXME: resetMask.
+  result.append(text_element("resetMask", "0x{:X}".format(table_definition.resetMask)))
   fields = etree.Element("fields")
   result.append(fields)
   bits = table_definition.bits
