@@ -16,7 +16,7 @@ model = Gtk.TreeStore(str, str, str) # type, name, tooltip
 # Note: optional: device: vendor, vendorID, series, licenseText, access.
 type_to_pseudo_attributes = {
 	"device": ["name", "version", "addressUnitBits", "width", "size", "resetValue", "resetMask", "vendor", "vendorID", "series", "licenseText", "access", "description"],
-	"peripheral": ["name", "groupName", "baseAddress", "addressBlock", "resetValue", "resetMask", "description"],
+	"peripheral": ["name", "groupName", "baseAddress", "addressBlock", "resetValue", "resetMask", "access", "modifiedWriteValues", "description"],
 	"register": ["name", "displayName", "addressOffset", "size", "access", "resetValue", "resetMask", "alternateRegister", "description"],
 	"field": ["name", "bitOffset", "bitWidth", "access", "bitRange", "msb", "lsb", "description"], # note: bitRange, msb and lsb are optional.
 	"interrupt": ["name", "value", "description"],
