@@ -418,6 +418,8 @@ def clean_up_logical_name(s):
         s = s[len("_inst"):]
     if s.endswith("_alias" + selected_access_method):
         s = s[: -len("_alias" + selected_access_method)]
+    if s.startswith("_"):
+        s = s[1:]
     return s
     #svd_register.append(text_element("dimIndex", ",".join(clean_up(instance.logical_mnemonic) for instance in instances)))
 
@@ -434,7 +436,7 @@ def induce_access_array(addresses):
             previous_step = step
         elif step != previous_step:
             return addresses[0], None, len(addresses)
-    if previous_step < 0: # negative step is not supported!
+    if previous_step is not None and previous_step < 0: # negative step is not supported!
         previous_step = None
     return addresses[0], previous_step, len(addresses)
 
