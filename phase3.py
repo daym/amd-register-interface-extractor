@@ -434,6 +434,8 @@ def induce_access_array(addresses):
             previous_step = step
         elif step != previous_step:
             return addresses[0], None, len(addresses)
+    if previous_step < 0: # negative step is not supported!
+        previous_step = None
     return addresses[0], previous_step, len(addresses)
 
 def process_TableDefinition(peripheral_path, name, vv):
