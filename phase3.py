@@ -210,7 +210,14 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
 class TableDefinition(object):
     def __init__(self, spectuple, context_string=None):
         prefix, spec = spectuple
-        # Note: strip_off_rwops also strips off the access mode and reset value.  If that bothers you, retain strip_off_rwops(...)[0].
+        extra = {}
+        for line in prefix.split("\n"):
+            extra, _ = strip_off_rwops(line.strip())
+            if extra:
+                break
+        self.access = extra.get("access")
+        self.resetValue = extra.get("Reset")
+        # Note: strip_off_rwops also strips off the access mode and reset value.
         self.description = ("\n".join(line for line in prefix.split("\n") if not strip_off_rwops(line.strip())[1].strip().startswith("_"))).strip()
         if spec[-1:] == [[]]:
           spec = spec[:-1]
@@ -384,8 +391,46 @@ def create_register(peripheral_path, table_definition, name, addressOffset, desc
   result.append(text_element("description", description or name))
   result.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
   result.append(text_element("size", table_definition.size))
-  # FIXME: access.
-  # FIXME: resetValue, resetMask.
+  if table_definition.access:
+    access = table_definition.access
+    # Only put the ones SVD defined (read-only, write-only, read-write, writeOnce, read-writeOnce)
+    if access in [
+      "Read-write",
+      "Read,Write-1-to-clear",
+      "Read-write,Volatile",
+      "Read-write,Reserved",
+      "Read,Error-on-write-1"
+      "Volatile",
+      "Read-write,Read,Write-1-to-clear",
+      "Read,Write-1-to-clear,Volatile",
+    ]:
+      access = "read-write"
+    elif access in [
+      "Read-only",
+      "Read-only,Volatile",
+      "Inaccessible",
+    ]:
+      access = "read-only"
+    elif access in [
+      "Write-only",
+      "Write-1-to-clear",
+    ]:
+      access = "write-only"
+    else:
+      access = access.lower()
+    if table_definition.access in [
+      "Read,Write-1-to-clear",
+      "Read-write,Read,Write-1-to-clear",
+      "Read,Write-1-to-clear,Volatile",
+    ]:
+      result.append(text_element("modifiedWriteValues", "oneToClear"))
+    result.append(text_element("access", access))
+  if table_definition.resetValue:
+    resetValue = table_definition.resetValue
+    if resetValue.endswith("h"):
+        resetValue = "0x" + resetValue[:-len("h")]
+    result.append(text_element("resetValue", resetValue.replace("_", "")))
+  # FIXME: resetMask.
   fields = etree.Element("fields")
   result.append(fields)
   bits = table_definition.bits
