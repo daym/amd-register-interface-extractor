@@ -5,7 +5,9 @@ import gi
 import lxml
 from lxml import etree
 gi.require_version("Gtk", "3.0")
+gi.require_version("GLib", "2.0")
 from gi.repository import Gtk
+from gi.repository import GLib
 
 model = Gtk.TreeStore(str, str, str) # type, name, tooltip
 
@@ -42,6 +44,7 @@ def traverse(root, store_parent):
     "{}: {}".format(cname, root.find(cname).text) for cname in type_to_pseudo_attributes.get(type, []) if root.find(cname) is not None
   ])
   tooltip = tooltip.strip()
+  tooltip = GLib.markup_escape_text(tooltip, -1)
   # TODO: root.attrib
   store_root = model.append(store_parent, (type, name, tooltip))
   if type == "registers":
