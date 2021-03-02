@@ -17,7 +17,7 @@ type_to_pseudo_attributes = {
 	"device": ["name", "version", "description", "addressUnitBits", "width", "size", "resetValue", "resetMask", "vendor", "vendorID", "series", "licenseText", "access"],
 	"peripheral": ["name", "description", "groupName", "baseAddress", "addressBlock"],
 	"register": ["name", "displayName", "description", "addressOffset", "size", "access", "resetValue", "alternateRegister"],
-	"field": ["name", "description", "bitOffset", "bitWidth", "access", "bitRange"], # note: bitRange is optional.
+	"field": ["name", "description", "bitOffset", "bitWidth", "access", "bitRange", "msb", "lsb"], # note: bitRange, msb and lsb are optional.
 	"interrupt": ["name", "description", "value"],
 }
 
