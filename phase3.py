@@ -211,7 +211,7 @@ class TableDefinition(object):
     def __init__(self, spectuple, context_string=None):
         prefix, spec = spectuple
         # Note: strip_off_rwops also strips off the access mode and reset value.  If that bothers you, retain strip_off_rwops(...)[0].
-        self.description = ("\n".join(line for line in prefix.split("\n") if not strip_off_rwops(line.strip())[1].strip().startswith("_"))).lstrip()
+        self.description = ("\n".join(line for line in prefix.split("\n") if not strip_off_rwops(line.strip())[1].strip().startswith("_"))).strip()
         if spec[-1:] == [[]]:
           spec = spec[:-1]
         self.spec = spec
