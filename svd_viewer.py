@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import gi
 import lxml
@@ -81,6 +82,7 @@ traverse(root, None)
 scroller.add(tree)
 
 win = Gtk.Window()
+win.props.title = "{} - {}".format(os.path.realpath(sys.argv[1]), sys.argv[0])
 win.connect("destroy", Gtk.main_quit)
 win.add(scroller)
 win.show_all()
