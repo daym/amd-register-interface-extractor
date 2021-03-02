@@ -17,3 +17,5 @@ Then invoke something like (using the name of the first PDF file as argument):
 
 The result is in `phase3_host.svd`.
 It's also useful to `import phase2_result` in a Python interpreter and look around.
+
+A rudimentary SVD viewer is also included, so you can inspect the result graphically using `python3 svd_viewer.py phase3_host.svd` or similar.
