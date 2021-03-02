@@ -406,12 +406,84 @@ def create_register(peripheral_path, table_definition, name, addressOffset, desc
     # TODO: enumeratedValues, enumeratedValue
     fields.append(field)
   svd_registers.append(result)
-  return result
+  return svd_registers, result
 
 #import pprint
 #pprint.pprint(tree)
 
 selected_access_method = "HOST"
+
+def clean_up_logical_name(s):
+    if s.startswith("_inst"):
+        s = s[len("_inst"):]
+    if s.endswith("_alias" + selected_access_method):
+        s = s[: -len("_alias" + selected_access_method)]
+    return s
+    #svd_register.append(text_element("dimIndex", ",".join(clean_up(instance.logical_mnemonic) for instance in instances)))
+
+def induce_access_array(addresses):
+    """ Tries to induce a regular array from ADDRESSES.
+        Returns (first_address, step, count) if that was possible.
+        Otherwise, returns (first_address, None, count). """
+    previous_address = addresses[0]
+    previous_step = None
+    even_steps = True
+    for address in addresses[1:]:
+        step = address - previous_address
+        if previous_step is None:
+            previous_step = step
+        elif step != previous_step:
+            return addresses[0], None, len(addresses)
+    return addresses[0], previous_step, len(addresses)
+
+def process_TableDefinition(peripheral_path, name, vv):
+    global offset
+    path = *peripheral_path, name
+    description = "::".join(path) + "\n" + vv.description
+    prefixname = name
+    basename = None
+
+    assert selected_access_method in vv.instances
+    instances = vv.instances[selected_access_method]
+    try:
+        addresses = [calculate_hex_instance_value(instance.resolved_physical_mnemonic) for instance in instances]
+        first_address, step, count = induce_access_array(addresses)
+        addressOffset = addresses[0]
+    except:
+        import traceback
+        traceback.print_exc()
+        addresses = []
+        print("Error: Could not calculate addresses of register {}--defaulting to nonsense (very low) value for a dummy entry.".format(name), file=sys.stderr)
+        offset += 4
+        description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description:)\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances))
+        addressOffset = offset
+
+    if len(addresses) > 1:
+        if step is not None: # regular array
+            name = name + "[%s]"
+        else: # unroll manually
+            name = "{}_{}".format(prefixname, clean_up_logical_name(instances[0].logical_mnemonic))
+            basename = name
+    svd_registers, svd_register = create_register(peripheral_path, vv, name, addressOffset, description=description)
+    if name.find("[") != -1:
+        # Create array of registers
+        svd_register.append(text_element("dim", len(instances)))
+        if step == 0:
+            print("Error: step is 0 for register {} instances--only the first register will be able to be accessed".format(name), file=sys.stderr)
+        else:
+            svd_register.append(text_element("dimIncrement", "0x{:X}".format(step)))
+    else: # manually unroll
+        for instance, addressOffset in zip(instances[1:], addresses[1:]):
+            derived_register = etree.Element("register")
+            derived_register.attrib["derivedFrom"] = basename
+            name = "{}_{}".format(prefixname, clean_up_logical_name(instance.logical_mnemonic))
+            derived_register.append(text_element("name", name))
+            #derived_register.append(text_element("description", description)
+            #addressOffset = calculate_hex_instance_value(instance.resolved_physical_mnemonic)
+            derived_register.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
+            #derived_register.append(text_element("size", table_definition.size))
+            svd_registers.append(derived_register)
+            #svd_register.append(text_element("dimIndex", ",".join(clean_up_logical_name(instance.logical_mnemonic) for instance in instances)))
 
 def traverse1(tree, path):
   global offset
@@ -432,62 +504,8 @@ def traverse1(tree, path):
       peripheral_path = tuple(path + [k])
       for kk, vv in v.items():
         if isinstance(vv, TableDefinition):
-          if selected_access_method in vv.instances:
-            instances = vv.instances[selected_access_method]
-            #for instance in instances:
-            #  print("INSTANCE", instance, instance.resolved_physical_mnemonic, file=sys.stderr)
-            name = kk # "_".join(path + [k, kk])
-            if vv.bits:
-              first_instance = instances[0]
-              try:
-                  addressOffset = calculate_hex_instance_value(first_instance.resolved_physical_mnemonic)
-              except:
-                  print("Error: Could not calculate address of register {}--defaulting to nonsense (very low) value.".format(name), file=sys.stderr)
-                  offset += 4
-                  addressOffset = offset
-              try:
-                  addresses = [calculate_hex_instance_value(instance.resolved_physical_mnemonic) for instance in instances]
-                  previous_address = addresses[0]
-                  previous_step = None
-                  for address in addresses[1:]:
-                      step = address - previous_address
-                      if previous_step is None:
-                          previous_step = step
-                      else:
-                          assert step == previous_step, name
-                  if len(addresses) > 1:
-                      if step >= 0:
-                          name = name + "[%s]"
-                      else: # Note: svd2rust can't handle it--but it's better to fix it in svd2rust
-                          name = name + "%s"
-                          # Reverse addresses so they are in increasing order.
-                          # But that means that the logical order is now all messed up.  So we will also create a "dimIndex" node (with the actual names)--otherwise it would be very confusing.
-                          addresses.reverse()
-                          addressOffset = addresses[0]
-                          instances.reverse()
-                          step = -step
-              except:
-                  import traceback
-                  traceback.print_exc()
-                  print("Error: Could not calculate all instances' addresses of register {}--only the first register will be able to be accessed".format(name), file=sys.stderr)
-                  addresses = []
-                  step = 0
-              svd_register = create_register(peripheral_path, vv, name, addressOffset, description="::".join(path + [k, kk]) + "\n" + vv.description + "\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances)))
-              if len(addresses) > 1:
-                  # Create array of registers
-                  svd_register.append(text_element("dim", len(instances)))
-                  if step == 0:
-                      print("Error: step is 0 for register {} instances--only the first register will be able to be accessed".format(name), file=sys.stderr)
-                  if name.find("[") == -1:
-                      assert step > 0
-                      def clean_up(s):
-                          if s.startswith("_inst"):
-                              s = s[len("_inst"):]
-                          if s.endswith("_alias" + selected_access_method):
-                              s = s[: -len("_alias" + selected_access_method)]
-                          return s
-                      svd_register.append(text_element("dimIndex", ",".join(clean_up(instance.logical_mnemonic) for instance in instances)))
-                  svd_register.append(text_element("dimIncrement", "0x{:X}".format(step)))
+          if selected_access_method in vv.instances and vv.bits:
+            process_TableDefinition(peripheral_path, kk, vv)
     else:
       traverse1(v, path + [k])
 
