@@ -3,6 +3,7 @@
 import sys
 import gi
 import lxml
+from copy import deepcopy
 from lxml import etree
 gi.require_version("Gtk", "3.0")
 gi.require_version("GLib", "2.0")
@@ -33,8 +34,23 @@ tree.props.search_column = 1
 tree.append_column(col0)
 #tree.expand_all()
 
+def resolve_derivedFrom(root):
+  """ If ROOT has a 'derivedFrom' attribute, find an element with that name and copy all its children--except for the ones ROOT already has"""
+  derivedFrom = root.attrib.get("derivedFrom")
+  if derivedFrom:
+    reference = root.find("..//register[name={!r}]".format(derivedFrom))
+    if reference is not None:
+      resolve_derivedFrom(reference)
+      for node in reference:
+        if etree.iselement(node):
+          tag = node.tag
+          if tag not in root:
+              root.append(deepcopy(node))
+
 def traverse(root, store_parent):
   type = root.tag if etree.iselement(root) else None
+  if etree.iselement(root):
+    resolve_derivedFrom(root)
   type = str(type)
   names = root.xpath("name/text()")
   name = names[0] if len(names) > 0 else (type or str(root))
