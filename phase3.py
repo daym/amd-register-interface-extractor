@@ -250,7 +250,8 @@ class TableDefinition(object):
                 for bit in range(min_bit, max_bit + 1):
                   assert bit in unused_bits, context_string
                   unused_bits.remove(bit)
-                bitspecs.append(((max_bit, min_bit), name, description))
+                if name != "Reserved":
+                  bitspecs.append(((max_bit, min_bit), name, description))
             self.bits = bitspecs
             if unused_bits:
               # Problems:
