@@ -459,6 +459,7 @@ def process_TableDefinition(peripheral_path, name, vv):
         offset += 4
         description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description:)\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances))
         addressOffset = offset
+        step = None
 
     if len(addresses) > 1:
         if step is not None: # regular array
@@ -467,13 +468,13 @@ def process_TableDefinition(peripheral_path, name, vv):
             name = "{}_{}".format(prefixname, clean_up_logical_name(instances[0].logical_mnemonic))
             basename = name
     svd_registers, svd_register = create_register(peripheral_path, vv, name, addressOffset, description=description)
-    if name.find("[") != -1:
+    if step is not None:
         # Create array of registers
-        svd_register.append(text_element("dim", len(instances)))
+        if len(instances) > 1:
+            svd_register.append(text_element("dim", len(instances)))
+            svd_register.append(text_element("dimIncrement", "0x{:X}".format(step)))
         if step == 0:
             print("Error: step is 0 for register {} instances--only the first register will be able to be accessed".format(name), file=sys.stderr)
-        else:
-            svd_register.append(text_element("dimIncrement", "0x{:X}".format(step)))
     else: # manually unroll
         for instance, addressOffset in zip(instances[1:], addresses[1:]):
             derived_register = etree.Element("register")
