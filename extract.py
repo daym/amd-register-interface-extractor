@@ -367,7 +367,7 @@ class State(object):
           self.result[-1][1].append("")
         if self.result[-1][1][column_i]:
           separator = " "
-          if self.in_table and self.in_table_prefix and int(attrib["left"]) in [54, 59]:
+          if self.in_table and self.in_table_prefix and int(attrib["left"]) in [54, 58, 59]:
             assert column_i == 0
             #assert text.startswith("_") or text.startswith("Read-write."), text
             separator = "\u00b6" # paragraph sign
