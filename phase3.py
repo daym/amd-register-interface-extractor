@@ -506,11 +506,11 @@ def process_TableDefinition(peripheral_path, name, vv):
         addresses = [calculate_hex_instance_value(instance.resolved_physical_mnemonic) for instance in instances]
         first_address, step, count = induce_access_array(addresses)
         addressOffset = addresses[0]
-    except:
-        import traceback
-        traceback.print_exc()
+    except Exception as e:
+        #import traceback
+        #traceback.print_exc()
         addresses = []
-        print("Error: Could not calculate addresses of register {}--defaulting to nonsense (very low) value for a dummy entry.".format(name), file=sys.stderr)
+        print("Error: Could not calculate addresses of register {}: {}.  Defaulting to nonsense (very low) value for a dummy entry.".format(name, e), file=sys.stderr)
         offset += 4
         description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description:)\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances))
         addressOffset = offset
