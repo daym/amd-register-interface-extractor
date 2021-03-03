@@ -35,24 +35,6 @@ class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic
 			physical_mnemonic = physical_mnemonic.replace(k, v)
 		return physical_mnemonic
 
-"""
-TODO:
-            logical_mnemonic = logical_mnemonic.strip()
-            if logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]_n"
-) or logical_mnemonic == "_ccd[7:0]_lthree[1:0]_core[3:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_core[3:0]_n") or logical_mnemonic == "_ccd[7:0
-]_lthree[1:0]" or logical_mnemonic.startswith("_ccd[7:0]_lthree[1:0]_n") or re_direct_instance_number.match(logical_mnemonic): # implicit core reference etc
-                aliaskind = None
-            elif context_string and context_string.startswith("SBRMIx"):
-                aliaskind = None # FIXME: AMD does not specify which it is.
-            elif context_string and context_string.startswith("DFPMCx"):
-                aliaskind = None # FIXME: AMD does not specify which it is.
-            else:
-                assert logical_mnemonic.find("_alias") != -1, (logical_mnemonic, context_string)
-                aliaskinds = re_alias.findall(logical_mnemonic)
-                assert len(aliaskinds) == 1, logical_mnemonic
-                aliaskind, = aliaskinds
-"""
-
 def unroll_inst_item_pattern(spec):
 	"""
 	>>> list(unroll_inst_item_pattern("_inst[INTSBDEVINDCFG0,NBIF[1:0]DEVINDCFG0,PCIE1DEVINDCFG[7:0],PCIE0DEVINDCFG[7:0]]_aliasSMN"))
@@ -175,6 +157,7 @@ def unroll_inst_pattern(spec):
 			physs.append(item)
 			#variable_definitions.append(item)
 		else:
+			# Note: Suffix is usually "_n".
 			implicit_patterns = ["_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd[7:0]_lthree0_core[7:0]", "_ccd[7:0]_lthree0",
 			"_ccd[1:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]", # Ryzen 7
 			"_lthree[1:0]_core[3:0]_thread[1:0]", "_lthree[1:0]_core[3:0]", "_lthree[1:0]", # Naples
