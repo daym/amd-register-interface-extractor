@@ -60,8 +60,6 @@ def remove_cosmetic_line_breaks(header):
     if header.find("\n") == -1:
         return header
 
-    if header.find("UMC0CTLx00000804_address0009_00[D6") != -1:
-        pass
     # First, remove newlines inside hex numerals and in lists of numbers
 
     for i in range(16):
