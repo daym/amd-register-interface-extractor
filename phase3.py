@@ -11,7 +11,18 @@ import pprint
 from collections import namedtuple
 from rwops import strip_off_rwops
 from unroller import unroll_inst_pattern, RegisterInstanceSpec
-from hexcalculator import calculate_hex_instance_value
+from hexcalculator import calculate_hex_instance_value as internal_calculate_hex_instance_value
+
+selected_access_method = "HOST"
+
+def calculate_hex_instance_value(s):
+	if s.startswith("MSR"):
+		# Those have "MSR" prefix AND "MSR" access method.
+		assert selected_access_method == "MSR"
+		s = s[len("MSR"):]
+	else:
+		assert selected_access_method != "MSR"
+	return internal_calculate_hex_instance_value(s)
 
 re_pattern = re.compile(r"^([0-9A-F]+[_0-9A-Fa-f]*)[.][.][.]([0-9A-F]+[_0-9A-Fa-f]*)$")
 
@@ -454,8 +465,6 @@ def create_register(peripheral_path, table_definition, name, addressOffset, desc
 
 #import pprint
 #pprint.pprint(tree)
-
-selected_access_method = "HOST"
 
 def clean_up_logical_name(s):
     if s.startswith("_inst"):
