@@ -177,7 +177,6 @@ for line in open("result.txt", "r"):
 			if len(cells) >= 1 and cells[0].startswith("Bits Description "):
 				process_table_row(current_table, ["Bits", "Description"])
 				cells = [cells[0][len("Bits Description "):]] + cells[1:]
-			# 'APICx090', ' [ Arbitration Priority ]  (Core::X86::Apic::Arbitration Priority) Read-only,Volatile. Reset: 0000_0000h.  _lthree[1:0]_core[3:0]_thread[1:0]; APICx090; APIC={Core::X86::Msr::APIC_BAR[ApicBar[47:12]] , 000h} Bits Description 31:8 Reserved.  7:0','Priority . Read-only,Volatile. Reset: 00h. Indicates the current priority for a pending interrupt, or a task or  interrupt being serviced by the core. The priority is used to arbitrate between cores to determine which accepts a  lowest-priority interrupt request.'
 			mistaken_pattern_1 = re_mistaken_pattern_1.match(cells[0]) if len(cells) >= 1 else None
 			if mistaken_pattern_1:
 				OK1 = mistaken_pattern_1.group(1)
