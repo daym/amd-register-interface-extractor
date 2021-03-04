@@ -66,6 +66,8 @@ Note that the `meaning` can be (and usually is) refined by further routines, for
 
 `traverse`: Traverses the XML file.  This is the entry point.  Remembers `<fontspec>`.  Processes `<text>`, `<font>` and `<page>`.  Note: Hard-coded 27 page skip at the beginning for `TEXT` output.  Calls `process_text` for all text.
 
+If there's an assertion failure in this phase, you can examine the `resultvol`*`.txt.new` file (note `.new`) for the context.
+
 ## Phase 2: phase2.py
 
 This takes the concatenation of multiple `txt` files from the previous phase and emits Python source code that provides variables that have all the register definitions spelled out in nice actual tables (Python lists).  It also includes all the non-register tables from the PPR.
