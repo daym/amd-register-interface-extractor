@@ -102,8 +102,6 @@ def unroll_inst_item_pattern(spec):
 						radix = 10
 					else:
 						radix = 16
-						#if spec.find("x") != -1:
-						#elif spec.startswith("15[E:B]0_0000h") or spec.startswith("IOAGR[") or spec.startswith("IOAPICMMIO[3:0]") or spec.startswith("02[B:8]0_0000h") or spec.startswith("IOAPIC[3:0]") or spec.startswith("14[6:3]0_0000h") or spec.startswith("IOAPICMMIOINDEX[3:0]") or spec.startswith("02[B:8]0_1000h"): # Seriously, Rome PPR?
 					try:
 						beginning = int(beginning, radix)
 						end = int(end, radix)
