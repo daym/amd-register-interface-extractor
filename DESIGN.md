@@ -82,7 +82,7 @@ It is very useful to import this `phase2_result` from your own Python programs (
 
 This imports a `phase2_result.py`, uses reflection to find all the tables, collects them into a tree-shaped namespace and then emits actual CMSIS SVD XML nodes for each of the peripherals in the tree.  Note that it only keeps entries with the access method specified in selected_access_method (usually `HOST`).
 
-In order to unroll instance specifiers into actual instances, it uses `unroller.py`.  Sometimes, the PPRs list something that looks like a pattern to unroll--but from the CPU's point of view it's really the opposite--it specifies where there is NO extra registers.  Those are listed in the variable `implicit_patterns` in `unroller.py` in order to prevent them from being unrolled.
+In order to unroll instance specifiers into actual instances, it uses `unroller.py`.  Sometimes, the PPRs list something that looks like a pattern to unroll--but it's really the opposite--it specifies where there are NO extra register instances.  Those are listed in the variable `implicit_patterns` in `unroller.py` in order to prevent them from being unrolled.
 
 The outputs are usually called `phase3_host.svd` for the HOST access method and `phase3_io.svd` for the IO access method.
 
