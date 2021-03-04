@@ -2,7 +2,7 @@
 
 """
 This file is there in order to avoid an register access needing another register access somewhere else.
-The settings here are a lookup table and the assumption is that the firmware set up those values and left them at that--so we don't need to look them up.
+The settings here are a lookup table and the assumption is that the firmware set up those values and left them at that--so we don't need to look them up in hardware.
 """
 
 """ Ron:
