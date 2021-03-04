@@ -75,6 +75,11 @@ def remove_cosmetic_line_breaks(header):
         for j in range(16):
             for k in range(10):
                 header = header.replace("{:X}\n{:X}{}".format(i, j, k), "{:X}{:X}{}".format(i, j, k))
+    for i in range(10):
+        for j in range(16):
+            for k in range(16):
+                for l in range(10):
+                    header = header.replace("{}\n{:X}{:X}{}".format(i, j, k, l), "{}{:X}{:X}{}".format(i, j, k, l))
     header = header.replace("\n,", ",")
     header = header.replace(" \n", " ")
     def replace_ul(header):
