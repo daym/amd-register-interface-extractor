@@ -25,7 +25,7 @@ re_mistaken_pattern_reserved = re.compile(r"^([0-9]+:[0-9]+)[ ]+(Reserved[ ]*[.:
 
 # Note: \u00b6 is the paragraph sign, used in place of "\n" (because re handles the latter really badly).
 re_table_prefix = re.compile(r"^(.*)[ \u00b6](Bits Description.*)$")
-re_table_prefix_nice_names = re.compile(r"^[ ]*([[][^(]* []])[ \u00b6]+([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
+re_table_prefix_nice_names = re.compile(r"^[ ]*(\[[^(]* \])[ \u00b6]+([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
 re_table_prefix_nice_name = re.compile(r"^([ \u00b6]*)([(][A-Za-z0-9]+::[A-Za-z0-9:_]+[)])(.*)$")
 re_deparen = re.compile(r"[(]([^]:]+)[)]")
 
