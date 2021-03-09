@@ -14,6 +14,7 @@ from unroller import unroll_inst_pattern, RegisterInstanceSpec
 from hexcalculator import calculate_hex_instance_value as internal_calculate_hex_instance_value
 
 selected_access_method = "HOST"
+selected_data_port_write = None
 
 def calculate_hex_instance_value(s):
 	if s.startswith("MSR"):
@@ -502,6 +503,18 @@ def process_TableDefinition(peripheral_path, name, vv):
 
     assert selected_access_method in vv.instances
     instances = vv.instances[selected_access_method]
+    global_data_port_write = None
+    for instance in instances:
+        vars = dict(definition.split("=", 1) for definition in instance.variable_definitions)
+        data_port_write = vars.get("DataPortWrite", "direct")
+        if global_data_port_write is None:
+            global_data_port_write = data_port_write
+        # Assumption: all the data port write are the same for one register
+        assert data_port_write == global_data_port_write
+    if selected_data_port_write != global_data_port_write:
+        #print("info: Skipping {} because of different data port write".format(name), file=sys.stderr)
+        return
+
     try:
         addresses = [calculate_hex_instance_value(instance.resolved_physical_mnemonic) for instance in instances]
         first_address, step, count = induce_access_array(addresses)
@@ -567,10 +580,12 @@ def traverse1(tree, path):
     else:
       traverse1(v, path + [k])
 
-opts, args = getopt.getopt(sys.argv[1:], "m:", ["mode="])
+opts, args = getopt.getopt(sys.argv[1:], "m:d:", ["mode=", "data-port-write="])
 for k,v in opts:
 	if k == "-m" or k == "--mode":
 		selected_access_method = v
+	elif k == "-d" or k == "--data-port-write":
+		selected_data_port_write = v
 
 traverse1(tree, [])
 

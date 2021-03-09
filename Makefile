@@ -1,7 +1,7 @@
 
 .PHONY: all clean distclean validate
 
-all: phase3_host.svd phase3_io.svd phase3_msr.svd phase3_smn.svd
+all: phase3_host.svd phase3_host_ficaa.svd phase3_io.svd phase3_msr.svd phase3_smn.svd phase3_smn_ficaa.svd
 
 include config.mk
 include compiler.mk
