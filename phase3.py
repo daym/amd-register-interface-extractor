@@ -393,18 +393,7 @@ offset = 0
 
 svd_peripherals_by_path = {}
 
-def create_register(peripheral_path, table_definition, name, addressOffset, description=None):
-  if peripheral_path not in svd_peripherals_by_path:
-        svd_peripheral = create_peripheral("_".join(peripheral_path), "1.0", 0, 100, "read-write") # FIXME
-        #svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
-        # TODO: <interrupt> as child of peripheral.
-        #svd_peripheral.append(svd_addressBlock)
-        svd_peripherals.append(svd_peripheral)
-        svd_registers = etree.Element("registers")
-        svd_peripheral.append(svd_registers)
-        svd_peripherals_by_path[peripheral_path] = svd_peripheral, svd_registers
-  else:
-        svd_peripheral, svd_registers = svd_peripherals_by_path[peripheral_path]
+def create_register(table_definition, name, addressOffset, description=None):
   result = etree.Element("register")
   result.append(text_element("name", name))
   result.append(text_element("description", description or name))
@@ -461,8 +450,7 @@ def create_register(peripheral_path, table_definition, name, addressOffset, desc
     # FIXME: access
     # TODO: enumeratedValues, enumeratedValue
     fields.append(field)
-  svd_registers.append(result)
-  return svd_registers, result
+  return result
 
 #import pprint
 #pprint.pprint(tree)
@@ -535,7 +523,22 @@ def process_TableDefinition(peripheral_path, name, vv):
         else: # unroll manually
             name = "{}_{}".format(prefixname, clean_up_logical_name(instances[0].logical_mnemonic))
             basename = name
-    svd_registers, svd_register = create_register(peripheral_path, vv, name, addressOffset, description=description)
+    if peripheral_path not in svd_peripherals_by_path:
+        svd_peripheral = create_peripheral("_".join(peripheral_path), "1.0", 0, 100, "read-write") # FIXME
+        #svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
+        # TODO: <interrupt> as child of peripheral.
+        #svd_peripheral.append(svd_addressBlock)
+        svd_peripherals.append(svd_peripheral)
+        svd_registers = etree.Element("registers")
+        svd_peripheral.append(svd_registers)
+        peripheral_state = {} # for detecting strides etc.
+        svd_peripherals_by_path[peripheral_path] = svd_peripheral, svd_registers, peripheral_state
+    else:
+        svd_peripheral, svd_registers, peripheral_state = svd_peripherals_by_path[peripheral_path]
+
+    svd_register = create_register(vv, name, addressOffset, description=description)
+    svd_registers.append(svd_register)
+
     if step is not None:
         # Create array of registers
         if len(instances) > 1:
