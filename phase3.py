@@ -559,6 +559,10 @@ def process_TableDefinition(peripheral_path, name, vv):
             svd_registers.append(derived_register)
             #svd_register.append(text_element("dimIndex", ",".join(clean_up_logical_name(instance.logical_mnemonic) for instance in instances)))
 
+def finish_TableDefinition(peripheral_path):
+    if peripheral_path in svd_peripherals_by_path:
+        svd_peripheral, svd_registers, peripheral_state = svd_peripherals_by_path[peripheral_path]
+
 def traverse1(tree, path):
   global offset
   for k, v in tree.items():
@@ -580,6 +584,7 @@ def traverse1(tree, path):
         if isinstance(vv, TableDefinition):
           if selected_access_method in vv.instances and vv.bits:
             process_TableDefinition(peripheral_path, kk, vv)
+      finish_TableDefinition(peripheral_path)
     else:
       traverse1(v, path + [k])
 
