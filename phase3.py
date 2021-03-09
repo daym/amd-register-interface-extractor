@@ -14,7 +14,7 @@ from unroller import unroll_inst_pattern, RegisterInstanceSpec
 from hexcalculator import calculate_hex_instance_value as internal_calculate_hex_instance_value
 
 selected_access_method = "HOST"
-selected_data_port_write = None
+selected_data_port_write = "direct"
 
 def calculate_hex_instance_value(s):
 	if s.startswith("MSR"):
