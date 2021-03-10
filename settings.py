@@ -195,45 +195,45 @@ settings = {
 #   Ron: 0x1140_0018:0x00010100
 "PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio3_instPCIE0_func0_aliasSMN[SECONDARY_BUS]": "1_0100h", # No default available
 
-"D00F0x": "PCI{Bus: 0, Device: 0x00, Function: 0}",
-"D00F1x": "PCI{Bus: 0, Device: 0x00, Function: 1}",
-"D00F2x": "PCI{Bus: 0, Device: 0x00, Function: 2}",
-"D00F3x": "PCI{Bus: 0, Device: 0x00, Function: 3}",
-"D00F4x": "PCI{Bus: 0, Device: 0x00, Function: 4}",
+"D00F0x": "e0000000h + ",
+"D00F1x": "e0001000h + ",
+"D00F2x": "e0002000h + ",
+"D00F3x": "e0003000h + ",
+"D00F4x": "e0004000h + ",
 
-"D01F0x": "PCI{Bus: 0, Device: 0x01, Function: 0}",
-"D01F1x": "PCI{Bus: 0, Device: 0x01, Function: 1}",
-"D01F2x": "PCI{Bus: 0, Device: 0x01, Function: 2}",
-"D01F3x": "PCI{Bus: 0, Device: 0x01, Function: 3}",
-"D01F4x": "PCI{Bus: 0, Device: 0x01, Function: 4}",
-"D01F5x": "PCI{Bus: 0, Device: 0x01, Function: 5}",
-"D01F6x": "PCI{Bus: 0, Device: 0x01, Function: 6}",
-"D01F7x": "PCI{Bus: 0, Device: 0x01, Function: 7}",
+"D01F0x": "e0008000h + ",
+"D01F1x": "e0009000h + ",
+"D01F2x": "e000a000h + ",
+"D01F3x": "e000b000h + ",
+"D01F4x": "e000c000h + ",
+"D01F5x": "e000d000h + ",
+"D01F6x": "e000e000h + ",
+"D01F7x": "e000f000h + ",
 
-"D02F0x": "PCI{Bus: 0, Device: 0x02, Function: 0}",
-"D02F1x": "PCI{Bus: 0, Device: 0x02, Function: 1}",
-"D03F0x": "PCI{Bus: 0, Device: 0x03, Function: 0}",
-"D04F0x": "PCI{Bus: 0, Device: 0x04, Function: 0}",
-"D04F1x": "PCI{Bus: 0, Device: 0x04, Function: 1}",
-"D05F1x": "PCI{Bus: 0, Device: 0x05, Function: 1}",
-"D05F2x": "PCI{Bus: 0, Device: 0x05, Function: 2}",
-"D07F0x": "PCI{Bus: 0, Device: 0x07, Function: 0}",
-"D07F1x": "PCI{Bus: 0, Device: 0x07, Function: 1}",
-"D08F0x": "PCI{Bus: 0, Device: 0x08, Function: 0}",
-"D08F1x": "PCI{Bus: 0, Device: 0x08, Function: 1}",
-"D08F2x": "PCI{Bus: 0, Device: 0x08, Function: 2}",
-"D08F3x": "PCI{Bus: 0, Device: 0x08, Function: 3}",
-"D14F3x": "PCI{Bus: 0, Device: 0x14, Function: 3}",
+"D02F0x": "e0010000h + ",
+"D02F1x": "e0011000h + ",
+"D03F0x": "e0018000h + ",
+"D04F0x": "e0020000h + ",
+"D04F1x": "e0021000h + ",
+"D05F1x": "e0029000h + ",
+"D05F2x": "e002a000h + ",
+"D07F0x": "e0038000h + ",
+"D07F1x": "e0039000h + ",
+"D08F0x": "e0040000h + ",
+"D08F1x": "e0041000h + ",
+"D08F2x": "e0042000h + ",
+"D08F3x": "e0043000h + ",
+"D14F3x": "e00a3000h + ",
 
-"D18F0x": "PCI{Bus: 0, Device: 0x18, Function: 0}",
-"D18F1x": "PCI{Bus: 0, Device: 0x18, Function: 1}",
-"D18F2x": "PCI{Bus: 0, Device: 0x18, Function: 2}",
-"D18F3x": "PCI{Bus: 0, Device: 0x18, Function: 3}",
-"D18F4x": "PCI{Bus: 0, Device: 0x18, Function: 4}",
-"D18F5x": "PCI{Bus: 0, Device: 0x18, Function: 5}",
-"D18F6x": "PCI{Bus: 0, Device: 0x18, Function: 6}",
-"D18F7x": "PCI{Bus: 0, Device: 0x18, Function: 7}",
-# TODO: D19 ?
+"D18F0x": "e00c0000h + ",
+"D18F1x": "e00c1000h + ",
+"D18F2x": "e00c2000h + ",
+"D18F3x": "e00c3000h + ",
+"D18F4x": "e00c4000h + ",
+"D18F5x": "e00c5000h + ",
+"D18F6x": "e00c6000h + ",
+"D18F7x": "e00c7000h + ",
+# TODO: D19?
 
 "BXXD00F0x": "PCI{Bus: BXX, Device: 0x00, Function: 0x0}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM] or BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev?_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[PRIMARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[SECONDARY_BUS]; see IOHCMISC[0...3]x00000044 (IOHC::NB_BUS_NUM_CNTL) [_nbio[3:0]_aliasSMN; IOHCMISC[3:0]x00000044; IOHCMISC[3:0]=13[E:B]1_0000h]; default: disabled
 "BXXD00F1x": "PCI{Bus: BXX, Device: 0x00, Function: 0x1}", # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev0_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS]
@@ -262,4 +262,3 @@ settings = {
 "BXXD08F2x": "PCI{Bus: BXX, Device: 0x08, Function: 0x2}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
 "BXXD08F3x": "PCI{Bus: BXX, Device: 0x08, Function: 0x3}", # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
 }
-
