@@ -37,6 +37,10 @@ def calculate_hex_instance_value(expression_string):
         scanner.consume()
         b = scanner.consume()
         result = result + b
+    if scanner.input == "+":
+        scanner.consume()
+        b = scanner.consume()
+        result = result + b
     if scanner.input is not None:
         raise SyntaxError(expression_string)
     return result
