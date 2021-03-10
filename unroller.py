@@ -2,6 +2,7 @@
 
 import sys
 import pdb
+import re
 import sys
 from io import StringIO
 from collections import namedtuple
@@ -9,9 +10,10 @@ from settings import settings
 
 #RegisterInstanceSpec = namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic", "variable_definitions"])
 
+re_DataPortWrite_pattern = re.compile(r"^(.*)_x([0-9A-Fa-f_]+)$")
+
 class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic", "variable_definitions"])):
-	@property
-	def resolved_physical_mnemonic(self):
+	def resolve_physical_mnemonic(self, data_port_encoder):
 		physical_mnemonic = self.physical_mnemonic
 		for definition in self.variable_definitions:
 			lhs_spec, rhs_spec = definition.split("=", 1)
@@ -35,6 +37,15 @@ class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic
 						tail = "0"
 					physical_mnemonic = r + " + " + tail
 					break
+		DataPortWrite_match = re_DataPortWrite_pattern.match(physical_mnemonic)
+		if DataPortWrite_match:
+			spec_inside = DataPortWrite_match.group(1)
+			data_port_write = int(DataPortWrite_match.group(2), 16)
+			data_port_write = data_port_encoder(spec_inside, data_port_write)
+			if isinstance(data_port_write, str):
+				physical_mnemonic = data_port_write
+			else:
+				physical_mnemonic = "{:X}".format(data_port_write)
 		for k, v in settings:
 			physical_mnemonic = physical_mnemonic.replace(k, v)
 		return physical_mnemonic

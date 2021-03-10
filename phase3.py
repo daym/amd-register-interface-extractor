@@ -8,6 +8,7 @@ import phase2_result
 from phase2_result import __names, __model
 import os
 import pprint
+import traceback
 from collections import namedtuple
 from rwops import strip_off_rwops
 from unroller import unroll_inst_pattern, RegisterInstanceSpec
@@ -480,6 +481,33 @@ def induce_access_array(addresses):
         previous_step = None
     return addresses[0], previous_step, len(addresses)
 
+def data_port_encode_error(spec, data_port_base):
+    raise Exception("unknown DataPortWrite")
+
+def data_port_encode_ignore(spec, data_port_base):
+    return "{}_x{:x}".format(spec, data_port_base)
+
+re_ficaa_offset_pattern = re.compile(r"^D([0-9A-Fa-f]+)F([0-9A-Fa-f]+)x([0-9A-Fa-f_]+)")
+
+def data_port_encode_ficaa(spec, data_port_base):
+    match = re_ficaa_offset_pattern.match(spec)
+    assert(match), spec
+    device, target_function, target_register = match.groups()
+    device = int(device, 16)
+    target_function = int(target_function, 16)
+    target_register = int(target_register, 16)
+    assert(device in [0x18]), device
+    assert(target_function >= 0 and target_function < 8), target_function
+    assert(target_register & 3 == 0), target_register
+    assert(target_register < 2048), target_register
+    addr = target_register | (target_function << 11)
+    # This loses the device reference.  I sure hope it's always D18
+    return data_port_base | addr
+
+data_port_encoders = {
+    "DF::FabricConfigAccessControl": data_port_encode_ficaa,
+}
+
 def process_TableDefinition(peripheral_path, name, vv):
     global offset
     path = *peripheral_path, name
@@ -500,9 +528,10 @@ def process_TableDefinition(peripheral_path, name, vv):
     if selected_data_port_write != global_data_port_write:
         #print("info: Skipping {} because of different data port write".format(name), file=sys.stderr)
         return
+    data_port_encoder = data_port_encoders.get(selected_data_port_write, data_port_encode_error)
 
     try:
-        addresses = [calculate_hex_instance_value(instance.resolved_physical_mnemonic) for instance in instances]
+        addresses = [calculate_hex_instance_value(instance.resolve_physical_mnemonic(data_port_encoder)) for instance in instances]
         first_address, step, count = induce_access_array(addresses)
         addressOffset = addresses[0]
     except Exception as e:
@@ -511,7 +540,7 @@ def process_TableDefinition(peripheral_path, name, vv):
         addresses = []
         print("Error: Could not calculate addresses of register {}: {}.  Defaulting to nonsense (very low) value for a dummy entry.".format(name, e), file=sys.stderr)
         offset += 4
-        description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description:)\n" + ("\n".join(instance.resolved_physical_mnemonic for instance in instances))
+        description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description)\n{}\n".format(traceback.format_exc()) + ("\n".join(instance.resolve_physical_mnemonic(data_port_encode_ignore) for instance in instances))
         addressOffset = offset
         step = None
 
