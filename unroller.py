@@ -169,7 +169,7 @@ def unroll_inst_pattern(spec):
 			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst5_thread[1:0]", # Rome MSR
 			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst6_thread[1:0]", # Rome MSR
 			"_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[7:0]_lthree[1:0]_core[3:0]", "_ccd[7:0]_lthree[1:0]", "_ccd[7:0]", # Rome
-			"_ccd[7:0]_inst", # Rome MSR
+			# doesn't work "_ccd[7:0]_inst", # Rome MSR
 			"_ccd[1:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]", # Ryzen 7
 			"_lthree[1:0]_core[3:0]_thread[1:0]", "_lthree[1:0]_core[3:0]", "_lthree[1:0]", # Naples
 			"_lthree0_core[3:0]_thread[1:0]", "_lthree0_core[3:0]", "_lthree0", # Ryzen APU NRB
