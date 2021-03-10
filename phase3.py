@@ -371,10 +371,9 @@ svd_root.append(svd_peripherals)
 # TODO: Read "Memory Map - PCICFG" in tree.
 # TODO: Read "Memory Map - SMN" in tree.
 
-def create_peripheral(name, version, baseAddress, access="read-write", description=None, groupName=None):
+def create_peripheral(name, baseAddress, access="read-write", description=None, groupName=None):
   result = etree.Element("peripheral")
   result.append(text_element("name", name))
-  result.append(text_element("version", version))
   result.append(text_element("description", description or name))
   result.append(text_element("groupName", groupName or "generic"))
   result.append(text_element("baseAddress", baseAddress))
@@ -523,7 +522,7 @@ def process_TableDefinition(peripheral_path, name, vv):
             name = "{}_{}".format(prefixname, clean_up_logical_name(instances[0].logical_mnemonic))
             basename = name
     if peripheral_path not in svd_peripherals_by_path:
-        svd_peripheral = create_peripheral("_".join(peripheral_path), "1.0", 0, "read-write") # FIXME
+        svd_peripheral = create_peripheral("_".join(peripheral_path), 0, "read-write")
         #svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
         # TODO: <interrupt> as child of peripheral.
         #svd_peripheral.append(svd_addressBlock)
