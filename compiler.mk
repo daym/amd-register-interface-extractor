@@ -78,6 +78,9 @@ phase3_io.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py 
 phase3_io_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	./phase3.py -m IO -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
 
+phase3_io_abindex.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
+	./phase3.py -m IO -d FCH::AB::ABIndex $< > $@.new && mv $@.new $@
+
 phase3_msr.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	./phase3.py -m MSR $< > $@.new && mv $@.new $@
 

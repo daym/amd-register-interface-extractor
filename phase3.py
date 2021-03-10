@@ -505,8 +505,15 @@ def data_port_encode_ficaa(spec, data_port_base):
     # This loses the device reference.  I sure hope it's always D18
     return data_port_base | addr
 
+def data_port_encode_abindex(spec, data_port_base):
+    addr = calculate_hex_instance_value(spec)
+    assert addr < 2**17
+    # This loses the device reference.  I sure hope it's always D18
+    return data_port_base | addr
+
 data_port_encoders = {
     "DF::FabricConfigAccessControl": data_port_encode_ficaa,
+    "FCH::AB::ABIndex": data_port_encode_abindex,
 }
 
 def process_TableDefinition(peripheral_path, name, vv):

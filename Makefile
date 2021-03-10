@@ -1,7 +1,7 @@
 
 .PHONY: all clean distclean validate
 
-all: phase3_host.svd phase3_host_ficaa.svd phase3_io.svd phase3_msr.svd phase3_smn.svd phase3_smn_ficaa.svd
+all: phase3_host.svd phase3_host_ficaa.svd phase3_io.svd phase3_io_abindex.svd phase3_msr.svd phase3_smn.svd phase3_smn_ficaa.svd
 
 include config.mk
 include compiler.mk
@@ -16,3 +16,6 @@ distclean: clean
 
 validate: phase3_host.svd CMSIS-SVD.xsd
 	xmllint --schema CMSIS-SVD.xsd phase3_host.svd
+
+svd_viewer: svd_viewer.c
+	$(CC) -g3 -o $@ $< `pkg-config --cflags --libs gtk+-3.0 libxml-2.0`
