@@ -88,4 +88,5 @@ phase3_smn.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py
 	./phase3.py -m SMN $< > $@.new && mv $@.new $@
 
 phase3_smn_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m SMN -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
+	#  Keep broken registers in phase3_smn_ficaa.svd (otherwise would be empty)
+	./phase3.py -m SMN -d DF::FabricConfigAccessControl -k $< > $@.new && mv $@.new $@
