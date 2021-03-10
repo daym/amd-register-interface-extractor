@@ -16,6 +16,7 @@ from hexcalculator import calculate_hex_instance_value as internal_calculate_hex
 
 selected_access_method = "HOST"
 selected_data_port_write = "direct"
+selected_error_handling = "omit-registers-with-errors"
 
 def calculate_hex_instance_value(s):
 	if s.startswith("MSR"):
@@ -539,6 +540,8 @@ def process_TableDefinition(peripheral_path, name, vv):
         #traceback.print_exc()
         addresses = []
         print("Error: Could not calculate addresses of register {}: {}.  Defaulting to nonsense (very low) value for a dummy entry.".format(name, e), file=sys.stderr)
+        if selected_error_handling != "keep-registers-with-errors":
+            return
         offset += 4
         description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description)\n{}\n".format(traceback.format_exc()) + ("\n".join(instance.resolve_physical_mnemonic(data_port_encode_ignore) for instance in instances))
         addressOffset = offset
@@ -615,12 +618,14 @@ def traverse1(tree, path):
     else:
       traverse1(v, path + [k])
 
-opts, args = getopt.getopt(sys.argv[1:], "m:d:", ["mode=", "data-port-write="])
+opts, args = getopt.getopt(sys.argv[1:], "m:d:k", ["mode=", "data-port-write=", "keep-registers-with-errors"])
 for k,v in opts:
 	if k == "-m" or k == "--mode":
 		selected_access_method = v
 	elif k == "-d" or k == "--data-port-write":
 		selected_data_port_write = v
+	elif k == "-k" or k == "--keep-registers-with-errors":
+		selected_error_handling = "keep-registers-with-errors"
 
 traverse1(tree, [])
 
