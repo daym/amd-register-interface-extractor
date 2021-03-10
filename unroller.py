@@ -35,7 +35,7 @@ class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic
 						tail = "0"
 					physical_mnemonic = r + " + " + tail
 					break
-		for k, v in settings.items():
+		for k, v in settings:
 			physical_mnemonic = physical_mnemonic.replace(k, v)
 		return physical_mnemonic
 
