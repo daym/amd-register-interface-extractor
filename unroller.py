@@ -161,6 +161,15 @@ def unroll_inst_pattern(spec):
 		else:
 			# Note: Suffix is usually "_n".
 			implicit_patterns = ["_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd[7:0]_lthree0_core[7:0]", "_ccd[7:0]_lthree0",
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst0_thread[1:0]", # Rome MSR
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst1_thread[1:0]", # Rome MSR
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst2_thread[1:0]", # Rome MSR
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst3_thread[1:0]", # Rome MSR
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst4_thread[1:0]", # Rome MSR
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst5_thread[1:0]", # Rome MSR
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst6_thread[1:0]", # Rome MSR
+			"_ccd[7:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[7:0]_lthree[1:0]_core[3:0]", "_ccd[7:0]_lthree[1:0]", "_ccd[7:0]", # Rome
+			"_ccd[7:0]_inst", # Rome MSR
 			"_ccd[1:0]_lthree[1:0]_core[3:0]_thread[1:0]", "_ccd[1:0]_lthree[1:0]_core[3:0]", "_ccd[1:0]_lthree[1:0]", "_ccd[1:0]", # Ryzen 7
 			"_lthree[1:0]_core[3:0]_thread[1:0]", "_lthree[1:0]_core[3:0]", "_lthree[1:0]", # Naples
 			"_lthree0_core[3:0]_thread[1:0]", "_lthree0_core[3:0]", "_lthree0", # Ryzen APU NRB
