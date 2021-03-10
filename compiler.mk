@@ -67,29 +67,29 @@ phase2_result.py: result.txt phase2.py
 	./phase2.py $< > $@.new && mv $@.new $@
 
 phase3_host.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m HOST $< > $@.new && mv $@.new $@
+	./phase3.py -a -m HOST $< > $@.new && mv $@.new $@
 
 phase3_host_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m HOST -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
+	./phase3.py -a -m HOST -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
 
 phase3_io.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m IO $< > $@.new && mv $@.new $@
+	./phase3.py -a -m IO $< > $@.new && mv $@.new $@
 
 phase3_io_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m IO -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
+	./phase3.py -a -m IO -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
 
 phase3_io_abindex.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m IO -d FCH::AB::ABIndex $< > $@.new && mv $@.new $@
+	./phase3.py -a -m IO -d FCH::AB::ABIndex $< > $@.new && mv $@.new $@
 
 phase3_msr.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	./phase3.py -m MSR $< > $@.new && mv $@.new $@
 
 phase3_msr_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m MSR -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
+	./phase3.py -a -m MSR -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
 
 phase3_smn.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
-	./phase3.py -m SMN $< > $@.new && mv $@.new $@
+	./phase3.py -a -m SMN $< > $@.new && mv $@.new $@
 
 phase3_smn_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	#  Keep broken registers in phase3_smn_ficaa.svd (otherwise would be empty)
-	./phase3.py -m SMN -d DF::FabricConfigAccessControl -k $< > $@.new && mv $@.new $@
+	./phase3.py -a -m SMN -d DF::FabricConfigAccessControl -k $< > $@.new && mv $@.new $@

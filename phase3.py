@@ -17,6 +17,7 @@ from hexcalculator import calculate_hex_instance_value as internal_calculate_hex
 selected_access_method = "HOST"
 selected_data_port_write = "direct"
 selected_error_handling = "omit-registers-with-errors"
+selected_alias_reduction_method = "none"
 
 def calculate_hex_instance_value(s):
 	if s.startswith("MSR"):
@@ -525,6 +526,15 @@ def process_TableDefinition(peripheral_path, name, vv):
 
     assert selected_access_method in vv.instances
     instances = vv.instances[selected_access_method]
+
+    if selected_alias_reduction_method == "default":
+        if selected_access_method == "SMN":
+            if "HOST" in vv.instances: # prefer HOST to SMN (i.e. suppress SMN)
+                return
+        elif selected_access_method == "IO":
+            if "HOST" in vv.instances or "SMN" in vv.instances:
+                return
+
     global_data_port_write = None
     for instance in instances:
         vars = dict(definition.split("=", 1) for definition in instance.variable_definitions)
@@ -625,7 +635,7 @@ def traverse1(tree, path):
     else:
       traverse1(v, path + [k])
 
-opts, args = getopt.getopt(sys.argv[1:], "m:d:k", ["mode=", "data-port-write=", "keep-registers-with-errors"])
+opts, args = getopt.getopt(sys.argv[1:], "m:d:ka", ["mode=", "data-port-write=", "keep-registers-with-errors", "reduce-aliases"])
 for k,v in opts:
 	if k == "-m" or k == "--mode":
 		selected_access_method = v
@@ -633,6 +643,8 @@ for k,v in opts:
 		selected_data_port_write = v
 	elif k == "-k" or k == "--keep-registers-with-errors":
 		selected_error_handling = "keep-registers-with-errors"
+	elif k == "-a" or k == "--reduce-aliases":
+		selected_alias_reduction_method = "default"
 
 traverse1(tree, [])
 
