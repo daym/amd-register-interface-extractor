@@ -19,6 +19,33 @@ selected_data_port_write = "direct"
 selected_error_handling = "omit-registers-with-errors"
 selected_alias_reduction_method = "none"
 
+def usage():
+    print("Usage: {} [-a] [-m <mode>] [-d <data-port-write>] [-k]".format(sys.argv[0]))
+    print("Options:")
+    print("\t-a\t--reduce-aliases\tReduce the number of aliases printed by preferring aliases with modern access methods to aliases with older access methods")
+    print("\t-m <method>\t--mode=<method>\tOnly emit registers with the given access method (choices: HOST, IO, SMN)")
+    print("\t-d <data-port-write>\t--data-port-write=<data-port-write>\tOnly emit registers with the given data port write")
+    print("\t-k\t--keep-registers-with-errors\tKeep registers that have errors (like unknown addressOffset), but mark them in the description")
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "m:d:kah", ["mode=", "data-port-write=", "keep-registers-with-errors", "reduce-aliases", "help"])
+except getopt.GetoptError:
+    usage()
+    sys.exit(2)
+
+for k,v in opts:
+	if k == "-m" or k == "--mode":
+		selected_access_method = v
+	elif k == "-d" or k == "--data-port-write":
+		selected_data_port_write = v
+	elif k == "-k" or k == "--keep-registers-with-errors":
+		selected_error_handling = "keep-registers-with-errors"
+	elif k == "-a" or k == "--reduce-aliases":
+		selected_alias_reduction_method = "default"
+	elif k == "-h" or k == "--help":
+		usage()
+		sys.exit()
+
 def calculate_hex_instance_value(s):
 	if s.startswith("MSR"):
 		# Those have "MSR" prefix AND "MSR" access method.
@@ -634,17 +661,6 @@ def traverse1(tree, path):
       finish_TableDefinition(peripheral_path)
     else:
       traverse1(v, path + [k])
-
-opts, args = getopt.getopt(sys.argv[1:], "m:d:ka", ["mode=", "data-port-write=", "keep-registers-with-errors", "reduce-aliases"])
-for k,v in opts:
-	if k == "-m" or k == "--mode":
-		selected_access_method = v
-	elif k == "-d" or k == "--data-port-write":
-		selected_data_port_write = v
-	elif k == "-k" or k == "--keep-registers-with-errors":
-		selected_error_handling = "keep-registers-with-errors"
-	elif k == "-a" or k == "--reduce-aliases":
-		selected_alias_reduction_method = "default"
 
 traverse1(tree, [])
 
