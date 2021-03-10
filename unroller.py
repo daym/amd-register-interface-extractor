@@ -29,7 +29,11 @@ class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic
 					physical_mnemonic = r + " + " + physical_mnemonic[len(l + "x"):]
 					break
 				elif physical_mnemonic.startswith(l):
-					physical_mnemonic = r + " + " + physical_mnemonic[len(l):]
+					tail = physical_mnemonic[len(l):].strip()
+					# Some (few) registers have no "x..." part at all--assume offset 0.
+					if tail == "":
+						tail = "0"
+					physical_mnemonic = r + " + " + tail
 					break
 		for k, v in settings.items():
 			physical_mnemonic = physical_mnemonic.replace(k, v)
