@@ -175,7 +175,7 @@ class State(object):
             self.in_table_header = True
             # prefix is its own row.
             #? self.result.append((self.in_table, []))
-            # FIXME Often, the column Bits is center-justified.  So don't use its text beginning.
+            # Often, the column Bits is center-justified.  So don't use its text beginning.
             if attrib["left"] > self.in_table_header_column_left + 1:
               attrib["left"] = self.in_table_header_column_left + 1
             if attrib["left"] > self.in_table_header_column_left: # Next column
@@ -254,7 +254,6 @@ class State(object):
         print("// TABLE ENDS IN HEADLINE")
         self.finish_this_table()
         assert False
-        # FIXME
       self.result.append([self.headline, []])
       self.headline = ""
       self.headline_type = None
