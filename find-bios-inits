@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import phase2_result
+
+for register_key, register_name in phase2_result.__names.items():
+	x, table = getattr(phase2_result, register_key)
+	if x.find("BIOS") != -1:
+		print("({!r}, {!r}),".format(register_name, x))
+	while table[-1] == []:
+		table = table[:-1]
+	for row in table:
+		try:
+			bitIndex, description = row
+			if description.find("BIOS,") != -1:
+				print("({!r}, {!r}, {!r}),".format(register_name, bitIndex, description))
+		except ValueError:
+			pass
