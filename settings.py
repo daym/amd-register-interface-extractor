@@ -195,6 +195,33 @@ settings = [
 #   Ron: 0x1140_0018:0x00010100
 ("PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio3_instPCIE0_func0_aliasSMN[SECONDARY_BUS]", "1_0100h"), # No default available
 
+("BXXD00F0x", "PCI{Bus: BXX, Device: 0x00, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM] or BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev?_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[PRIMARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[SECONDARY_BUS]; see IOHCMISC[0...3]x00000044 (IOHC::NB_BUS_NUM_CNTL) [_nbio[3:0]_aliasSMN; IOHCMISC[3:0]x00000044; IOHCMISC[3:0]=13[E:B]1_0000h]; default: disabled
+("BXXD00F1x", "PCI{Bus: BXX, Device: 0x00, Function: 0x1}"), # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev0_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS]
+("BXXD00F2x", "PCI{Bus: BXX, Device: 0x00, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM] or BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev0_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS]
+("BXXD00F3x", "PCI{Bus: BXX, Device: 0x00, Function: 0x3}"), # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
+("BXXD00F4x", "PCI{Bus: BXX, Device: 0x00, Function: 0x4}"), # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
+("BXXD01F0x", "PCI{Bus: BXX, Device: 0x01, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]; see IOHCMISC[0...3]x00000044 (IOHC::NB_BUS_NUM_CNTL) [_nbio[3:0]_aliasSMN; IOHCMISC[3:0]x00000044; IOHCMISC[3:0]=13[E:B]1_0000h]
+("BXXD01F1x", "PCI{Bus: BXX, Device: 0x01, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD01F2x", "PCI{Bus: BXX, Device: 0x01, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD01F3x", "PCI{Bus: BXX, Device: 0x01, Function: 0x3}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD01F4x", "PCI{Bus: BXX, Device: 0x01, Function: 0x4}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD01F5x", "PCI{Bus: BXX, Device: 0x01, Function: 0x5}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD01F6x", "PCI{Bus: BXX, Device: 0x01, Function: 0x6}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD01F7x", "PCI{Bus: BXX, Device: 0x01, Function: 0x7}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD02F0x", "PCI{Bus: BXX, Device: 0x02, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD02F1x", "PCI{Bus: BXX, Device: 0x02, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD03F0x", "PCI{Bus: BXX, Device: 0x03, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD04F0x", "PCI{Bus: BXX, Device: 0x04, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD04F1x", "PCI{Bus: BXX, Device: 0x04, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD05F1x", "PCI{Bus: BXX, Device: 0x05, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio0_aliasSMN[NB_BUS_NUM]
+("BXXD05F2x", "PCI{Bus: BXX, Device: 0x05, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio0_aliasSMN[NB_BUS_NUM]
+("BXXD07F0x", "PCI{Bus: BXX, Device: 0x07, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD07F1x", "PCI{Bus: BXX, Device: 0x07, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD08F0x", "PCI{Bus: BXX, Device: 0x08, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD08F1x", "PCI{Bus: BXX, Device: 0x08, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD08F2x", "PCI{Bus: BXX, Device: 0x08, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+("BXXD08F3x", "PCI{Bus: BXX, Device: 0x08, Function: 0x3}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
+
 ("D00F0x", "e0000000h + "),
 ("D00F1x", "e0001000h + "),
 ("D00F2x", "e0002000h + "),
@@ -235,30 +262,4 @@ settings = [
 ("D18F7x", "e00c7000h + "),
 # TODO: D19?
 
-("BXXD00F0x", "PCI{Bus: BXX, Device: 0x00, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM] or BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev?_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[PRIMARY_BUS] or BXX=PCIERCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instPCIE0_func0_aliasSMN[SECONDARY_BUS]; see IOHCMISC[0...3]x00000044 (IOHC::NB_BUS_NUM_CNTL) [_nbio[3:0]_aliasSMN; IOHCMISC[3:0]x00000044; IOHCMISC[3:0]=13[E:B]1_0000h]; default: disabled
-("BXXD00F1x", "PCI{Bus: BXX, Device: 0x00, Function: 0x1}"), # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev0_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS]
-("BXXD00F2x", "PCI{Bus: BXX, Device: 0x00, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM] or BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF?_dev0_aliasSMN[SECONDARY_BUS] or BXX=NBIFSWDSCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF2_aliasSMN[SECONDARY_BUS]
-("BXXD00F3x", "PCI{Bus: BXX, Device: 0x00, Function: 0x3}"), # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio?_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
-("BXXD00F4x", "PCI{Bus: BXX, Device: 0x00, Function: 0x4}"), # BXX=NBIFRCCFG::SUB_BUS_NUMBER_LATENCY_nbio2_instNBIF1_dev0_aliasSMN[SECONDARY_BUS]
-("BXXD01F0x", "PCI{Bus: BXX, Device: 0x01, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]; see IOHCMISC[0...3]x00000044 (IOHC::NB_BUS_NUM_CNTL) [_nbio[3:0]_aliasSMN; IOHCMISC[3:0]x00000044; IOHCMISC[3:0]=13[E:B]1_0000h]
-("BXXD01F1x", "PCI{Bus: BXX, Device: 0x01, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD01F2x", "PCI{Bus: BXX, Device: 0x01, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD01F3x", "PCI{Bus: BXX, Device: 0x01, Function: 0x3}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD01F4x", "PCI{Bus: BXX, Device: 0x01, Function: 0x4}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD01F5x", "PCI{Bus: BXX, Device: 0x01, Function: 0x5}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD01F6x", "PCI{Bus: BXX, Device: 0x01, Function: 0x6}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD01F7x", "PCI{Bus: BXX, Device: 0x01, Function: 0x7}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD02F0x", "PCI{Bus: BXX, Device: 0x02, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD02F1x", "PCI{Bus: BXX, Device: 0x02, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD03F0x", "PCI{Bus: BXX, Device: 0x03, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD04F0x", "PCI{Bus: BXX, Device: 0x04, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD04F1x", "PCI{Bus: BXX, Device: 0x04, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD05F1x", "PCI{Bus: BXX, Device: 0x05, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio0_aliasSMN[NB_BUS_NUM]
-("BXXD05F2x", "PCI{Bus: BXX, Device: 0x05, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio0_aliasSMN[NB_BUS_NUM]
-("BXXD07F0x", "PCI{Bus: BXX, Device: 0x07, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD07F1x", "PCI{Bus: BXX, Device: 0x07, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD08F0x", "PCI{Bus: BXX, Device: 0x08, Function: 0x0}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD08F1x", "PCI{Bus: BXX, Device: 0x08, Function: 0x1}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD08F2x", "PCI{Bus: BXX, Device: 0x08, Function: 0x2}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
-("BXXD08F3x", "PCI{Bus: BXX, Device: 0x08, Function: 0x3}"), # BXX=IOHC::NB_BUS_NUM_CNTL_nbio?_aliasSMN[NB_BUS_NUM]
 ]
