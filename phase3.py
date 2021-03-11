@@ -97,7 +97,7 @@ if selected_access_method == "HOST":
 	if selected_data_port_write == "DF::FabricConfigAccessControl":
 		_, memory_map = phase2_result.Memory_Map___PCICFG_Physical_Mnemonic_Namespace
 	else:
-		_, memory_map = phase2_result.Memory_Map___Main_Memory_Physical_Mnemonic_Namespace
+		_, memory_map = getattr(phase2_result, "Memory_Map___Main_Memory_Physical_Mnemonic_Namespace", ("", []))
 elif selected_access_method == "MSR":
 	_, memory_map = phase2_result.Memory_Map___MSR_Physical_Mnemonic_Namespace
 elif selected_access_method == "SMN":
@@ -113,6 +113,8 @@ if memory_map != [] and memory_map[-1] == []:
 	memory_map = memory_map[:-1]
 
 def calculate_namespaces():
+	# For now, this assumes that the part of the name before the "x" is unique enough.
+	# If necessary, this can be adapted to unroll the spec pattern in the map and register all of those instances in the map (with the respective namespace)--but for now, that's overkill.
 	result = {}
 	print(memory_map, file=sys.stderr)
 	for row in memory_map:
@@ -128,7 +130,20 @@ def calculate_namespaces():
 			prefix, *b = spec.split("x", 1)
 			if len(b) > 0:
 				assert len(prefix) >= 2
-				result[prefix + "x"] = namespace
+				if spec.startswith("PMx5F_"): # RTCEXT
+					pass
+				elif spec.startswith("PMx"):
+					result["PMx"] = "FCH::PM" #  PM2 only very rarely
+				elif spec.startswith("SATA0AHCIx") or spec.startswith("SATA1AHCIx") or spec.startswith("SATA2AHCIx") or spec.startswith("SATA3AHCIx"):
+					# Technically, there's still more sub-namespaces here.
+					result[spec[:spec.find("x") + 1]] = "SYSHUB::SATA::AHCI"
+				elif spec.startswith("USBCONTAINER0x0007") or spec.startswith("USBCONTAINER1x0007"):
+					pass
+				else:
+					if (prefix + "x") in result:
+						x_namespace = result[prefix + "x"]
+						assert x_namespace == namespace, (prefix, namespace)
+					result[prefix + "x"] = namespace
 	return result
 
 namespace_by_prefix = calculate_namespaces()
@@ -175,6 +190,12 @@ def extract_nice_name(spec, nuke_pattern=True):
 	else:
 		if spec.startswith("Table ") or spec.find("x") == -1:
 			return spec
+		elif spec.startswith("PMx000001FF"):
+			return "FCH::PM2::{}".format(spec)
+		elif spec.startswith("PMx5F_"):
+			return "FCH::PM::RTCEXT::{}".format(spec)
+		elif spec.startswith("USBCONTAINER0x0007") or spec.startswith("USBCONTAINER1x0007"):
+			return "USB31::USBCONTAINERS0REGCNTR0::{}".format(spec)
 		for prefix, namespace in namespace_by_prefix.items():
 			if spec.startswith(prefix):
 				return "{}::{}".format(namespace, spec)
