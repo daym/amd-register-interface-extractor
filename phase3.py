@@ -654,6 +654,7 @@ def traverse1(tree, path):
 
     if has_peripheral:
       peripheral_path = tuple(path + [k])
+      assert peripheral_path not in svd_peripherals_by_path
       for kk, vv in v.items():
         if isinstance(vv, TableDefinition):
           if selected_access_method in vv.instances and vv.bits:
