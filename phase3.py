@@ -534,9 +534,17 @@ def process_TableDefinition(peripheral_path, name, vv):
     if selected_alias_reduction_method == "default":
         if selected_access_method == "SMN":
             if "HOST" in vv.instances: # prefer HOST to SMN (i.e. suppress SMN)
-                return
+                if len(vv.instances["HOST"]) != len(instances):
+                    #assert len(vv.instances["HOST"]) == len(instances), (path, vv.instances["HOST"], instances)
+                    print("Warning: register {} has different instances accessible via SMN vs HOST.  Therefore, providing both aliases.".format(path), file=sys.stderr)
+                else:
+                    return
         elif selected_access_method == "IO":
-            if "HOST" in vv.instances or "SMN" in vv.instances:
+            if "HOST" in vv.instances:
+                assert len(vv.instances["HOST"]) == len(instances)
+                return
+            if "SMN" in vv.instances:
+                assert len(vv.instances["SMN"]) == len(instances)
                 return
 
     global_data_port_write = None
