@@ -92,6 +92,47 @@ def unroll_pattern(spec):
 
 #List_of_Namespaces = phase2_result.List_of_Namespaces # Namespace -> Chapter
 
+memory_map = None
+if selected_access_method == "HOST":
+	if selected_data_port_write == "DF::FabricConfigAccessControl":
+		_, memory_map = phase2_result.Memory_Map___PCICFG_Physical_Mnemonic_Namespace
+	else:
+		_, memory_map = phase2_result.Memory_Map___Main_Memory_Physical_Mnemonic_Namespace
+elif selected_access_method == "MSR":
+	_, memory_map = phase2_result.Memory_Map___MSR_Physical_Mnemonic_Namespace
+elif selected_access_method == "SMN":
+	_, memory_map = phase2_result.Memory_Map___SMN_Physical_Mnemonic_Namespace
+elif selected_access_method == "SMNCCD":
+	_, memory_map = getattr(phase2_result, "Memory_Map___SMNCCD_Physical_Mnemonic_Namespace", ("", []))
+elif selected_access_method == "IO":
+	memory_map = [] # TODO: fake all the IO things
+
+assert memory_map is not None, "Memory map for access_method={!r}, data_port_write={!r}".format(selected_access_method, selected_data_port_write)
+
+if memory_map != [] and memory_map[-1] == []:
+	memory_map = memory_map[:-1]
+
+def calculate_namespaces():
+	result = {}
+	print(memory_map, file=sys.stderr)
+	for row in memory_map:
+		try:
+			spec, namespace = row
+		except (TypeError, ValueError): # sometimes there are slight mistakes in the namespace map
+			print("Warning: malformed row in memory map: {}".format(row), file=sys.stderr)
+			continue
+		addr, *spec = spec.split(":", 1)
+		if len(spec) > 0:
+			spec = spec[0]
+			spec = spec.strip()
+			prefix, *b = spec.split("x", 1)
+			if len(b) > 0:
+				assert len(prefix) >= 2
+				result[prefix + "x"] = namespace
+	return result
+
+namespace_by_prefix = calculate_namespaces()
+
 def extract_nice_name(spec, nuke_pattern=True):
 	"""
 	>>> extract_nice_name("foo (bar::baz)")
@@ -132,77 +173,13 @@ def extract_nice_name(spec, nuke_pattern=True):
 		name = name.rstrip(")").strip()
 		return name
 	else:
-		# See page 2946 "List of Namespaces"
-		# See page 2953 "Memory Map - Main Memory"
-		if spec.startswith("ABx"):
-			return "FCH::AB::{}".format(spec) # Not that nice...
-		elif spec.startswith("ACDCx"):
-			return "FCH::TMR::{}".format(spec) # Not that nice...
-		elif spec.startswith("AOACx"):
-			return "FCH::AOAC::{}".format(spec) # Not that nice...
-		elif spec.startswith("APICx"):
-			return "Core::X86::Apic::{}".format(spec) # Not that nice...
-		elif spec.startswith("ASFx"):
-			return "FCH::ASF::{}".format(spec) # Not that nice...
-		elif spec.startswith("CPUID_"):
-			return "Core::X86::Cpuid::{}".format(spec)
-		elif spec.startswith("D14F0x"):
-			return "FCH::SMBUSPCI::{}".format(spec) # Not that nice...
-		elif spec.startswith("D14F3x"):
-			return "FCH::ITF::LPC::{}".format(spec) # Not that nice...
-		elif spec.startswith("D18F0x") or spec.startswith("D18F1x") or spec.startswith("D18F2x") or spec.startswith("D18F3x") or spec.startswith("D18F4x") or spec.startswith("D18F5x") or spec.startswith("D18F6x"):
-			return "DF::{}".format(spec) # Not that nice...
-		elif spec.startswith("DFPMCx"):
-			return "DF::PMC::{}".format(spec) # Not that nice...
-		elif spec.startswith("HPETx"):
-			return "FCH::TMR::HPET::{}".format(spec)
-		elif spec.startswith("GPIOx"): # FIXME.
-			return "GPIOx::{}".format(spec) # FIXME.
-		elif spec.startswith("HDTx"): # TWO
-			return "HDT::{}".format(spec) # Not that nice...
-		elif spec.startswith("HCEx"):
-			return "FCH::USBLEGACY::{}".format(spec) # Not that nic
-		elif spec.startswith("FCHSDPx"):
-			return "FCH::SDP::{}".format(spec.replace("FCHSDPx00004_x", "")) # not that nice...
-
-		elif spec.startswith("SMBUSx"):
-			return "FCH::SMBUS::{}".format(spec) # Not that nice...
-		elif spec.startswith("SMIx"):
-			return "FCH::SMI::{}".format(spec) # Not that nice...
-		elif spec.startswith("SMMx"):
-			return "Core::X86::Smm::{}".format(spec) # Not that nic
-		elif spec.startswith("UMC0CHx"):
-			return "UMC::CH::{}".format(spec) # Not that nice...
-		elif spec.startswith("UMC0CTLx"):
-			return "UMC::CTRL::{}".format(spec) # Not that nice...
-		elif spec.startswith("PMx"):
-			return "FCH::PM::{}".format(spec)
-		elif spec.startswith("PM2x"):
-			return "FCH::PM2::{}".format(spec) # Not that nice...
-		elif spec.startswith("PMCx"):
-			return "Core::X86::Pmc::Core::{}".format(spec)
-		elif spec.startswith("SPIx"):
-			return "FCH::ITF::SPI::{}".format(spec) # Not that.
-		elif spec.startswith("SBTSIx"):
-			return "SBTSI::{}".format(spec) # Not that nice...
-		elif spec.startswith("SBRMIx"):
-			return "SBRMI::{}".format(spec) # Not that nice...
-		elif spec.startswith("UARTx"):
-			return "FCH::UART::{}".format(spec) # Not that nice...
-		elif spec.startswith("UMC0CHx"):
-			return "UMC::CH::{}".format(spec) # Not that nice...
-		elif spec.startswith("UMC0CTLx"):
-			return "UMC::CTRL::{}".format(spec) # Not that nice...
-		elif spec.startswith("MISCx"):
-			return "FCH::MISC::{}".format(spec)
-		elif spec.startswith("IOx"):
-			return "IO::{}".format(spec) # Not that nice...
-		elif spec.startswith("UMCPMCx"): # Performance counters...
-			return "UMC::PMC::{}".format(spec) # Not that nice...
-		elif spec.startswith("IOAPICx") or spec.startswith("IOApicx"):
-			return "IOAPIC::{}".format(spec) # Not that nice...
-		elif spec.startswith("I2Cx"):
-			return "FCH::I2C::{}".format(spec) # Not that nice...
+		if spec.startswith("Table ") or spec.find("x") == -1:
+			return spec
+		for prefix, namespace in namespace_by_prefix.items():
+			if spec.startswith(prefix):
+				return "{}::{}".format(namespace, spec)
+		assert False, spec # match for prefix in namespace map
+		return spec
 
 		# return spec.strip().rstrip(")").strip()
 
