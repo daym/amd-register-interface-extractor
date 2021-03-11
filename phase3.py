@@ -95,7 +95,7 @@ def unroll_pattern(spec):
 memory_map = None
 if selected_access_method == "HOST":
 	if selected_data_port_write == "DF::FabricConfigAccessControl":
-		_, memory_map = phase2_result.Memory_Map___PCICFG_Physical_Mnemonic_Namespace
+		_, memory_map = getattr(phase2_result, "Memory_Map___PCICFG_Physical_Mnemonic_Namespace", ("", []))
 	else:
 		_, memory_map = getattr(phase2_result, "Memory_Map___Main_Memory_Physical_Mnemonic_Namespace", ("", []))
 elif selected_access_method == "MSR":
