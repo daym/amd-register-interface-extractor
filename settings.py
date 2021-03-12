@@ -263,3 +263,29 @@ settings = [
 # TODO: D19?
 
 ]
+
+phase4_cluster_names = {
+	"DF": { # Peripheral
+		"DeviceVendorId0": "PCIInfo0",
+		"DeviceVendorId1": "PCIInfo1",
+		"DeviceVendorId2": "PCIInfo2",
+		"DeviceVendorId3": "PCIInfo3",
+		"DeviceVendorId4": "PCIInfo4",
+		"DeviceVendorId5": "PCIInfo5",
+		"DeviceVendorId6": "PCIInfo6",
+		"DeviceVendorId7": "PCIInfo7",
+
+		#"CapabilitiesPtr0": "FCAC0",
+		#"CapabilitiesPtr1": "FCAC1",
+		#"CapabilitiesPtr2": "FCAC2",
+		#"CapabilitiesPtr3": "FCAC3",
+		#"CapabilitiesPtr4": "FCAC4",
+		#"CapabilitiesPtr5": "FCAC5",
+		#"CapabilitiesPtr6": "FCAC6",
+		#"CapabilitiesPtr7": "FCAC7",
+
+		"FabricIndirectConfigAccessAddress_n0": "FICAA",
+		"FabricIndirectConfigAccessDataLo_n0": "FICAD",
+		"FabricIndirectConfigAccessDataHi_n1": "FICAD1", # XXX: Why does this cluster exist?
+	},
+}

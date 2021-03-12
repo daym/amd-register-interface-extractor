@@ -4,6 +4,7 @@
 
 from lxml import etree
 import sys
+import settings
 
 def eval_int(element):
     """ Given a SVD node, extracts the integer from its text. """
@@ -38,7 +39,7 @@ To that end, if this node has no derivedFrom, it's good to know what the first i
 For example, after A.instance0 there comes A.instance1, and that gives you the maximal cluster size for this peripheral cluster.
 """
 
-def traverse(source_root, parent_name):
+def traverse(source_root, parent_name, peripheral_name):
     """ Traverses source_root and modifies it in place to cluster things together that belong together. """
     has_any_register = len([child for child in source_root if child.tag == "register"]) > 0
     if has_any_register:
@@ -94,7 +95,7 @@ def traverse(source_root, parent_name):
                     name = name.replace("_", "")[len(parent_basename):]
                     while name.startswith("_"):
                         name = name[1:]
-            cluster_name.text = name + "X" # TODO: Be nicer.
+            cluster_name.text = settings.phase4_cluster_names.get(peripheral_name, {}).get(name, name + "X")
             cluster.append(cluster_name)
         finish_cluster()
         first_addressOffset, first_size, first_name, first_child = registers[0]
@@ -122,15 +123,17 @@ def traverse(source_root, parent_name):
         name = source_root.find("name")
         if name is not None:
             name = name.text
+            if source_root.tag == "peripheral":
+                peripheral_name = name
         else:
             name = parent_name
         for child in source_root:
-            traverse(child, name)
+            traverse(child, name, peripheral_name)
 
 tree = etree.parse(sys.stdin)
 root = tree.getroot()
 
-traverse(root, "")
+traverse(root, "", None)
 
 tree.write(sys.stdout.buffer, pretty_print=True)
 sys.stdout.flush()
