@@ -635,7 +635,7 @@ def process_TableDefinition(peripheral_path, name, vv):
             #derived_register.append(text_element("description", description)
             #addressOffset = calculate_hex_instance_value(instance.resolved_physical_mnemonic)
             derived_register.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
-            #derived_register.append(text_element("size", table_definition.size))
+            derived_register.append(text_element("size", table_definition.size)) # To make phase4 easier
             svd_registers.append(derived_register)
             #svd_register.append(text_element("dimIndex", ",".join(clean_up_logical_name(instance.logical_mnemonic) for instance in instances)))
 

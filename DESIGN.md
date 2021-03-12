@@ -91,6 +91,10 @@ After that, you can use `svd2rust` or similar tools to generate header files or 
 There's also files `phase3_host_ficaa.svd` and `phase3_smn_ficaa.svd` which can't be used with `svd2rust` but which list data fabric registers that are beind a FICAA indirect access.  The field `addressOffset` already contains the FICAA field as it is supposed to be programmed.
 Because of the way this indirect access is to be done, it's not possible to represent any of those peripherals as a continuous (bigger than 32 bit long) struct in memory.
 
+## Phase 4: Identifying register blocks
+
+Phase 4 identifies register blocks and collects those into clusters.
+
 ## Collecting it all together
 
 This is all automated using GNU Make, so just `make` is enough to make it go through all the phases.

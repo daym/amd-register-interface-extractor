@@ -1,7 +1,7 @@
 
 .PHONY: all clean distclean validate
 
-all: phase3_host.svd phase3_host_ficaa.svd phase3_io.svd phase3_io_abindex.svd phase3_msr.svd phase3_smn.svd phase3_smn_ficaa.svd phase3_smnccd.svd phase3_smnccd_ficaa.svd
+all: phase4_host.svd phase4_host_ficaa.svd phase4_io.svd phase4_io_abindex.svd phase4_msr.svd phase4_smn.svd phase4_smn_ficaa.svd phase4_smnccd.svd phase4_smnccd_ficaa.svd
 
 include config.mk
 include compiler.mk
@@ -10,7 +10,7 @@ result.txt: $(if $(PPRVOL1),resultvol1.txt,) $(if $(PPRVOL2),resultvol2.txt,) $(
 	cat $^ > "$@.new" && mv "$@.new" "$@"
 
 clean:
-	rm -rf result.txt resultvol1.txt resultvol2.txt resultvol3.txt resultvol4.txt resultvol5.txt resultvol6.txt resultvol7.txt resultvol8.txt resultvol9.txt phase2_result.py phase3_*.svd partsvol1 partsvol2 partsvol3 partsvol4 partsvol5 partsvol6 partsvol7 partsvol8 partsvol9
+	rm -rf result.txt resultvol1.txt resultvol2.txt resultvol3.txt resultvol4.txt resultvol5.txt resultvol6.txt resultvol7.txt resultvol8.txt resultvol9.txt phase2_result.py phase3_*.svd phase4_*.svd partsvol1 partsvol2 partsvol3 partsvol4 partsvol5 partsvol6 partsvol7 partsvol8 partsvol9
 
 distclean: clean
 
