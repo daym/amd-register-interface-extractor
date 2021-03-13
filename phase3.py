@@ -119,7 +119,6 @@ def calculate_namespaces():
 	# For now, this assumes that the part of the name before the "x" is unique enough.
 	# If necessary, this can be adapted to unroll the spec pattern in the map and register all of those instances in the map (with the respective namespace)--but for now, that's overkill.
 	result = {}
-	print(memory_map, file=sys.stderr)
 	for row in memory_map:
 		try:
 			spec, namespace = row
