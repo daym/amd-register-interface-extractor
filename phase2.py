@@ -151,8 +151,8 @@ for line in open("result.txt", "r"):
 					x = re_table_prefix.match(cells[0])
 					prefix = x.group(1)
 					suffix = x.group(2)
-					prefix = remove_cosmetic_line_breaks(prefix.replace("\u00b6", "\n"))
-					prefix_metadata = prefix
+					prefix_metadata = remove_cosmetic_line_breaks(prefix.replace("\u00b6", "\n"))
+					prefix = prefix_metadata.replace("\n", "\u00b6")
 					# work around limitation of regexes (recursive nesting not supported)
 					prefix = re_deparen.sub(", \\1", prefix)
 					prefix = prefix.replace("(ASCII Bytes ", ", ASCII Bytes").replace("(Bytes ", ", Bytes ")
