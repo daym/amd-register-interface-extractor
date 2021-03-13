@@ -101,7 +101,10 @@ if selected_access_method == "HOST":
 elif selected_access_method == "MSR":
 	_, memory_map = phase2_result.Memory_Map___MSR_Physical_Mnemonic_Namespace
 elif selected_access_method == "SMN":
-	_, memory_map = phase2_result.Memory_Map___SMN_Physical_Mnemonic_Namespace
+	_, memory_map = getattr(phase2_result, "Memory_Map___SMN_Physical_Mnemonic_Namespace", getattr(phase2_result, "Memory_Map___SMN", ("", None)))
+	if memory_map is None:
+		print("Warning: No 'Memory Map - SMN' section found in PDF.  Namespaces will be hard-coded", file=sys.stderr)
+		memory_map = []
 elif selected_access_method == "SMNCCD":
 	_, memory_map = getattr(phase2_result, "Memory_Map___SMNCCD_Physical_Mnemonic_Namespace", ("", []))
 elif selected_access_method == "IO":
@@ -199,6 +202,17 @@ def extract_nice_name(spec, nuke_pattern=True):
 		for prefix, namespace in namespace_by_prefix.items():
 			if spec.startswith(prefix):
 				return "{}::{}".format(namespace, spec)
+		# These are for the old (2017) public PPRs which don't always have a namespace map
+		if spec == "IOx0CF8" or spec == "IOx0CFC":
+			return "IO::{}".format(spec)
+		elif spec.startswith("SMMxFEC"):
+			return "Core::X86::Smm::{}".format(spec)
+		elif spec.startswith("APICx"):
+			return "Core::X86::Apic::{}".format(spec)
+		elif spec.startswith("PMCx"):
+			return "Core::X86::Pmc::Core::{}".format(spec)
+		elif spec.startswith("L3PMCx06"):
+			return "Core::X86::Pmc::L3::{}".format(spec)
 		assert False, spec # match for prefix in namespace map
 		return spec
 
