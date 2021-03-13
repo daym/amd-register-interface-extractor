@@ -216,7 +216,7 @@ def unroll_inst_pattern(spec):
 		elif insts != [] and ps == []:
 			pass
 		else:
-			print("ERROR", insts, physs, file=sys.stderr)
+			print("ERROR unrolling: logical instances are {!r} but physical instances are {!r} (raw: {!r})--which is impossible".format(insts, ps, physs), file=sys.stderr)
 		# else who knows
 	#print("PHYSS", physs, file=sys.stderr)
 	phys_i = 0
