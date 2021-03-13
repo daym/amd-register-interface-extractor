@@ -141,10 +141,12 @@ def calculate_namespaces():
 					result[spec[:spec.find("x") + 1]] = "SYSHUB::SATA::AHCI"
 				elif spec.startswith("USBCONTAINER0x0007") or spec.startswith("USBCONTAINER1x0007"):
 					pass
+				elif spec.startswith("PCIERCCFG0F0x") or spec.startswith("PCIERCCFG1F0x"): # Work around Naples namespace confusion
+					result[spec[:spec.find("x") + 1]] = "PCIESWUSCFG"
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
-						assert x_namespace == namespace, (prefix, namespace)
+						assert x_namespace == namespace, (prefix, namespace, x_namespace)
 					result[prefix + "x"] = namespace
 	return result
 
