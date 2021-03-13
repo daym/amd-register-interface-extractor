@@ -264,7 +264,7 @@ class State(object):
       if attrib["meaning"]:
           if text == "Processor Cores and Downcoring" or text == "Downcoring within a Core Complex" or text == "Downcoring within a Processor Die" or text == "Downcoring within a Multi-Node System" or text == "Downcoring within a Multi-Node System" or text == "CPUID Instruction Functions": # bad special case!
             attrib["meaning"] = "h1"
-          elif attrib["left"] in [54, 58, 59] and re_section_headline.match(text) and xx == {"b"}: # catches a lot of misdetections, like 2.1.10, 2.1.10.1, 2.1.10.2; does not catch 3.8.2 because its still in the table prefix of "Unexpected Completion".
+          elif attrib["left"] in [54, 58, 59, 76] and re_section_headline.match(text) and xx == {"b"}: # catches a lot of misdetections, like 2.1.10, 2.1.10.1, 2.1.10.2; does not catch 3.8.2 because its still in the table prefix of "Unexpected Completion".
             #assert text != "3.8.2", attrib
             attrib["meaning"] = "headline"
           if text.endswith(".") and len(text) > 15 and attrib["meaning"] in ["headline", "h1"]: # # example: "Soft down core needs to follow the same symmetric guidelines used for fused down core." (not really--that would be a bitfield-description)
@@ -330,7 +330,7 @@ class State(object):
           self.finish_this_headline() # headline after headline
           if re_section_headline.match(text):
             self.finish_this_table()
-            assert False
+            assert False, (text, meaning, attrib)
           if not self.start_new_cell(text, attrib):
             self.headline = text
             self.headline_type = "headline"
