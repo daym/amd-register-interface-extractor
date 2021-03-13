@@ -151,7 +151,8 @@ for line in open("result.txt", "r"):
 					x = re_table_prefix.match(cells[0])
 					prefix = x.group(1)
 					suffix = x.group(2)
-					prefix_metadata = remove_cosmetic_line_breaks(prefix.replace("\u00b6", "\n"))
+					prefix = remove_cosmetic_line_breaks(prefix.replace("\u00b6", "\n"))
+					prefix_metadata = prefix
 					# work around limitation of regexes (recursive nesting not supported)
 					prefix = re_deparen.sub(", \\1", prefix)
 					prefix = prefix.replace("(ASCII Bytes ", ", ASCII Bytes").replace("(Bytes ", ", Bytes ")
@@ -176,8 +177,6 @@ for line in open("result.txt", "r"):
 					else:
 						#sys.stderr.write("Warning: Fixed up cell 0: {}\n".format(cells[0]))
 						cells[0] = suffix
-					#print(prefix, file=sys.stderr)
-					#sys.exit(1)
 				start_table(current_table, prefix_metadata)
 			else: # ignore trivial "tables"
 				current_table = None
