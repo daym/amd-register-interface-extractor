@@ -111,6 +111,7 @@ def remove_cosmetic_line_breaks(header):
                 j = i + 1
         return header
     header = replace_ul(header)
+    header = header.replace("\n)", ")")
     return header
 
 current_table = None
@@ -150,7 +151,7 @@ for line in open("result.txt", "r"):
 					x = re_table_prefix.match(cells[0])
 					prefix = x.group(1)
 					suffix = x.group(2)
-					prefix_metadata = prefix
+					prefix_metadata = remove_cosmetic_line_breaks(prefix.replace("\u00b6", "\n"))
 					# work around limitation of regexes (recursive nesting not supported)
 					prefix = re_deparen.sub(", \\1", prefix)
 					prefix = prefix.replace("(ASCII Bytes ", ", ASCII Bytes").replace("(Bytes ", ", Bytes ")
@@ -177,7 +178,7 @@ for line in open("result.txt", "r"):
 						cells[0] = suffix
 					#print(prefix, file=sys.stderr)
 					#sys.exit(1)
-				start_table(current_table, remove_cosmetic_line_breaks(prefix_metadata.replace("\u00b6", "\n")))
+				start_table(current_table, prefix_metadata)
 			else: # ignore trivial "tables"
 				current_table = None
 		if current_table:
