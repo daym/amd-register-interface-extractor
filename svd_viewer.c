@@ -2,12 +2,14 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 #define C_TYPE 0
 #define C_NAME 1
 #define C_TOOLTIP 2
 
 static xmlDocPtr input_document;
+static xmlXPathContextPtr input_xpath_context;
 static GtkTreeStore* store;
 static GtkTreeView* tree_view;
 
@@ -73,6 +75,16 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 				}
 				xmlFree(name);
 			}
+		}
+		if (!sibling) { /* didn't find the node in the siblings--try some more aggressive means */
+#if 0
+			char* xpath_expression = g_strdup_printf("//register[name='%s']", derivedFrom); // XXX: injection
+			xmlXPathObjectPtr result = xmlXPathEvalExpression(xpath_expression, input_xpath_context);
+			if (!xmlXPathNodeSetIsEmpty(result->nodesetval)) {
+				sibling = result->nodesetval->nodeTab[0];
+			}
+			xmlXPathFreeObject(result);
+#endif
 		}
 		if (sibling) {
 			resolve_derivedFrom(sibling);
@@ -145,6 +157,11 @@ int main(int argc, char* argv[]) {
 		input_document = xmlParseFile(argv[1]);
 		if (input_document == NULL) {
 			g_error("could not open input file \"%s\"", argv[1]);
+			exit(1);
+		}
+		input_xpath_context = xmlXPathNewContext(input_document);
+		if (input_xpath_context == NULL) {
+			g_error("could not create xpath context");
 			exit(1);
 		}
 	}
