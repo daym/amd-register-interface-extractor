@@ -166,7 +166,9 @@ tree = etree.parse(sys.stdin if len(sys.argv) == 1 else open(sys.argv[-1]))
 root = tree.getroot()
 
 traverse(root, "", None)
-#fixup_cluster_baseAddress(root, root)
+
+# Make all the offsets relative.
+fixup_cluster_baseAddress(root, root)
 
 tree.write(sys.stdout.buffer, pretty_print=True)
 sys.stdout.flush()
