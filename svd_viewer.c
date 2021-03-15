@@ -16,12 +16,14 @@ static GtkTreeView* tree_view;
 static const char* device_keys[] = {"name", "version", "addressUnitBits", "width", "size", "resetValue", "resetMask", "vendor", "vendorID", "series", "licenseText", "access", "description", NULL};
 static const char* peripheral_keys[] = {"name", "version", "size", "groupName", "baseAddress", "addressBlock", "resetValue", "resetMask", "access", "modifiedWriteValues", "description", NULL};
 static const char* register_keys[] = {"name", "displayName", "addressOffset", "size", "access", "resetValue", "resetMask", "alternativeRegister", "description", NULL};
-static const char* cluster_keys[] = {"name", "size", "access", "resetValue", "resetMask", "alternateCluster", "description", NULL};
+static const char* cluster_keys[] = {"name", "addressOffset", "size", "access", "resetValue", "resetMask", "alternateCluster", "description", NULL};
 static const char* field_keys[] = {"name", "bitOffset", "bitWidth", "access", "bitRange", "msb", "lsb", "description", NULL};
 static const char* interrupt_keys[] = {"name", "value", "description", NULL};
 
 static const char** keys_of_element_type(const char* type) {
-	if (strcmp(type, "device") == 0) {
+	if (strcmp(type, "cluster") == 0) {
+		return cluster_keys;
+	} else if (strcmp(type, "device") == 0) {
 		return device_keys;
 	} else if (strcmp(type, "peripheral") == 0) {
 		return peripheral_keys;
