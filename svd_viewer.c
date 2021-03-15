@@ -109,7 +109,7 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root) {
 	int i;
 	const char** keys = keys_of_element_type(type);
 	if (keys) {
-		for (i = 0; i < sizeof(keys)/sizeof(keys[0]); ++i) {
+		for (i = 0; i < keys[i]; ++i) {
 			const char* value = child_element_text(root, keys[i]);
 			if (value)
 				result = g_strdup_printf("%s\n%s: %s", result, keys[i], value);
