@@ -52,6 +52,8 @@ def traverse(source_root, parent_name, peripheral_name):
             cluster.append(x_child)
         def update_addressLimit(x_child):
             nonlocal addressLimit
+            if x_child.attrib.get("derivedFrom") is not None:
+                return
             x_child_name = x_child.find("name").text
             assert x_child_name
             found = False
@@ -83,8 +85,7 @@ def traverse(source_root, parent_name, peripheral_name):
                     source_root.append(cluster)
             cluster = etree.Element("cluster")
             addressLimit = 2**32
-        def create_cluster_name(name):
-            cluster_name = etree.Element("name")
+        def calculate_cluster_name(name):
             if name.startswith(parent_name):
                 name = name[len(parent_name):]
                 while name.startswith("_"):
@@ -95,19 +96,26 @@ def traverse(source_root, parent_name, peripheral_name):
                     name = name.replace("_", "")[len(parent_basename):]
                     while name.startswith("_"):
                         name = name[1:]
-            cluster_name.text = settings.phase4_cluster_names.get(peripheral_name, {}).get(name, name + "X")
-            cluster.append(cluster_name)
+            return settings.phase4_cluster_names.get(peripheral_name, {}).get(name, name + "X")
         finish_cluster()
         first_addressOffset, first_size, first_name, first_child = registers[0]
         for x_addressOffset, x_size, x_name, x_child in registers:
             dim = x_child.find("dim")
             if dim is not None:
                 x_size = x_size * eval_int(dim)
-            if x_child.attrib.get("derivedFrom") is None:
-                update_addressLimit(x_child)
+            update_addressLimit(x_child)
             if x_addressOffset < addressOffset or x_addressOffset > addressOffset + 8 or x_addressOffset >= addressLimit: # next register instance is not where we expected it to be, or we are outside that instance now.
-                finish_cluster()
-                create_cluster_name(x_name)
+                new_cluster_name_text = calculate_cluster_name(x_name)
+                cluster_name = cluster.find("name") if cluster is not None else None
+                cluster_name_text = cluster_name.text if cluster_name is not None else None
+                if cluster_name_text != new_cluster_name_text:
+                    finish_cluster()
+                    cluster_name = etree.Element("name")
+                    cluster_name.text = new_cluster_name_text
+                    cluster.append(cluster_name)
+                else: # if x_addressOffset >= addressLimit:
+                    addressLimit = 2**32
+                    update_addressLimit(x_child)
                 addressOffset = x_addressOffset
             add_to_cluster(x_child)
             addressOffset = addressOffset + x_size//8
