@@ -335,4 +335,18 @@ phase4_cluster_names = {
 		"LVTLINT[%s]": "LVTLINT",
 		"InterruptEnable0": "InterruptEnable0",
 	},
+	"FCH_AB": {
+		"BIFCtl0": "BIFCtl0",
+		"MiscCtl1": "MiscCtl1",
+		"BLinkRABCtl": "BLinkRABCtl",
+		"MiscCtl2": "MiscCtl2",
+		"AL_Arb_Ctl": "AL_Arb_Ctl",
+		"ALinkDmaPrefetchEn": "ALinkDmaPrefetchEn",
+		"MiscCtl3": "MiscCtl3",
+		"MsiCtl": "MsiCtl",
+	},
+	"FCH_SDP": {
+		"DISCONNECT_CTL": "DisconnectCtl",
+		"MISC_CTL": "MiscCtl",
+	},
 }
