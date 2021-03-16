@@ -604,9 +604,10 @@ def process_TableDefinition(peripheral_path, name, vv):
         #import traceback
         #traceback.print_exc()
         addresses = []
-        print("Error: Could not calculate addresses of register {}: {}.  Defaulting to nonsense (very low) value for a dummy entry.".format(name, e), file=sys.stderr)
+        print("Error: Could not calculate addresses of register {}: {}.".format(name, e), file=sys.stderr)
         if selected_error_handling != "keep-registers-with-errors":
             return
+        print("Info: ^: Defaulting to nonsense (very low) value for a dummy entry.", file=sys.stderr)
         offset += 4
         description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description)\n{}\n".format(traceback.format_exc()) + ("\n".join(instance.resolve_physical_mnemonic(data_port_encode_ignore) for instance in instances))
         addressOffset = offset
