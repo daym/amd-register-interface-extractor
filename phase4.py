@@ -101,7 +101,12 @@ def traverse(source_root, parent_name, peripheral_name):
                         name = name[1:]
             return settings.phase4_cluster_names.get(peripheral_name, {}).get(name, (name + "_unsorted") if fallback else None)
         finish_cluster()
-        first_addressOffset, first_size, first_name, first_child = registers[0]
+        addressOffset, first_size, first_name, first_child = registers[0]
+        new_cluster_name_text = calculate_cluster_name(first_name, True)
+        cluster_name = etree.Element("name")
+        cluster_name.text = new_cluster_name_text
+        cluster.append(cluster_name)
+        previous_addressOffset = -1
         for x_addressOffset, x_size, x_name, x_child in registers:
             #if x_name.find("FabricIndirectConfigAccessDataLo_n0") != -1:
             #    import pdb
