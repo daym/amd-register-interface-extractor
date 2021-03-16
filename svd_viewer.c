@@ -185,6 +185,7 @@ int main(int argc, char* argv[]) {
 	gtk_window_set_title(window, g_strdup_printf("%s - %s", argv[1], argv[0]));
 	g_signal_connect(window, "destroy", gtk_main_quit, NULL);
 	gtk_container_add(window, scrolled_window);
+	gtk_window_set_default_size(window, 400, 400);
 	gtk_widget_show_all(window);
 
 	traverse(xmlDocGetRootElement(input_document), NULL);
