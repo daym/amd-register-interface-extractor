@@ -267,6 +267,7 @@ settings = [
 phase4_cluster_names = {
 	"DF": { # Peripheral
 		"DeviceVendorId0": "PCIInfo0",
+		#"StatusCommand0": "PCIInfo0",
 		"DeviceVendorId1": "PCIInfo1",
 		"DeviceVendorId2": "PCIInfo2",
 		"DeviceVendorId3": "PCIInfo3",
@@ -284,8 +285,50 @@ phase4_cluster_names = {
 		#"CapabilitiesPtr6": "FCAC6",
 		#"CapabilitiesPtr7": "FCAC7",
 
+		"FabricConfigAccessControl": "FCAC", # Note: Dummy cluster name just to make it stop grouping the register in the previous cluster
 		"FabricIndirectConfigAccessAddress_n0": "FICAA",
 		"FabricIndirectConfigAccessDataLo_n0": "FICAD",
-		"FabricIndirectConfigAccessDataHi_n1": "FICAD1", # XXX: Why does this cluster exist?
+		#"FabricIndirectConfigAccessDataHi_n1": "FICAD", # AMD has this in an extra register table
+	},
+	"FCH_I2C": {
+		"IC_CON_link0": "Connection_link0",
+		"IC_SDA_SETUP_link0": "Connection_link0",
+		"IC_COMP_PARAM_1_link0": "CompParam1_link0",
+
+		"IC_CON_link1": "Connection_link1",
+		"IC_SDA_SETUP_link1": "Connection_link1",
+		"IC_COMP_PARAM_1_link1": "CompParam1_link1",
+
+		"IC_CON_link2": "Connection_link2",
+		"IC_SDA_SETUP_link2": "Connection_link2",
+		"IC_COMP_PARAM_1_link2": "CompParam1_link2",
+
+		"IC_CON_link3": "Connection_link3",
+		"IC_SDA_SETUP_link3": "Connection_link3",
+		"IC_COMP_PARAM_1_link3": "IC_CompParam1_link3",
+
+		"IC_CON_link4": "Connection_link4",
+		"IC_SDA_SETUP_link4": "Connection_link4",
+		"IC_COMP_PARAM_1_link4": "CompParam1_link4",
+
+		"IC_CON_link5": "Connection_link5",
+		"IC_SDA_SETUP_link5": "Connection_link5",
+		"IC_COMP_PARAM_1_link5": "CompParam1_link5",
+	},
+	"FCH_ITF_LPC": {
+		"VENDOR_ID": "PCIInfo",
+		"CAPABILITIES_POINTER": "CAPABILITIES_POINTER",
+	},
+	"IOHC": {
+		"NB_VENDOR_ID_nbio3": "PCIInfo_nbio3",
+		"NB_VENDOR_ID_nbio2": "PCIInfo_nbio2",
+		"NB_VENDOR_ID_nbio1": "PCIInfo_nbio1",
+		"NB_VENDOR_ID_nbio0": "PCIInfo_nbio0",
+	},
+	"IOMMUL2": {
+		"IOMMU_VENDOR_ID_nbio3": "PCIInfo_nbio3",
+		"IOMMU_VENDOR_ID_nbio2": "PCIInfo_nbio2",
+		"IOMMU_VENDOR_ID_nbio1": "PCIInfo_nbio1",
+		"IOMMU_VENDOR_ID_nbio0": "PCIInfo_nbio0",
 	},
 }
