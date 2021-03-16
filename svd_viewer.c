@@ -115,7 +115,7 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root) {
 				result = g_strdup_printf("%s\n%s: %s", result, keys[i], value);
 		}
 	}
-	result = g_strdup_printf("%s\n%s", result, g_strstrip(xmlNodeListGetString(input_document, root->children, 1)));
+	result = g_strdup_printf("%s\n%s", result, g_strstrip(xmlNodeListGetString(input_document, root->children, 1) ?: strdup("")));
 	if (result[0])
 		return &result[1];
 	else
