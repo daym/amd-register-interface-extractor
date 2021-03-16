@@ -548,9 +548,8 @@ def data_port_encode_ficaa(spec, data_port_base):
 
 def data_port_encode_abindex(spec, data_port_base):
     addr = calculate_hex_instance_value(spec)
-    assert addr < 2**17
-    # This loses the device reference.  I sure hope it's always D18
-    return data_port_base | addr
+    assert addr == 0xCDC, addr
+    return data_port_base
 
 data_port_encoders = {
     "DF::FabricConfigAccessControl": data_port_encode_ficaa,
