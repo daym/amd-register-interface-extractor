@@ -46,30 +46,33 @@ def traverse(source_root, parent_name, peripheral_name):
         registers = sorted((eval_int(child.find("addressOffset")), eval_int(child.find("size")), child.find("name").text, child) for child in source_root if child.tag == "register")
         addressOffset = -1
         cluster = None
-        addressLimit = 2**32
+        addressLimits = []
         def add_to_cluster(x_child):
             source_root.remove(x_child)
             cluster.append(x_child)
-        def update_addressLimit(x_child):
-            nonlocal addressLimit
+        def update_addressLimits(x_child):
+            nonlocal addressLimits
             if x_child.attrib.get("derivedFrom") is not None:
                 return
+            #addressLimits = []
             x_child_name = x_child.find("name").text
             assert x_child_name
             found = False
             instances = [y_child for (_, _, _, y_child) in registers if y_child is x_child or y_child.attrib.get("derivedFrom") == x_child_name]
             i = instances.index(x_child)
-            if i + 1 < len(instances):
-                next_register = instances[i + 1]
+            for j in range(i + 1, len(instances)):
+                next_register = instances[j]
                 assert next_register.tag == "register"
                 next_register_addressOffset = eval_int(next_register.find("addressOffset"))
                 if next_register_addressOffset > x_addressOffset:
                     assert next_register_addressOffset > x_addressOffset, (next_register.find("name").text, x_child_name)
-                    if next_register_addressOffset < addressLimit:
-                        addressLimit = next_register_addressOffset
+                    while j >= len(addressLimits):
+                        addressLimits.append(2**32)
+                    if next_register_addressOffset < addressLimits[j]:
+                        addressLimits[j] = next_register_addressOffset
         def finish_cluster():
             nonlocal cluster
-            nonlocal addressLimit
+            nonlocal addressLimits
             if cluster is not None and len([node for node in cluster if node.tag != "name"]) > 0:
                 if len([node for node in cluster if node.tag != "name"]) == 1:
                     for node in cluster:
@@ -84,8 +87,8 @@ def traverse(source_root, parent_name, peripheral_name):
                 else:
                     source_root.append(cluster)
             cluster = etree.Element("cluster")
-            addressLimit = 2**32
-        def calculate_cluster_name(name):
+            addressLimits = []
+        def calculate_cluster_name(name, fallback=True):
             if name.startswith(parent_name):
                 name = name[len(parent_name):]
                 while name.startswith("_"):
@@ -96,16 +99,22 @@ def traverse(source_root, parent_name, peripheral_name):
                     name = name.replace("_", "")[len(parent_basename):]
                     while name.startswith("_"):
                         name = name[1:]
-            return settings.phase4_cluster_names.get(peripheral_name, {}).get(name, name + "X")
+            return settings.phase4_cluster_names.get(peripheral_name, {}).get(name, (name + "X") if fallback else None)
         finish_cluster()
         first_addressOffset, first_size, first_name, first_child = registers[0]
         for x_addressOffset, x_size, x_name, x_child in registers:
+            #if x_name.find("FabricIndirectConfigAccessDataLo_n0") != -1:
+            #    import pdb
+            #    pdb.set_trace()
             dim = x_child.find("dim")
             if dim is not None:
                 x_size = x_size * eval_int(dim)
-            update_addressLimit(x_child)
-            if x_addressOffset < addressOffset or x_addressOffset > addressOffset + 8 or x_addressOffset >= addressLimit: # next register instance is not where we expected it to be, or we are outside that instance now.
-                new_cluster_name_text = calculate_cluster_name(x_name)
+            update_addressLimits(x_child)
+            new_cluster_name_text = calculate_cluster_name(x_name, False)
+            if x_addressOffset < addressOffset or x_addressOffset > addressOffset + 8 or (addressLimits != [] and x_addressOffset >= addressLimits[0]) or new_cluster_name_text is not None: # next register instance is not where we expected it to be, or we are outside that instance now, or user requested new cluster.
+                if addressLimits != [] and x_addressOffset >= addressLimits[0]:
+                    addressLimits = addressLimits[1:]
+                new_cluster_name_text = calculate_cluster_name(x_name, True)
                 cluster_name = cluster.find("name") if cluster is not None else None
                 cluster_name_text = cluster_name.text if cluster_name is not None else None
                 if cluster_name_text != new_cluster_name_text:
@@ -114,8 +123,8 @@ def traverse(source_root, parent_name, peripheral_name):
                     cluster_name.text = new_cluster_name_text
                     cluster.append(cluster_name)
                 else: # if x_addressOffset >= addressLimit:
-                    addressLimit = 2**32
-                    update_addressLimit(x_child)
+                    addressLimits = []
+                    update_addressLimits(x_child)
                 addressOffset = x_addressOffset
             add_to_cluster(x_child)
             addressOffset = addressOffset + x_size//8
