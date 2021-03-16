@@ -95,6 +95,17 @@ Because of the way this indirect access is to be done, it's not possible to repr
 
 Phase 4 identifies register blocks and collects those into clusters.
 
+If the collection into clusters is done automatically (rather than by
+configuration), then the cluster name with have the suffix "_unsorted".
+
+Registers with adjacent addresses are collected into clusters.
+
+The collection proceeds greedily and if in doubt, collects more into fewer clusters.
+
+It's a good idea to edit `phase4_cluster_names` in `settings.py` to set up which things start a new cluster.
+
+Finally, if a cluster contains only one register, the cluster level is elided and the register is represented without extra cluster.
+
 ## Collecting it all together
 
 This is all automated using GNU Make, so just `make` is enough to make it go through all the phases.
