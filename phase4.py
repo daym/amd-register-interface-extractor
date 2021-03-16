@@ -99,7 +99,7 @@ def traverse(source_root, parent_name, peripheral_name):
                     name = name.replace("_", "")[len(parent_basename):]
                     while name.startswith("_"):
                         name = name[1:]
-            return settings.phase4_cluster_names.get(peripheral_name, {}).get(name, (name + "X") if fallback else None)
+            return settings.phase4_cluster_names.get(peripheral_name, {}).get(name, (name + "_unsorted") if fallback else None)
         finish_cluster()
         first_addressOffset, first_size, first_name, first_child = registers[0]
         for x_addressOffset, x_size, x_name, x_child in registers:
