@@ -116,7 +116,9 @@ def traverse(source_root, parent_name, peripheral_name):
                 x_size = x_size * eval_int(dim)
             update_addressLimits(x_child)
             new_cluster_name_text = calculate_cluster_name(x_name, False)
-            if x_addressOffset < addressOffset or x_addressOffset > addressOffset + 8 or (addressLimits != [] and x_addressOffset >= addressLimits[0]) or new_cluster_name_text is not None: # next register instance is not where we expected it to be, or we are outside that instance now, or user requested new cluster.
+            if x_addressOffset == previous_addressOffset:
+                pass
+            elif x_addressOffset < addressOffset or x_addressOffset > addressOffset + 8 or (addressLimits != [] and x_addressOffset >= addressLimits[0]) or new_cluster_name_text is not None: # next register instance is not where we expected it to be, or we are outside that instance now, or user requested new cluster.
                 if addressLimits != [] and x_addressOffset >= addressLimits[0]:
                     addressLimits = addressLimits[1:]
                 new_cluster_name_text = calculate_cluster_name(x_name, True)
@@ -132,7 +134,8 @@ def traverse(source_root, parent_name, peripheral_name):
                     update_addressLimits(x_child)
                 addressOffset = x_addressOffset
             add_to_cluster(x_child)
-            addressOffset = addressOffset + x_size//8
+            previous_addressOffset = x_addressOffset
+            addressOffset = x_addressOffset + x_size//8
         finish_cluster()
         if len([x_child for x_child in source_root]) == 1 and source_root[0].tag == "cluster": # There's only one cluster
             for x_child in source_root:
