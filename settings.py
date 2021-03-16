@@ -331,4 +331,8 @@ phase4_cluster_names = {
 		"IOMMU_VENDOR_ID_nbio1": "PCIInfo_nbio1",
 		"IOMMU_VENDOR_ID_nbio0": "PCIInfo_nbio0",
 	},
+	"Core_X86_Msr": {
+		"LVTLINT[%s]": "LVTLINT",
+		"InterruptEnable0": "InterruptEnable0",
+	},
 }
