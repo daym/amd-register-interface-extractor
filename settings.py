@@ -375,4 +375,8 @@ phase4_cluster_names = {
 		"INTERRUPT_STATUS_INDEX_0": "InterruptStatus",
 		"I0": "gpio",
 	},
+	"FCH_RMTGPIO": {
+		"GPIO_256": "gpio",
+		"WAKESTATUS": "WakeStatus",
+	},
 }
