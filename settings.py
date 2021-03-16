@@ -370,4 +370,9 @@ phase4_cluster_names = {
 		"CPR_link2": "settings2_link2",
 		"CPR_link3": "settings2_link3",
 	},
+	"FCH_GPIO": {
+		"WAKE_STATUS_INDEX_0": "WakeStatus",
+		"INTERRUPT_STATUS_INDEX_0": "InterruptStatus",
+		"I0": "gpio",
+	},
 }
