@@ -349,4 +349,25 @@ phase4_cluster_names = {
 		"DISCONNECT_CTL": "DisconnectCtl",
 		"MISC_CTL": "MiscCtl",
 	},
+	"FCH_UART": {
+		"DLL_link0": "main_link0",
+		"DLL_link1": "main_link1",
+		"DLL_link2": "main_link2",
+		"DLL_link3": "main_link3",
+
+		"SRBR0_link0": "shadow_link0",
+		"SRBR0_link1": "shadow_link1",
+		"SRBR0_link2": "shadow_link2",
+		"SRBR0_link3": "shadow_link3",
+
+		"FAR_link0": "settings_link0",
+		"FAR_link1": "settings_link1",
+		"FAR_link2": "settings_link2",
+		"FAR_link3": "settings_link3",
+
+		"CPR_link0": "settings2_link0",
+		"CPR_link1": "settings2_link1",
+		"CPR_link2": "settings2_link2",
+		"CPR_link3": "settings2_link3",
+	},
 }
