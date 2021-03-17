@@ -549,6 +549,7 @@ def data_port_encode_ficaa(spec, data_port_base):
         assert(target_register & 3 == 0), target_register
         assert(target_register < 2048), target_register
         addr = target_register | (target_function << 11)
+        assert data_port_base & addr == 0, (addr, data_port_base)
         # This loses the device reference.  I sure hope it's always D18
         return data_port_base | addr
 
