@@ -532,19 +532,25 @@ def data_port_encode_ignore(spec, data_port_base):
 re_ficaa_offset_pattern = re.compile(r"^D([0-9A-Fa-f]+)F([0-9A-Fa-f]+)x([0-9A-Fa-f_]+)")
 
 def data_port_encode_ficaa(spec, data_port_base):
-    match = re_ficaa_offset_pattern.match(spec)
-    assert(match), spec
-    device, target_function, target_register = match.groups()
-    device = int(device, 16)
-    target_function = int(target_function, 16)
-    target_register = int(target_register, 16)
-    assert(device in [0x18]), device
-    assert(target_function >= 0 and target_function < 8), target_function
-    assert(target_register & 3 == 0), target_register
-    assert(target_register < 2048), target_register
-    addr = target_register | (target_function << 11)
-    # This loses the device reference.  I sure hope it's always D18
-    return data_port_base | addr
+    if selected_access_method == "SMN":
+        addr = calculate_hex_instance_value(spec)
+        assert addr & data_port_base == 0, (addr, data_port_base)
+        return data_port_base | addr
+    else:
+        assert selected_access_method == "HOST"
+        match = re_ficaa_offset_pattern.match(spec)
+        assert(match), spec
+        device, target_function, target_register = match.groups()
+        device = int(device, 16)
+        target_function = int(target_function, 16)
+        target_register = int(target_register, 16)
+        assert(device in [0x18]), device
+        assert(target_function >= 0 and target_function < 8), target_function
+        assert(target_register & 3 == 0), target_register
+        assert(target_register < 2048), target_register
+        addr = target_register | (target_function << 11)
+        # This loses the device reference.  I sure hope it's always D18
+        return data_port_base | addr
 
 def data_port_encode_abindex(spec, data_port_base):
     addr = calculate_hex_instance_value(spec)
