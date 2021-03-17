@@ -555,6 +555,7 @@ def data_port_encode_ficaa(spec, data_port_base):
 
 def data_port_encode_abindex(spec, data_port_base):
     addr = calculate_hex_instance_value(spec)
+    # For some reason, AMD docs have 0xCDC in the address *behind* the data port, too.  That's obviously wrong, so drop it.
     assert addr == 0xCDC, addr
     return data_port_base
 
