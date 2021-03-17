@@ -15,7 +15,7 @@ static GtkTreeView* tree_view;
 
 static const char* device_keys[] = {"name", "version", "addressUnitBits", "width", "size", "resetValue", "resetMask", "vendor", "vendorID", "series", "licenseText", "access", "description", NULL};
 static const char* peripheral_keys[] = {"name", "version", "size", "groupName", "baseAddress", "addressBlock", "resetValue", "resetMask", "access", "modifiedWriteValues", "description", NULL};
-static const char* register_keys[] = {"name", "displayName", "addressOffset", "size", "dim", "dimIncrement", "dimIndex", "dimName", "dimArrayIndex", "access", "resetValue", "resetMask", "alternativeRegister", "description", NULL};
+static const char* register_keys[] = {"name", "displayName", "alternateRegister", "addressOffset", "size", "dim", "dimIncrement", "dimIndex", "dimName", "dimArrayIndex", "access", "resetValue", "resetMask", "alternativeRegister", "description", NULL};
 static const char* cluster_keys[] = {"name", "addressOffset", "size", "dim", "dimIncrement", "dimIndex", "dimName", "dimArrayIndex", "access", "resetValue", "resetMask", "alternateCluster", "description", NULL};
 static const char* field_keys[] = {"name", "bitOffset", "bitWidth", "access", "bitRange", "msb", "lsb", "description", NULL};
 static const char* interrupt_keys[] = {"name", "value", "description", NULL};

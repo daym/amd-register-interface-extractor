@@ -434,12 +434,20 @@ offset = 0
 
 svd_peripherals_by_path = {}
 
+# This exists in order to be able to emit <alternateRegister> tags
+primary_registers_by_absolute_address = {
+}
+
 def create_register(table_definition, name, addressOffset, description=None):
   result = etree.Element("register")
   result.append(text_element("name", name))
   result.append(text_element("description", description or name))
   result.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
   result.append(text_element("size", table_definition.size))
+  if addressOffset in primary_registers_by_absolute_address:
+    result.append(text_element("alternateRegister", primary_registers_by_absolute_address[addressOffset]))
+  else:
+    primary_registers_by_absolute_address[addressOffset] = name
   if table_definition.access:
     access = table_definition.access
     # Only put the ones SVD defined (read-only, write-only, read-write, writeOnce, read-writeOnce)
