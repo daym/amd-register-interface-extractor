@@ -534,7 +534,7 @@ re_ficaa_offset_pattern = re.compile(r"^D([0-9A-Fa-f]+)F([0-9A-Fa-f]+)x([0-9A-Fa
 def data_port_encode_ficaa(spec, data_port_base):
     if selected_access_method == "SMN":
         addr = calculate_hex_instance_value(spec)
-        assert addr & data_port_base == 0, (addr, data_port_base)
+        assert addr & data_port_base == 0, ("data_port_encode_ficaa: addr and data_port_base are disjunct", addr, data_port_base)
         return data_port_base | addr
     else:
         assert selected_access_method == "HOST"
@@ -549,7 +549,7 @@ def data_port_encode_ficaa(spec, data_port_base):
         assert(target_register & 3 == 0), target_register
         assert(target_register < 2048), target_register
         addr = target_register | (target_function << 11)
-        assert data_port_base & addr == 0, (addr, data_port_base)
+        assert data_port_base & addr == 0, ("data_port_encode_ficaa: addr and data_port_base are disjunct", addr, data_port_base)
         # This loses the device reference.  I sure hope it's always D18
         return data_port_base | addr
 
@@ -610,7 +610,7 @@ def process_TableDefinition(peripheral_path, name, vv):
         #import traceback
         #traceback.print_exc()
         addresses = []
-        print("Error: Could not calculate addresses of register {}: {}.".format(name, e), file=sys.stderr)
+        print("Error: Could not calculate addresses of register {}: {}: {}.".format(name, e.__class__.__name__, e), file=sys.stderr)
         if selected_error_handling != "keep-registers-with-errors":
             return
         print("Info: ^: Defaulting to nonsense (very low) value for a dummy entry.", file=sys.stderr)
