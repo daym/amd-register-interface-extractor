@@ -514,23 +514,6 @@ def clean_up_logical_name(s):
     return s
     #svd_register.append(text_element("dimIndex", ",".join(clean_up(instance.logical_mnemonic) for instance in instances)))
 
-def infer_access_array(addresses):
-    """ Tries to infer a regular array from ADDRESSES.
-        Returns (first_address, step, count) if that was possible.
-        Otherwise, returns (first_address, None, count). """
-    previous_address = addresses[0]
-    previous_step = None
-    even_steps = True
-    for address in addresses[1:]:
-        step = address - previous_address
-        if previous_step is None:
-            previous_step = step
-        elif step != previous_step:
-            return addresses[0], None, len(addresses)
-    if previous_step is not None and previous_step < 0: # negative step is not supported!
-        previous_step = None
-    return addresses[0], previous_step, len(addresses)
-
 def data_port_encode_error(spec, data_port_base):
     raise Exception("unknown DataPortWrite")
 
@@ -613,7 +596,6 @@ def process_TableDefinition(peripheral_path, name, vv):
 
     try:
         addresses = [calculate_hex_instance_value(instance.resolve_physical_mnemonic(data_port_encoder)) for instance in instances]
-        first_address, step, count = infer_access_array(addresses)
         addressOffset = addresses[0]
     except Exception as e:
         #import traceback
@@ -626,14 +608,10 @@ def process_TableDefinition(peripheral_path, name, vv):
         offset += 4
         description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description)\n{}\n".format(traceback.format_exc()) + ("\n".join(instance.resolve_physical_mnemonic(data_port_encode_ignore) for instance in instances))
         addressOffset = offset
-        step = None
 
     if len(addresses) > 1:
-        if step is not None: # regular array
-            name = name + "[%s]"
-        else: # unroll manually
-            name = "{}_{}".format(prefixname, clean_up_logical_name(instances[0].logical_mnemonic))
-            basename = name
+        name = "{}_{}".format(prefixname, clean_up_logical_name(instances[0].logical_mnemonic))
+        basename = name
     if peripheral_path not in svd_peripherals_by_path:
         svd_peripheral = create_peripheral("_".join(peripheral_path), 0, "read-write")
         #svd_addressBlock = create_addressBlock(0, 100, "registers") # FIXME
@@ -650,25 +628,17 @@ def process_TableDefinition(peripheral_path, name, vv):
     svd_register = create_register(vv, name, addressOffset, description=description)
     svd_registers.append(svd_register)
 
-    if step is not None:
-        # Create array of registers
-        if len(instances) > 1:
-            svd_register.append(text_element("dim", len(instances)))
-            svd_register.append(text_element("dimIncrement", "0x{:X}".format(step)))
-        if step == 0:
-            print("Error: step is 0 for register {} instances--only the first register will be able to be accessed".format(name), file=sys.stderr)
-    else: # manually unroll
-        for instance, addressOffset in zip(instances[1:], addresses[1:]):
-            derived_register = etree.Element("register")
-            derived_register.attrib["derivedFrom"] = basename
-            name = "{}_{}".format(prefixname, clean_up_logical_name(instance.logical_mnemonic))
-            derived_register.append(text_element("name", name))
-            #derived_register.append(text_element("description", description)
-            #addressOffset = calculate_hex_instance_value(instance.resolved_physical_mnemonic)
-            derived_register.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
-            derived_register.append(text_element("size", vv.size)) # To make phase4 easier
-            svd_registers.append(derived_register)
-            #svd_register.append(text_element("dimIndex", ",".join(clean_up_logical_name(instance.logical_mnemonic) for instance in instances)))
+    for instance, addressOffset in zip(instances[1:], addresses[1:]):
+        derived_register = etree.Element("register")
+        derived_register.attrib["derivedFrom"] = basename
+        name = "{}_{}".format(prefixname, clean_up_logical_name(instance.logical_mnemonic))
+        derived_register.append(text_element("name", name))
+        #derived_register.append(text_element("description", description)
+        #addressOffset = calculate_hex_instance_value(instance.resolved_physical_mnemonic)
+        derived_register.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
+        derived_register.append(text_element("size", vv.size)) # To make phase4 easier
+        svd_registers.append(derived_register)
+        #svd_register.append(text_element("dimIndex", ",".join(clean_up_logical_name(instance.logical_mnemonic) for instance in instances)))
 
 def finish_TableDefinition(peripheral_path):
     if peripheral_path in svd_peripherals_by_path:
