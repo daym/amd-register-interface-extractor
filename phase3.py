@@ -514,8 +514,8 @@ def clean_up_logical_name(s):
     return s
     #svd_register.append(text_element("dimIndex", ",".join(clean_up(instance.logical_mnemonic) for instance in instances)))
 
-def induce_access_array(addresses):
-    """ Tries to induce a regular array from ADDRESSES.
+def infer_access_array(addresses):
+    """ Tries to infer a regular array from ADDRESSES.
         Returns (first_address, step, count) if that was possible.
         Otherwise, returns (first_address, None, count). """
     previous_address = addresses[0]
@@ -613,7 +613,7 @@ def process_TableDefinition(peripheral_path, name, vv):
 
     try:
         addresses = [calculate_hex_instance_value(instance.resolve_physical_mnemonic(data_port_encoder)) for instance in instances]
-        first_address, step, count = induce_access_array(addresses)
+        first_address, step, count = infer_access_array(addresses)
         addressOffset = addresses[0]
     except Exception as e:
         #import traceback
