@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# Note: See PPR Table "AccessType Definitions"
 rwops = {"Read-write",
          "Read-only",
          #"Reset",
