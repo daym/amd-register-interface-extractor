@@ -111,6 +111,10 @@ elif selected_access_method == "IO":
 	memory_map = [] # TODO: hard-code all the IO namespaces
 elif selected_access_method == "HOSTLEGACY":
 	memory_map = []
+elif selected_access_method == "MSRLEGACY":
+	memory_map = []
+elif selected_access_method == "MSRLSLEGACY":
+	memory_map = []
 
 assert memory_map is not None, "Memory map for access_method={!r}, data_port_write={!r}".format(selected_access_method, selected_data_port_write)
 
