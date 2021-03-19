@@ -170,6 +170,8 @@ def unroll_inst_pattern(spec):
 			physs.append(item)
 			#variable_definitions.append(item)
 		else:
+			# Those are the only NON-implicit ccd patterns (which should, after all, be unrolled).  So mask them from what follows... (Rome)
+			item = item.replace("_ccd[7:0]_pcs", "_nonimplicitccd[7:0]_pcs")
 			# Note: Suffix is usually "_n".
 			implicit_patterns = ["_ccd[7:0]_lthree0_core[7:0]_thread[1:0]", "_ccd[7:0]_lthree0_core[7:0]", "_ccd[7:0]_lthree0",
 			"_ccd[7:0]_lthree[1:0]_core[3:0]_inst0_thread[1:0]", # Rome MSR
@@ -189,6 +191,7 @@ def unroll_inst_pattern(spec):
 				if item.startswith(implicit_pattern):
 					new_pattern = implicit_pattern.replace("[", "").replace(":", ".").replace("]", "")
 					item = new_pattern + item[len(implicit_pattern):]
+			item = item.replace("_nonimplicitccd[7:0]_pcs", "_ccd[7:0]_pcs")
 			item = item.replace("IOS3,IOM3,IOS2,IOM2,IOS1,IOM1,IOS0,IOM0", "IOMS3,IOMS2,IOMS1,IOMS0") # Rome; these are actually master and slave in one, each
 			try:
 				x = list(unroll_inst_item_pattern(item))
