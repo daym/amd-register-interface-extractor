@@ -81,6 +81,9 @@ phase3_io_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwo
 phase3_io_abindex.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	./phase3.py -a -m IO -d FCH::AB::ABIndex $< > $@.new && mv $@.new $@
 
+phase3_hostlegacy.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
+	./phase3.py -a -m HOSTLEGACY $< > $@.new && mv $@.new $@
+
 phase3_msr.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	./phase3.py -m MSR $< > $@.new && mv $@.new $@
 

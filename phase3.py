@@ -107,8 +107,10 @@ elif selected_access_method == "SMN":
 		memory_map = []
 elif selected_access_method == "SMNCCD":
 	_, memory_map = getattr(phase2_result, "Memory_Map___SMNCCD_Physical_Mnemonic_Namespace", ("", []))
-elif selected_access_method == "IO":
-	memory_map = [] # TODO: fake all the IO things
+elif selected_access_method == "IO" or selected_access_method == "HOSTLEGACY":
+	memory_map = [] # TODO: hard-code all the IO namespaces
+elif selected_access_method == "HOSTLEGACY":
+	memory_map = []
 
 assert memory_map is not None, "Memory map for access_method={!r}, data_port_write={!r}".format(selected_access_method, selected_data_port_write)
 
