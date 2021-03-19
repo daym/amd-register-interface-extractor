@@ -1,5 +1,5 @@
 
-.PHONY: all clean distclean validate
+.PHONY: all clean distclean validate3 validate4
 
 all: phase4_host.svd phase4_host_ficaa.svd phase4_io.svd phase4_io_abindex.svd phase4_msr.svd phase4_smn.svd phase4_smn_ficaa.svd phase4_smnccd.svd phase4_smnccd_ficaa.svd
 
