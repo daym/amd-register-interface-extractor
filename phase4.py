@@ -81,7 +81,13 @@ def traverse(source_root, parent_name, peripheral_name):
                         elif node.tag == "register":
                             cluster.remove(node)
                             source_root.append(node)
-                            print("Info: Eliding cluster {!r} grouping because there's only one node in it".format(cluster.find("name").text), file=sys.stderr)
+                            cluster_name = cluster.find("name").text
+                            if not cluster_name.endswith("_unsorted"):
+                                print("Info: Eliding cluster {!r} grouping because there's only one node in it".format(cluster_name), file=sys.stderr)
+                            else:
+                                # generated and then elided agai
+                                pass # no one cares
+
                             break
                         else:
                             assert False, node.tag
