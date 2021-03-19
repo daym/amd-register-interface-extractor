@@ -83,6 +83,7 @@ settings = [
 #   Ron: 0x1094_2014:0x00000000
 # Note: Keep value in sync with BXXD00F?x014 (NBIFEPFNCFG::BASE_ADDR_1) at _nbio0_instNBIF2_dev0_func2_aliasSMN; NBIO0NBIF2EPF2CFGx00000010; NBIO0NBIF2EPF2CFG=1094_2000h
 #   Ron: 0x1094_2010:0x0000000c
+# XXX this is most definitely wrong--probably because Ron had no NVMe drive connected.
 ("{NBIFEPFNCFG::BASE_ADDR_2_nbio0_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR] , NBIFEPFNCFG::BASE_ADDR_1_nbio0_instNBIF2_dev0_func2_aliasHOST[BASE_ADDR]}", "0Ch"), # Default: 0Ch
 
 # Note: Keep value in sync with BASE_ADDR_2 at _nbio1_instNBIF2_dev0_func2_aliasSMN; NBIO1NBIF2EPF2CFGx00000014; NBIO1NBIF2EPF2CFG=10A4_2000h
@@ -289,6 +290,8 @@ phase4_cluster_names = {
 		"FabricIndirectConfigAccessAddress_n0": "FICAA",
 		"FabricIndirectConfigAccessDataLo_n0": "FICAD",
 		#"FabricIndirectConfigAccessDataHi_n1": "FICAD", # AMD has this in an extra register table
+
+		"CfgAddressCntl_BCST": "Config",
 	},
 	"FCH_I2C": {
 		"IC_CON_link0": "Connection_link0",
@@ -378,5 +381,7 @@ phase4_cluster_names = {
 	"FCH_RMTGPIO": {
 		"GPIO_256": "gpio",
 		"WAKESTATUS": "WakeStatus",
+		"RMT_GPIO_INTERRUPT_STATUS": "InterruptStatus",
+		"RMT_GPIO_MASTER_SWITCH": "MasterSwitch",
 	},
 }
