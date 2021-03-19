@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
@@ -104,10 +106,24 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 	}
 }
 
-static char* calculate_tooltip(const char* type, xmlNodePtr root) {
+static uint64_t eval_int(const char* address_string) {
+	if (address_string[0] == '0' && address_string[1] == 'x') {
+		return strtoull(&address_string[2], NULL, 16);
+	} else {
+		return strtoull(address_string, NULL, 10);
+	}
+}
+
+
+static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_address) {
 	const char* result = "";
 	int i;
 	const char** keys = keys_of_element_type(type);
+	const char* addressOffset = child_element_text(root, "addressOffset") ?: child_element_text(root, "baseAddress");
+	if (addressOffset) {
+		uint64_t address_offset = eval_int(addressOffset);
+		result = g_strdup_printf("\n(absolute address: 0x%X)", base_address + address_offset);
+	}
 	if (keys) {
 		for (i = 0; i < keys[i]; ++i) {
 			const char* value = child_element_text(root, keys[i]);
@@ -122,7 +138,7 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root) {
 		return result;
 }
 
-static void traverse(xmlNodePtr root, GtkTreeIter* store_parent) {
+static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_address) {
 	xmlNodePtr child;
 	const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : NULL;
 	if (root->type == XML_ELEMENT_NODE)
@@ -134,7 +150,11 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent) {
 		name = type;
 	else
 		name = g_strdup_printf("%s %s", type, name);
-	const char* tooltip = calculate_tooltip(type, root);
+	const char* tooltip = calculate_tooltip(type, root, base_address);
+	const char* baseAddress = child_element_text(root, "addressOffset") ?: child_element_text(root, "baseAddress");
+	if (baseAddress)
+	    base_address += eval_int(baseAddress);
+
 	GtkTreeIter iter;
 	gtk_tree_store_append(store, &iter, store_parent);
 	if (strcmp(type, "registers") == 0)
@@ -145,7 +165,7 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent) {
 		if (child->type == XML_ELEMENT_NODE && pseudo_attribute_P(type, child->name)) {
 			//g_warning("ignore %s", child->name);
 		} else if (child->type == XML_ELEMENT_NODE) {
-			traverse(child, &iter);
+			traverse(child, &iter, base_address);
 		}
 	}
 }
@@ -188,7 +208,7 @@ int main(int argc, char* argv[]) {
 	gtk_window_set_default_size(window, 400, 400);
 	gtk_widget_show_all(window);
 
-	traverse(xmlDocGetRootElement(input_document), NULL);
+	traverse(xmlDocGetRootElement(input_document), NULL, 0);
 
 	gtk_main();
 	return 0;

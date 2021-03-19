@@ -49,7 +49,7 @@ def resolve_derivedFrom(root):
           if tag not in root:
               root.append(deepcopy(node))
 
-def traverse(root, store_parent):
+def traverse(root, store_parent, base_address):
   type = root.tag if etree.iselement(root) else None
   if etree.iselement(root):
     resolve_derivedFrom(root)
@@ -61,6 +61,14 @@ def traverse(root, store_parent):
   tooltip = "Type: {}\n".format(type) + "\n".join([
     "{}: {}".format(cname, root.find(cname).text) for cname in type_to_pseudo_attributes.get(type, []) if root.find(cname) is not None
   ])
+  addressOffsets = root.xpath("addressOffset/text()") or root.xpath("baseAddress/text()")
+  addressOffset = addressOffsets[0] if len(addressOffsets) > 0 else None
+  if addressOffset is not None:
+      address = base_address + eval(addressOffset)
+      tooltip = "(absolute address: 0x%X)\n" % (address, ) + tooltip
+  baseAddress = addressOffset
+  if baseAddress is not None:
+      base_address = base_address + eval(baseAddress)
   tooltip = tooltip.strip()
   tooltip = GLib.markup_escape_text(tooltip, -1)
   # TODO: root.attrib
@@ -71,14 +79,14 @@ def traverse(root, store_parent):
     if etree.iselement(child) and child.tag in type_to_pseudo_attributes.get(type, []):
       pass
     else:
-      traverse(child, store_root)
+      traverse(child, store_root, base_address)
 
 # FIXME: dtd_validation=True
 parser = etree.XMLParser(ns_clean=True, attribute_defaults=True, remove_blank_text=True)
 with open(sys.argv[1]) as f:
   svd = etree.parse(f, parser)
 root = svd.getroot()
-traverse(root, None)
+traverse(root, None, 0)
 
 scroller.add(tree)
 
