@@ -19,3 +19,5 @@ The result is in `phase4_host.svd`.
 It's also useful to `import phase2_result` in a Python interpreter and look around.
 
 A rudimentary SVD viewer is also included, so you can inspect the result graphically using `python3 svd_viewer.py phase4_host.svd` or similar.
+
+There are phase4 results for all the different access methods--one file per access method and `DataPortWrite` (named `phase4_io.svd` and so on).
