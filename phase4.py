@@ -81,6 +81,7 @@ def traverse(source_root, parent_name, peripheral_name):
                         elif node.tag == "register":
                             cluster.remove(node)
                             source_root.append(node)
+                            print("Info: Eliding cluster {!r} grouping because there's only one node in it".format(cluster.find("name").text), file=sys.stderr)
                             break
                         else:
                             assert False, node.tag
@@ -117,11 +118,12 @@ def traverse(source_root, parent_name, peripheral_name):
             update_addressLimits(x_child)
             new_cluster_name_text = calculate_cluster_name(x_name, False)
             if x_addressOffset == previous_addressOffset:
-                pass
+                assert new_cluster_name_text is None
             elif x_addressOffset < addressOffset or x_addressOffset > addressOffset + 8 or (addressLimits != [] and x_addressOffset >= addressLimits[0]) or new_cluster_name_text is not None: # next register instance is not where we expected it to be, or we are outside that instance now, or user requested new cluster.
-                if addressLimits != [] and x_addressOffset >= addressLimits[0]:
-                    addressLimits = addressLimits[1:]
                 new_cluster_name_text = calculate_cluster_name(x_name, True)
+                if addressLimits != [] and x_addressOffset >= addressLimits[0]:
+                    #new_cluster_name_text = new_cluster_name_text + "_{}".format(addressLimits[0])
+                    addressLimits = addressLimits[1:]
                 cluster_name = cluster.find("name") if cluster is not None else None
                 cluster_name_text = cluster_name.text if cluster_name is not None else None
                 if cluster_name_text != new_cluster_name_text:
