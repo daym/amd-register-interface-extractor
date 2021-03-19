@@ -189,6 +189,7 @@ def unroll_inst_pattern(spec):
 				if item.startswith(implicit_pattern):
 					new_pattern = implicit_pattern.replace("[", "").replace(":", ".").replace("]", "")
 					item = new_pattern + item[len(implicit_pattern):]
+			item = item.replace("IOS3,IOM3,IOS2,IOM2,IOS1,IOM1,IOS0,IOM0", "IOMS3,IOMS2,IOMS1,IOMS0") # Rome; these are actually master and slave in one, each
 			try:
 				x = list(unroll_inst_item_pattern(item))
 			except:
