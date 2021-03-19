@@ -14,8 +14,23 @@ clean:
 
 distclean: clean
 
-validate: phase3_host.svd CMSIS-SVD.xsd
+validate3: phase3_host.svd phase3_host_ficaa.svd phase3_io.svd phase3_io_abindex.svd phase3_msr.svd phase3_smn.svd phase3_smnccd.svd CMSIS-SVD.xsd
 	xmllint --schema CMSIS-SVD.xsd phase3_host.svd
+	xmllint --schema CMSIS-SVD.xsd phase3_host_ficaa.svd
+	xmllint --schema CMSIS-SVD.xsd phase3_io.svd
+	xmllint --schema CMSIS-SVD.xsd phase3_io_abindex.svd
+	xmllint --schema CMSIS-SVD.xsd phase3_msr.svd
+	xmllint --schema CMSIS-SVD.xsd phase3_smn.svd
+	xmllint --schema CMSIS-SVD.xsd phase3_smnccd.svd
+
+validate4: phase4_host.svd phase4_host_ficaa.svd phase4_io.svd phase4_io_abindex.svd phase4_msr.svd phase4_smn.svd phase4_smnccd.svd CMSIS-SVD.xsd
+	xmllint --schema CMSIS-SVD.xsd phase4_host.svd
+	xmllint --schema CMSIS-SVD.xsd phase4_host_ficaa.svd
+	xmllint --schema CMSIS-SVD.xsd phase4_io.svd
+	xmllint --schema CMSIS-SVD.xsd phase4_io_abindex.svd
+	xmllint --schema CMSIS-SVD.xsd phase4_msr.svd
+	xmllint --schema CMSIS-SVD.xsd phase4_smn.svd
+	xmllint --schema CMSIS-SVD.xsd phase4_smnccd.svd
 
 svd_viewer: svd_viewer.c
 	$(CC) -g3 -o $@ $< `pkg-config --cflags --libs gtk+-3.0 libxml-2.0`
