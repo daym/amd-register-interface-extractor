@@ -444,12 +444,12 @@ def create_register(table_definition, name, addressOffset, description=None):
   result = etree.Element("register")
   result.append(text_element("name", name))
   result.append(text_element("description", description or name))
-  result.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
-  result.append(text_element("size", table_definition.size))
   if addressOffset in primary_registers_by_absolute_address:
     result.append(text_element("alternateRegister", primary_registers_by_absolute_address[addressOffset]))
   else:
     primary_registers_by_absolute_address[addressOffset] = name
+  result.append(text_element("addressOffset", "0x{:X}".format(addressOffset)))
+  result.append(text_element("size", table_definition.size))
   if table_definition.access:
     access = table_definition.access
     # Only put the ones SVD defined (read-only, write-only, read-write, writeOnce, read-writeOnce)
@@ -477,12 +477,6 @@ def create_register(table_definition, name, addressOffset, description=None):
       access = "write-only"
     else:
       access = access.lower()
-    if table_definition.access in [
-      "Read,Write-1-to-clear",
-      "Read-write,Read,Write-1-to-clear",
-      "Read,Write-1-to-clear,Volatile",
-    ]:
-      result.append(text_element("modifiedWriteValues", "oneToClear"))
     result.append(text_element("access", access))
   if table_definition.resetValue:
     resetValue = table_definition.resetValue
@@ -490,6 +484,12 @@ def create_register(table_definition, name, addressOffset, description=None):
         resetValue = "0x" + resetValue[:-len("h")]
     result.append(text_element("resetValue", resetValue.replace("_", "")))
   result.append(text_element("resetMask", "0x{:X}".format(table_definition.resetMask)))
+  if table_definition.access and table_definition.access in [
+    "Read,Write-1-to-clear",
+    "Read-write,Read,Write-1-to-clear",
+    "Read,Write-1-to-clear,Volatile",
+  ]:
+    result.append(text_element("modifiedWriteValues", "oneToClear"))
   fields = etree.Element("fields")
   result.append(fields)
   bits = table_definition.bits
