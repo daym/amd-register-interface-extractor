@@ -107,7 +107,7 @@ elif selected_access_method == "SMN":
 		memory_map = []
 elif selected_access_method == "SMNCCD":
 	_, memory_map = getattr(phase2_result, "Memory_Map___SMNCCD_Physical_Mnemonic_Namespace", ("", []))
-elif selected_access_method == "IO" or selected_access_method == "HOSTLEGACY":
+elif selected_access_method == "IO":
 	memory_map = [] # TODO: hard-code all the IO namespaces
 elif selected_access_method == "HOSTLEGACY":
 	memory_map = []
