@@ -4,10 +4,72 @@ import phase2_result
 import unroller
 import re
 import sys
+from pprint import pprint
 from rwops import strip_off_rwops
+
+re_ficaa_offset_pattern = re.compile(r"^D([0-9A-Fa-f]+)F([0-9A-Fa-f]+)x([0-9A-Fa-f_]+)")
+
+selected_access_method = "HOST"
+
+def data_port_encode_ficaa(spec, data_port_base):
+    if selected_access_method == "SMN":
+        addr = calculate_hex_instance_value(spec)
+        assert addr & data_port_base == 0, ("data_port_encode_ficaa: addr and data_port_base are disjunct", addr, data_port_base)
+        return data_port_base | addr
+    else:
+        assert selected_access_method == "HOST"
+        match = re_ficaa_offset_pattern.match(spec)
+        assert(match), spec
+        device, target_function, target_register = match.groups()
+        device = int(device, 16)
+        target_function = int(target_function, 16)
+        target_register = int(target_register, 16)
+        assert(device in [0x18]), device
+        assert(target_function >= 0 and target_function < 8), target_function
+        assert(target_register & 3 == 0), target_register
+        assert(target_register < 2048), target_register
+        addr = target_register | (target_function << 11)
+        assert data_port_base & addr == 0, ("data_port_encode_ficaa: addr and data_port_base are disjunct", addr, data_port_base)
+        # This loses the device reference.  I sure hope it's always D18
+        return data_port_base | addr
 
 re_x = re.compile(r"^[A-Z0-9_]+x.*")
 re_xetc = re.compile(r"[A-Z0-9_]+.*x")
+
+for item in [ #"_inst[TCDX[11:0],CAKE[5:0],PIE0,IOM[3:0],CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasHOST; D18F1x200_x[00[30:1E]_0001,001[B:0]_0001,000[B:0]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl",
+#"_inst[TCDX[11:0],CAKE[5:0],PIE0,IOS3,IOM3,IOS2,IOM2,IOS1,IOM1,IOS0,IOM0,CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasHOST;D18F0x04C_x[00[30:1E]_0001,001[B:0]_0001,000[B:0]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl",
+#"_inst[PIE0,IOM[3:0],CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasHOST; D18F0x050_x[001E0001,001[B:0]_0001,000[B:0]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl",
+#"_inst[IOS[3:0],BCST]_aliasHOST; D18F0x050_x[001[B:8]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl",
+#"_inst[TCDX[11:0],CAKE[5:0],BCST]_aliasHOST; D18F0x050_x[00[30:1F]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl",
+"_inst[TCDX[11:0],CAKE[5:0],PIE0,IOS3,IOM3,IOS2,IOM2,IOS1,IOM1,IOS0,IOM0,CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasHOST; D18F0x044_x[00[30:1E]_0001,001[B:0]_0001,000[B:0]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl",
+"_nbio0_inst[IOAGR,NBIF0,PCIE[1:0]]_aliasSMN; IOMMUL1IOAGRPCIE0,IOMMUL1NBIFPCIE0,IOMMUL1PCIE[4,0]x000000F4; IOMMUL1IOAGRPCIE0,IOMMUL1NBIFPCIE0,IOMMUL1PCIE[4,0]=1[53,4F,4B,47]0_0000h",
+"_nbio1_inst[IOAGR,NBIF0,PCIE[1:0]]_aliasSMN; IOMMUL1IOAGRPCIE1,IOMMUL1NBIFPCIE1,IOMMUL1PCIE[5,1]x000000F4; IOMMUL1IOAGRPCIE1,IOMMUL1NBIFPCIE1,IOMMUL1PCIE[5,1]=1[54,50,4C,48]0_0000h",
+"_nbio2_inst[IOAGR,NBIF0,PCIE[1:0]]_aliasSMN; IOMMUL1IOAGRPCIE2,IOMMUL1NBIFPCIE2,IOMMUL1PCIE[6,2]x000000F4; IOMMUL1IOAGRPCIE2,IOMMUL1NBIFPCIE2,IOMMUL1PCIE[6,2]=1[55,51,4D,49]0_0000h",
+"_nbio3_inst[IOAGR,NBIF0,PCIE[1:0]]_aliasSMN; IOMMUL1IOAGRPCIE3,IOMMUL1NBIFPCIE3,IOMMUL1PCIE[7,3]x000000F4; IOMMUL1IOAGRPCIE3,IOMMUL1NBIFPCIE3,IOMMUL1PCIE[7,3]=1[56,52,4E,4A]0_0000h",
+
+]:
+    item = item.replace("IOS3,IOM3", "IOMS3").replace("IOS2,IOM2", "IOMS2").replace("IOS1,IOM1", "IOMS1").replace("IOS0,IOM0", "IOMS0")
+    instances = list(unroller.unroll_inst_pattern(item))
+    pprint(instances)
+    for instance in instances:
+        print(instance, instance.resolve_physical_mnemonic(data_port_encode_ficaa))
+
+    sys.exit(0)
+
+#item = "_inst[TCDX[11:0],CAKE[5:0],PIE0,IOM[3:0],CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasSMN; DFF1x00000200_x[00[30:1E]_0001,001[B:0]_0001,000[B:0]_0001,00000000]; DFF1=0001_C400h; DataPortWrite=DF::FabricConfigAccessControl"
+
+#item = "_inst[TCDX[11:0],CAKE[5:0],PIE0,IOS3,IOM3,IOS2,IOM2,IOS1,IOM1,IOS0,IOM0,CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasHOST; D18F0x044_x[00[30:1E]_0001,001[B:0]_0001,000[B:0]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl"
+
+# Original has IOS0,IOM0 and so on.  That's not correct.
+item = "_inst[TCDX[11:0],CAKE[5:0],PIE0,IOS3,IOM3,IOS2,IOM2,IOS1,IOM1,IOS0,IOM0,CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasHOST;D18F0x044_x[00[30:1E]_0001,001[B:0]_0001,000[B:0]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl"
+
+# sanitized: item = "_inst[TCDX[11:0],CAKE[5:0],PIE0,IOMS3,IOMS2,IOMS1,IOMS0,CCM[7:0],CCIX[3:0],CS[7:0],BCST]_aliasHOST; D18F0x044_x[00[30:1E]_0001,001[B:0]_0001,000[B:0]_0001,00000000]; DataPortWrite=DF::FabricConfigAccessControl"
+
+instances = list(unroller.unroll_inst_pattern(item))
+pprint(instances)
+for instance in instances:
+    print(instance, instance.resolved_physical_address)
+sys.exit(0)
 
 for name in dir(phase2_result):
     try:
