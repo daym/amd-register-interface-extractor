@@ -15,7 +15,7 @@ Then invoke something like (using the name of the first PDF file as argument):
     ./configure 54945_ppr_ZP_B2_specl_nda.pdf
     make
 
-The result is in `phase3_host.svd`.
+The result is in `phase4_host.svd`.
 It's also useful to `import phase2_result` in a Python interpreter and look around.
 
-A rudimentary SVD viewer is also included, so you can inspect the result graphically using `python3 svd_viewer.py phase3_host.svd` or similar.
+A rudimentary SVD viewer is also included, so you can inspect the result graphically using `python3 svd_viewer.py phase4_host.svd` or similar.
