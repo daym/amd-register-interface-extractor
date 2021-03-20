@@ -21,7 +21,11 @@ static const char* register_keys[] = {"name", "displayName", "alternateRegister"
 static const char* cluster_keys[] = {"name", "addressOffset", "size", "dim", "dimIncrement", "dimIndex", "dimName", "dimArrayIndex", "access", "resetValue", "resetMask", "alternateCluster", "description", NULL};
 static const char* field_keys[] = {"name", "bitOffset", "bitWidth", "access", "bitRange", "msb", "lsb", "description", NULL};
 static const char* interrupt_keys[] = {"name", "value", "description", NULL};
+static const char* no_keys[] = { NULL };
 
+/* Returns a null-terminated list of keys that are supposed to be SVD attributes rather than child nodes.
+   @param type The SVD type of node (an xml element tag name)
+ */
 static const char** keys_of_element_type(const char* type) {
 	if (strcmp(type, "cluster") == 0) {
 		return cluster_keys;
@@ -38,24 +42,31 @@ static const char** keys_of_element_type(const char* type) {
 	} else if (strcmp(type, "interrupt") == 0) {
 		return interrupt_keys;
 	} else {
-		return NULL;
+		return no_keys;
 	}
 }
 
+/* Returns whether the given xml node (given the SVD type of node and the name of the element to be checked) is an attribute or not.
+   @param type The SVD type of node (an xml element tag name)
+   @param name The tag name of the element to be checked.
+   @return Whether the element is an attribute of the SVD node
+ */
 static int pseudo_attribute_P(const char* type, const char* name) {
 	const char** keys = keys_of_element_type(type);
-	if (keys) {
-		int i;
-		for (i = 0; keys[i]; ++i) {
-			if (strcmp(keys[i], name) == 0)
-				return TRUE;
-		}
-		return FALSE;
-	} else
-		return FALSE;
+	int i;
+	for (i = 0; keys[i]; ++i) {
+		if (strcmp(keys[i], name) == 0)
+			return TRUE;
+	}
+	return FALSE;
 }
 
-static char* child_element_text(xmlNodePtr root, const char* key) {
+/* Retrieves the (first) element that is a child of ROOT and has the tag name KEY.  (This is how pseudo attributes are stored in SVD)
+   @param root The XML element whose children are to be checked
+   @param key The child element of ROOT that is to be searched for, by tag name
+   @return A newly allocated string containing the text body of the child element so found, or NULL if it was not found.  Caller should free using xmlFree.
+ */
+static xmlChar* child_element_text(xmlNodePtr root, const char* key) {
 	xmlNodePtr child;
 	for (child = root->children; child; child = child->next) {
 		if (child->type == XML_ELEMENT_NODE && strcmp(key, child->name) == 0) {
@@ -65,14 +76,19 @@ static char* child_element_text(xmlNodePtr root, const char* key) {
 	return NULL;
 }
 
+/* If ROOT has a 'derivedFrom' attribute, find an element with that name and copy all its children--except for the ones ROOT already has.
+   This implements the SVD inheritance functionality.
+   @param root The node that is to be checked for the 'derivedFrom' attribute (and whose children are to be mutated)
+   Side effect: Mutates ROOT.
+ */
 static void resolve_derivedFrom(xmlNodePtr root) {
-	// If ROOT has a 'derivedFrom' attribute, find an element with that name and copy all its children--except for the ones ROOT already has
 	xmlChar* derivedFrom = xmlGetProp(root, "derivedFrom");
 	if (derivedFrom) {
 		xmlNodePtr sibling = NULL;
+		// Find sibling with name equal to derivedFrom
 		for (sibling = xmlPreviousElementSibling(root); sibling; sibling = xmlPreviousElementSibling(sibling)) {
 			if (sibling->type == XML_ELEMENT_NODE && strcmp(sibling->name, root->name) == 0) {
-				char* name = child_element_text(sibling, "name");
+				xmlChar* name = child_element_text(sibling, "name");
 				if (name && strcmp(name, derivedFrom) == 0) {
 					xmlFree(name);
 					break;
@@ -90,22 +106,26 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 			xmlXPathFreeObject(result);
 #endif
 		}
-		if (sibling) {
+		if (sibling) { // If the sibling to be derived from has been found
 			resolve_derivedFrom(sibling);
 			xmlNodePtr child;
-			for(child = sibling->children; child; child = child->next) { // weird-ass attributes
+			// Copy all the pseudo attributes over that we don't already have
+			for(child = sibling->children; child; child = child->next) {
 				if (child->type == XML_ELEMENT_NODE) {
-					const char* key = xmlNodeListGetString(input_document, child->children, 1);
-					if (key && child_element_text(root, key) == NULL) { // default this one to sibling's item
+					const char* child_key = child->name;
+					xmlChar* our_value = child_element_text(root, child_key);
+					if (our_value == NULL) {
 						xmlNodePtr xchild = xmlCopyNode(child, 1);
 						xmlAddChild(root, xchild);
-					}
+					} else
+						xmlFree(our_value);
 				}
 			}
 		}
 	}
 }
 
+/* Evaluates SVD integer numeral and returns the number it represents. */
 static uint64_t eval_int(const char* address_string) {
 	if (address_string[0] == '0' && address_string[1] == 'x') {
 		return strtoull(&address_string[2], NULL, 16);
@@ -114,58 +134,85 @@ static uint64_t eval_int(const char* address_string) {
 	}
 }
 
-
-static const char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_address) {
-	const char* result = "";
+/* Given a SVD node (given by type and root), calculates tooltip text for it.
+   @param type The type of ROOT
+   @param root The node whose information to show in the tooltip
+   @param base_address The base address for addressOffsets in ROOT.
+   @return The tooltip text
+ */
+static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_address) {
+	char* result = g_strdup("");
 	int i;
 	const char** keys = keys_of_element_type(type);
-	const char* addressOffset = child_element_text(root, "addressOffset") ?: child_element_text(root, "baseAddress");
-	if (addressOffset) {
-		uint64_t address_offset = eval_int(addressOffset);
-		result = g_strdup_printf("\n(absolute address: 0x%X)", base_address + address_offset);
+	{
+		xmlChar* addressOffset = child_element_text(root, "addressOffset") ?: child_element_text(root, "baseAddress");
+		if (addressOffset) {
+			uint64_t address_offset = eval_int(addressOffset);
+			result = g_strdup_printf("\n(absolute address: 0x%X)", base_address + address_offset);
+			xmlFree(addressOffset);
+		}
 	}
-	if (keys) {
-		for (i = 0; keys[i]; ++i) {
-			const char* value = child_element_text(root, keys[i]);
-			if (value)
-				result = g_strdup_printf("%s\n%s: %s", result, keys[i], value);
+	for (i = 0; keys[i]; ++i) {
+		xmlChar* value = child_element_text(root, keys[i]);
+		if (value) {
+			result = g_strdup_printf("%s\n%s: %s", result, keys[i], value);
+			xmlFree(value);
 		}
 	}
 	{
 		char *text = xmlNodeListGetString(input_document, root->children, 1);
-		result = g_strdup_printf("%s\n%s", result, text ? g_strstrip(text) : "");
-		if (text)
+		if (text) {
+			result = g_strdup_printf("%s\n%s", result, text ? g_strstrip(text) : "");
 			xmlFree(text);
+		}
 	}
-	if (result[0])
-		return &result[1];
-	else
-		return result;
+	return result;
 }
 
+/** Stores ROOT under STORE_PARENT, uses base_address as base address for all the calculations under it.
+    @param root source (xml node)
+    @param store_parent destination (in a GtkTreeStore)
+    @param base_address base address to use for calculations
+ */
 static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_address) {
 	xmlNodePtr child;
-	const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : NULL;
+	const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : "?";
 	if (root->type == XML_ELEMENT_NODE)
 		resolve_derivedFrom(root);
-	if (type == NULL)
-		type = "?";
-	const char* name = child_element_text(root, "name");
-	if (name == NULL || !name[0])
-		name = type;
-	else
-		name = g_strdup_printf("%s %s", type, name);
-	const char* tooltip = calculate_tooltip(type, root, base_address);
-	const char* baseAddress = child_element_text(root, "addressOffset") ?: child_element_text(root, "baseAddress");
-	if (baseAddress)
-	    base_address += eval_int(baseAddress);
+	char* name;
+	{
+		xmlChar* xml_name = child_element_text(root, "name");
+		if (xml_name == NULL || !xml_name[0])
+			name = g_strdup(type);
+		else
+			name = g_strdup_printf("%s %s", type, xml_name);
+		if (xml_name)
+			xmlFree(xml_name);
+	}
+	char* tooltip = calculate_tooltip(type, root, base_address);
+	{
+		xmlChar* baseAddress = child_element_text(root, "addressOffset") ?: child_element_text(root, "baseAddress");
+		if (baseAddress) {
+			base_address += eval_int(baseAddress);
+			xmlFree(baseAddress);
+		}
+	}
 
 	GtkTreeIter iter;
 	gtk_tree_store_append(store, &iter, store_parent);
-	if (strcmp(type, "registers") == 0)
-	    gtk_tree_view_expand_to_path(tree_view, gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter));
-	tooltip = g_markup_escape_text(tooltip, -1);
+	if (strcmp(type, "registers") == 0) {
+		gtk_tree_view_expand_to_path(tree_view, gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter));
+	}
+	{
+		char* x_tooltip = g_markup_escape_text(tooltip, -1);
+		if (x_tooltip) {
+			g_free(tooltip);
+			tooltip = x_tooltip;
+		}
+	}
 	gtk_tree_store_set(store, &iter, C_TYPE, type, C_NAME, name, C_TOOLTIP, tooltip, -1);
+	g_free(tooltip);
+	g_free(name);
 	for (child = root->children; child; child = child->next) {
 		if (child->type == XML_ELEMENT_NODE && pseudo_attribute_P(type, child->name)) {
 			//g_warning("ignore %s", child->name);
@@ -177,7 +224,7 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 
 int main(int argc, char* argv[]) {
 	gtk_init(&argc, &argv);
-	if (!argv[1]) {
+	if (argc < 2 || !argv[0] || !argv[1]) {
 		g_error("input file missing");
 		exit(1);
 	} else {
