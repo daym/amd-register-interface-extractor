@@ -125,7 +125,7 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
 		result = g_strdup_printf("\n(absolute address: 0x%X)", base_address + address_offset);
 	}
 	if (keys) {
-		for (i = 0; i < keys[i]; ++i) {
+		for (i = 0; keys[i]; ++i) {
 			const char* value = child_element_text(root, keys[i]);
 			if (value)
 				result = g_strdup_printf("%s\n%s: %s", result, keys[i], value);
