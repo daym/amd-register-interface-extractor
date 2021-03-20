@@ -55,7 +55,7 @@ static int pseudo_attribute_P(const char* type, const char* name) {
 		return FALSE;
 }
 
-static const char* child_element_text(xmlNodePtr root, const char* key) {
+static char* child_element_text(xmlNodePtr root, const char* key) {
 	xmlNodePtr child;
 	for (child = root->children; child; child = child->next) {
 		if (child->type == XML_ELEMENT_NODE && strcmp(key, child->name) == 0) {
@@ -72,7 +72,7 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 		xmlNodePtr sibling = NULL;
 		for (sibling = xmlPreviousElementSibling(root); sibling; sibling = xmlPreviousElementSibling(sibling)) {
 			if (sibling->type == XML_ELEMENT_NODE && strcmp(sibling->name, root->name) == 0) {
-				const char* name = child_element_text(sibling, "name");
+				char* name = child_element_text(sibling, "name");
 				if (name && strcmp(name, derivedFrom) == 0) {
 					xmlFree(name);
 					break;
@@ -115,7 +115,7 @@ static uint64_t eval_int(const char* address_string) {
 }
 
 
-static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_address) {
+static const char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_address) {
 	const char* result = "";
 	int i;
 	const char** keys = keys_of_element_type(type);
@@ -131,7 +131,12 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
 				result = g_strdup_printf("%s\n%s: %s", result, keys[i], value);
 		}
 	}
-	result = g_strdup_printf("%s\n%s", result, g_strstrip(xmlNodeListGetString(input_document, root->children, 1) ?: strdup("")));
+	{
+		char *text = xmlNodeListGetString(input_document, root->children, 1);
+		result = g_strdup_printf("%s\n%s", result, text ? g_strstrip(text) : "");
+		if (text)
+			xmlFree(text);
+	}
 	if (result[0])
 		return &result[1];
 	else
@@ -158,7 +163,7 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 	GtkTreeIter iter;
 	gtk_tree_store_append(store, &iter, store_parent);
 	if (strcmp(type, "registers") == 0)
-	    gtk_tree_view_expand_to_path(tree_view, gtk_tree_model_get_path(store, &iter));
+	    gtk_tree_view_expand_to_path(tree_view, gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter));
 	tooltip = g_markup_escape_text(tooltip, -1);
 	gtk_tree_store_set(store, &iter, C_TYPE, type, C_NAME, name, C_TOOLTIP, tooltip, -1);
 	for (child = root->children; child; child = child->next) {
@@ -189,24 +194,24 @@ int main(int argc, char* argv[]) {
 	}
 	store = gtk_tree_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
-	GtkScrolledWindow* scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+	GtkScrolledWindow* scrolled_window = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(NULL, NULL));
 	gtk_scrolled_window_set_policy(scrolled_window, GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	GtkTreeViewColumn* col0 = gtk_tree_view_column_new_with_attributes("Name", gtk_cell_renderer_text_new(), "text", C_NAME, NULL);
-	tree_view = gtk_tree_view_new();
-	gtk_tree_view_set_model(tree_view, store);
+	tree_view = GTK_TREE_VIEW(gtk_tree_view_new());
+	gtk_tree_view_set_model(tree_view, GTK_TREE_MODEL(store));
 	gtk_tree_view_set_tooltip_column(tree_view, C_TOOLTIP);
 	gtk_tree_view_set_headers_visible(tree_view, FALSE);
 	gtk_tree_view_set_search_column(tree_view, C_NAME);
 	gtk_tree_view_append_column(tree_view, col0);
-	gtk_container_add(scrolled_window, tree_view);
+	gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(tree_view));
 
-	GtkWindow* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 	// TODO: realpath for first one
 	gtk_window_set_title(window, g_strdup_printf("%s - %s", argv[1], argv[0]));
 	g_signal_connect(window, "destroy", gtk_main_quit, NULL);
-	gtk_container_add(window, scrolled_window);
+	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(scrolled_window));
 	gtk_window_set_default_size(window, 400, 400);
-	gtk_widget_show_all(window);
+	gtk_widget_show_all(GTK_WIDGET(window));
 
 	traverse(xmlDocGetRootElement(input_document), NULL, 0);
 
