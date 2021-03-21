@@ -141,32 +141,33 @@ static uint64_t eval_int(const char* address_string) {
    @return The tooltip text
  */
 static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_address) {
-	char* result = g_strdup("");
+	GString* result;
 	int i;
+	result = g_string_new(NULL);
 	const char** keys = keys_of_element_type(type);
 	{
 		xmlChar* addressOffset = child_element_text(root, "addressOffset") ?: child_element_text(root, "baseAddress");
 		if (addressOffset) {
 			uint64_t address_offset = eval_int(addressOffset);
-			result = g_strdup_printf("\n(absolute address: 0x%X)", base_address + address_offset);
+			g_string_append_printf(result, "\n(absolute address: 0x%X)", base_address + address_offset);
 			xmlFree(addressOffset);
 		}
 	}
 	for (i = 0; keys[i]; ++i) {
 		xmlChar* value = child_element_text(root, keys[i]);
 		if (value) {
-			result = g_strdup_printf("%s\n%s: %s", result, keys[i], value);
+			g_string_append_printf(result, "\n%s: %s", keys[i], value);
 			xmlFree(value);
 		}
 	}
 	{
-		char *text = xmlNodeListGetString(input_document, root->children, 1);
+		xmlChar *text = xmlNodeListGetString(input_document, root->children, 1);
 		if (text) {
-			result = g_strdup_printf("%s\n%s", result, text ? g_strstrip(text) : "");
+			g_string_append_printf(result, "\n%s", text ? g_strstrip(text) : "");
 			xmlFree(text);
 		}
 	}
-	return result;
+	return g_string_free(result, FALSE);
 }
 
 /** Stores ROOT under STORE_PARENT, uses base_address as base address for all the calculations under it.
@@ -204,7 +205,7 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 		gtk_tree_view_expand_to_path(tree_view, gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter));
 	}
 	{
-		char* x_tooltip = g_markup_escape_text(tooltip, -1);
+		char* x_tooltip = g_markup_escape_text(g_strchug(tooltip), -1);
 		if (x_tooltip) {
 			g_free(tooltip);
 			tooltip = x_tooltip;
