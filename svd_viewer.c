@@ -209,7 +209,7 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 		if (xml_name == NULL || !xml_name[0])
 			name = g_strdup(type);
 		else
-			name = g_strdup_printf("%s %s", type, xml_name);
+			name = g_strdup_printf("%s (a %s)", xml_name, type);
 		xmlFree(xml_name);
 	}
 	char* tooltip = calculate_tooltip(type, root, base_address);
