@@ -123,6 +123,7 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 		} else {
 			g_warning("Could not find register referenced: '%s'", derivedFrom);
 		}
+		xmlFree(derivedFrom);
 	}
 }
 
@@ -176,7 +177,7 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
   */
 static void register_registers(xmlNodePtr root) {
 	xmlNodePtr child;
-	const char* type = root->name ?: "?";
+	const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : "?";
 	if (root->type == XML_ELEMENT_NODE && strcmp(type, "register") == 0) {
 		xmlChar* xml_name = child_element_text(root, "name");
 		if (xml_name) {
@@ -224,7 +225,9 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 	GtkTreeIter iter;
 	gtk_tree_store_append(store, &iter, store_parent);
 	if (strcmp(type, "registers") == 0) {
-		gtk_tree_view_expand_to_path(tree_view, gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter));
+		GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
+		gtk_tree_view_expand_to_path(tree_view, tree_path);
+		gtk_tree_path_free(tree_path);
 	}
 	{
 		char* x_tooltip = g_markup_escape_text(g_strchug(tooltip), -1);
