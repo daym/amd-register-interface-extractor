@@ -245,6 +245,14 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 	}
 }
 
+static void expand_all_cb(GtkButton* button, GtkTreeView* tree_view) {
+	gtk_tree_view_expand_all(tree_view);
+}
+
+static void collapse_all_cb(GtkButton* button, GtkTreeView* tree_view) {
+	gtk_tree_view_collapse_all(tree_view);
+}
+
 int main(int argc, char* argv[]) {
 	gtk_init(&argc, &argv);
 	if (argc < 2 || !argv[0] || !argv[1]) {
@@ -270,11 +278,25 @@ int main(int argc, char* argv[]) {
 	gtk_tree_view_append_column(tree_view, col0);
 	gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(tree_view));
 
+	GtkButton* expand_all_button = GTK_BUTTON(gtk_button_new_with_label("Expand all"));
+	g_signal_connect(G_OBJECT(expand_all_button), "clicked", G_CALLBACK(expand_all_cb), tree_view);
+
+	GtkButton* collapse_all_button = GTK_BUTTON(gtk_button_new_with_label("Collapse all"));
+	g_signal_connect(G_OBJECT(collapse_all_button), "clicked", G_CALLBACK(collapse_all_cb), tree_view);
+
+	GtkButtonBox* buttons = GTK_BUTTON_BOX(gtk_button_box_new(GTK_ORIENTATION_VERTICAL));
+	gtk_box_pack_start(GTK_BOX(buttons), GTK_WIDGET(expand_all_button), FALSE, FALSE, 7);
+	gtk_box_pack_start(GTK_BOX(buttons), GTK_WIDGET(collapse_all_button), FALSE, FALSE, 7);
+
+	GtkBox* box = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 7));
+	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(scrolled_window), TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(buttons), FALSE, TRUE, 0);
+
 	GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 	// TODO: realpath for first one
 	gtk_window_set_title(window, g_strdup_printf("%s - %s", argv[1], argv[0]));
 	g_signal_connect(window, "destroy", gtk_main_quit, NULL);
-	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(scrolled_window));
+	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(box));
 	gtk_window_set_default_size(window, 400, 400);
 	gtk_widget_show_all(GTK_WIDGET(window));
 
