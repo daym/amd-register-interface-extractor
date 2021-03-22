@@ -4,14 +4,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <libxml/tree.h>
-#include <libxml/xpath.h>
 
 #define C_TYPE 0
 #define C_NAME 1
 #define C_TOOLTIP 2
 
 static xmlDocPtr input_document;
-static xmlXPathContextPtr input_xpath_context;
 static GtkTreeStore* store;
 static GtkTreeView* tree_view;
 
@@ -76,6 +74,28 @@ static xmlChar* child_element_text(xmlNodePtr root, const char* key) {
 	return NULL;
 }
 
+static xmlNodePtr find_register_by_name(xmlNodePtr root, const char* name) {
+	xmlNodePtr child;
+	if (root->type == XML_ELEMENT_NODE && root->name && strcmp(root->name, "register") == 0) {
+		xmlChar* x_name = child_element_text(root, "name");
+		if (x_name && strcmp(x_name, name) == 0) {
+			xmlFree(x_name);
+			return root;
+		}
+		xmlFree(x_name);
+	}
+	for(child = root->children; child; child = child->next) {
+		if (child->type == XML_ELEMENT_NODE) {
+			xmlNodePtr match = find_register_by_name(child, name);
+			if (match)
+				return match;
+		}
+	}
+	return NULL;
+}
+
+static GHashTable* register_by_name; /* contains a map from register name to xml node of the register */
+
 /* If ROOT has a 'derivedFrom' attribute, find an element with that name and copy all its children--except for the ones ROOT already has.
    This implements the SVD inheritance functionality.
    @param root The node that is to be checked for the 'derivedFrom' attribute (and whose children are to be mutated)
@@ -84,28 +104,7 @@ static xmlChar* child_element_text(xmlNodePtr root, const char* key) {
 static void resolve_derivedFrom(xmlNodePtr root) {
 	xmlChar* derivedFrom = xmlGetProp(root, "derivedFrom");
 	if (derivedFrom) {
-		xmlNodePtr sibling = NULL;
-		// Find sibling with name equal to derivedFrom
-		for (sibling = xmlPreviousElementSibling(root); sibling; sibling = xmlPreviousElementSibling(sibling)) {
-			if (sibling->type == XML_ELEMENT_NODE && strcmp(sibling->name, root->name) == 0) {
-				xmlChar* name = child_element_text(sibling, "name");
-				if (name && strcmp(name, derivedFrom) == 0) {
-					xmlFree(name);
-					break;
-				}
-				xmlFree(name);
-			}
-		}
-		if (!sibling) { /* didn't find the node in the siblings--try some more aggressive means */
-#if 0
-			char* xpath_expression = g_strdup_printf("//register[name='%s']", derivedFrom); // XXX: injection
-			xmlXPathObjectPtr result = xmlXPathEvalExpression(xpath_expression, input_xpath_context);
-			if (!xmlXPathNodeSetIsEmpty(result->nodesetval)) {
-				sibling = result->nodesetval->nodeTab[0];
-			}
-			xmlXPathFreeObject(result);
-#endif
-		}
+		xmlNodePtr sibling = g_hash_table_lookup(register_by_name, derivedFrom);
 		if (sibling) { // If the sibling to be derived from has been found
 			resolve_derivedFrom(sibling);
 			xmlNodePtr child;
@@ -121,6 +120,8 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 						xmlFree(our_value);
 				}
 			}
+		} else {
+			g_warning("Could not find register referenced: '%s'", derivedFrom);
 		}
 	}
 }
@@ -170,7 +171,29 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
 	return g_string_free(result, FALSE);
 }
 
+/** Registers all registers in register_by_name.
+    Side effects: Fills global variable register_by_name.
+  */
+static void register_registers(xmlNodePtr root) {
+	xmlNodePtr child;
+	const char* type = root->name ?: "?";
+	if (root->type == XML_ELEMENT_NODE && strcmp(type, "register") == 0) {
+		xmlChar* xml_name = child_element_text(root, "name");
+		if (xml_name) {
+			g_hash_table_insert(register_by_name, xml_name, root);
+		}
+	}
+	for (child = root->children; child; child = child->next) {
+		if (child->type == XML_ELEMENT_NODE && pseudo_attribute_P(type, child->name)) {
+			//g_warning("ignore %s", child->name);
+		} else if (child->type == XML_ELEMENT_NODE) {
+			register_registers(child);
+		}
+	}
+}
+
 /** Stores ROOT under STORE_PARENT, uses base_address as base address for all the calculations under it.
+    Precondition: Expects register_by_name to be available already.
     @param root source (xml node)
     @param store_parent destination (in a GtkTreeStore)
     @param base_address base address to use for calculations
@@ -187,8 +210,7 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 			name = g_strdup(type);
 		else
 			name = g_strdup_printf("%s %s", type, xml_name);
-		if (xml_name)
-			xmlFree(xml_name);
+		xmlFree(xml_name);
 	}
 	char* tooltip = calculate_tooltip(type, root, base_address);
 	{
@@ -234,11 +256,6 @@ int main(int argc, char* argv[]) {
 			g_error("could not open input file \"%s\"", argv[1]);
 			exit(1);
 		}
-		input_xpath_context = xmlXPathNewContext(input_document);
-		if (input_xpath_context == NULL) {
-			g_error("could not create xpath context");
-			exit(1);
-		}
 	}
 	store = gtk_tree_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
@@ -261,6 +278,8 @@ int main(int argc, char* argv[]) {
 	gtk_window_set_default_size(window, 400, 400);
 	gtk_widget_show_all(GTK_WIDGET(window));
 
+	register_by_name = g_hash_table_new(g_str_hash, g_str_equal);
+	register_registers(xmlDocGetRootElement(input_document));
 	traverse(xmlDocGetRootElement(input_document), NULL, 0);
 
 	gtk_main();
