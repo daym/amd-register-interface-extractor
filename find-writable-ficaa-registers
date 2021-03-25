@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import phase2_result
+for vname, nice_name in phase2_result.__names.items():
+	v, t = getattr(phase2_result, vname)
+	if v.find("D18") != -1:
+		#print(nice_name, v)
+		if t[-1] == []:
+			t = t[:-1]
+		noro = False
+		for brange, bdesc in t[1:]:
+			if bdesc.strip().startswith("Reserved"):
+				continue
+			if bdesc.strip().find("Write-only") != -1:
+				noro = True
+			elif bdesc.strip().find("Read-only") == -1 or bdesc.strip().find("Read-write") != -1:
+				noro = True
+		if noro:
+			v = v.split("\n")
+			v = [x for x in v if x.find("D18") != -1]
+			v = ";".join(v)
+			print(nice_name, v)
