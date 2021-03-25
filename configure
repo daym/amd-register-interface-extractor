@@ -20,12 +20,20 @@ then # multipart
 		then
 			echo "PPRVOL${i} := ${base}_${i}.pdf"
 		else
-			break
+			echo "PPRVOL${i} :="
 		fi
 	done >> config.mk
 else
 	cat > config.mk << EOF
 PPRVOL1 := ${input}
+PPRVOL2 :=
+PPRVOL3 :=
+PPRVOL4 :=
+PPRVOL5 :=
+PPRVOL6 :=
+PPRVOL7 :=
+PPRVOL8 :=
+PPRVOL9 :=
 EOF
 fi
 make clean
