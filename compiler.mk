@@ -69,6 +69,9 @@ phase2_result.py: result.txt phase2.py
 phase3_host.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	./phase3.py -a -m HOST $< > $@.new && mv $@.new $@
 
+phase3_hostgpu.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
+	./phase3.py -a -m HOSTGPU $< > $@.new && mv $@.new $@
+
 phase3_host_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
 	./phase3.py -a -m HOST -d DF::FabricConfigAccessControl $< > $@.new && mv $@.new $@
 
@@ -105,6 +108,9 @@ phase3_smnccd_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py
 	./phase3.py -a -m SMNCCD -d DF::FabricConfigAccessControl -k $< > $@.new && mv $@.new $@
 
 phase4_host.svd: phase3_host.svd phase2_result.py phase4.py settings.py
+	./phase4.py < $< > $@.new && mv $@.new $@
+
+phase4_hostgpu.svd: phase3_hostgpu.svd phase2_result.py phase4.py settings.py
 	./phase4.py < $< > $@.new && mv $@.new $@
 
 phase4_host_ficaa.svd: phase3_host_ficaa.svd phase2_result.py phase4.py settings.py

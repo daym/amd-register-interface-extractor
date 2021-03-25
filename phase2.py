@@ -21,7 +21,7 @@ re_mistaken_pattern_3 = re.compile(r"^([0-9]+:[0-9]+)[ ]+([^.]*[.].*) ([0-9]+(:[
 # "10:3 <one-word>. <whatever>"
 re_mistaken_pattern_4 = re.compile(r"^([0-9]+:[0-9]+)[ ]+([^.:]*[.:].*)()$")
 # "10:3 Reserved.  <whatever>"
-re_mistaken_pattern_reserved = re.compile(r"^([0-9]+:[0-9]+)[ ]+(Reserved[ ]*[.:]( Read-[a-zA-Z0-9-,]+[.] (Reset: [^.]*[.])?)?) (.*)")
+re_mistaken_pattern_reserved = re.compile(r"^([0-9]+:[0-9]+)[ ]+(Reserved[ ]*[.:]?( Read-[a-zA-Z0-9-,]+[.] (Reset: [^.]*[.])?( Reserved_[12])?)?) (.*)")
 
 # Note: \u00b6 is the paragraph sign, used in place of "\n" (because re handles the latter really badly).
 re_table_prefix = re.compile(r"^(.*)[ \u00b6](Bits Description.*)$")
@@ -190,6 +190,7 @@ for line in open("result.txt", "r"):
 				OK1 = mistaken_pattern_1.group(1)
 				OK2 = mistaken_pattern_1.group(2)
 				too_early = mistaken_pattern_1.group(3)
+				assert too_early is not None, cells[0]
 				process_table_row(current_table, [OK1.strip(), OK2.strip()])
 				#sys.stderr.write("YEP " + current_table + "\n")
 				cells = [too_early] + cells[1:]
@@ -206,7 +207,8 @@ for line in open("result.txt", "r"):
 					OK1 = match.group(1)
 					OK2 = match.group(2)
 					process_table_row(current_table, [OK1.strip(), OK2.strip()])
-					too_early = match.group(5) # RECURSIVE ?
+					too_early = match.group(6)
+					assert too_early is not None, cells[0]
 					cells[0] = too_early.strip()
 				# Left over too_early !
 			mistaken_pattern_3 = (re_mistaken_pattern_3.match(cells[0]) or re_mistaken_pattern_4.match(cells[0])) if len(cells) >= 1 else None

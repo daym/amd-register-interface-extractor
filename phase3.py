@@ -93,7 +93,7 @@ def unroll_pattern(spec):
 #List_of_Namespaces = phase2_result.List_of_Namespaces # Namespace -> Chapter
 
 memory_map = None
-if selected_access_method == "HOST":
+if selected_access_method == "HOST" or selected_access_method == "HOSTGPU":
 	if selected_data_port_write == "DF::FabricConfigAccessControl":
 		_, memory_map = getattr(phase2_result, "Memory_Map___PCICFG_Physical_Mnemonic_Namespace", ("", []))
 	else:
@@ -149,6 +149,10 @@ def calculate_namespaces():
 					pass
 				elif spec.startswith("PCIERCCFG0F0x") or spec.startswith("PCIERCCFG1F0x"): # Work around Naples namespace confusion
 					result[spec[:spec.find("x") + 1]] = "PCIESWUSCFG"
+				elif spec.startswith("GPUF0REGx"):
+					result[spec[:spec.find("x") + 1]] = "OSS"
+				elif spec.startswith("ACPMMIOx"):
+					result[spec[:spec.find("x") + 1]] = "ACP" # way too complicated otherwise
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
@@ -220,6 +224,12 @@ def extract_nice_name(spec, nuke_pattern=True):
 			return "Core::X86::Pmc::Core::{}".format(spec)
 		elif spec.startswith("L3PMCx06"):
 			return "Core::X86::Pmc::L3::{}".format(spec)
+		elif spec.startswith("GPUF0REGx03"):
+			return "OSS::HDP::{}".format(spec)
+		elif spec.startswith("GPUF0REGx049") or spec.startswith("GPUF0REGx050"):
+			return "OSS::SDMA0::{}".format(spec)
+		elif spec.startswith("GPUF0REGx"):
+			return "OSS::OSSSYS::{}".format(spec)
 		assert False, spec # match for prefix in namespace map
 		return spec
 
