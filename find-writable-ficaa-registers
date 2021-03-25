@@ -11,9 +11,13 @@ for vname, nice_name in phase2_result.__names.items():
 		for brange, bdesc in t[1:]:
 			if bdesc.strip().startswith("Reserved"):
 				continue
-			if bdesc.strip().find("Write-only") != -1:
-				noro = True
-			elif bdesc.strip().find("Read-only") == -1 or bdesc.strip().find("Read-write") != -1:
+			read_only = bdesc.strip().find("Read-only") != -1
+			write_only = bdesc.strip().find("Write-only") != -1
+			read_write = bdesc.strip().find("Read-write") != -1
+			# The same register can have a conditional like foo ? Read-only : Read-write.
+			#if read_only and (write_only or read_write):
+			#	print("Sometimes read-only, sometimes not read-only: {!r}".format(v))
+			if not read_only or (write_only or read_write):
 				noro = True
 		if noro:
 			v = v.split("\n")
