@@ -21,6 +21,6 @@ for vname, nice_name in phase2_result.__names.items():
 				noro = True
 		if noro:
 			v = v.split("\n")
-			v = [x for x in v if x.find("D18") != -1]
+			v = [x[x.find("D18"):].split("_")[0] for x in v if x.find("D18") != -1]
 			v = ";".join(v)
 			print(nice_name, v)
