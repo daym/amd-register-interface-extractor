@@ -269,12 +269,19 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
                     in_instance_part = True
                 else:
                     continue
-            x = reversed(list(unroll_inst_pattern(row)))
+            x = list(reversed(list(unroll_inst_pattern(row))))
             aliaskind = row.split(";")[0].strip()
             if aliaskind.find("_alias") != -1:
                 aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
+            elif all(item.physical_mnemonic.startswith("MSR") for item in x): # Work around AMD doc bug where "_aliasMSR" is missing
+                print("Note: Unknown access method {} in context {}--assuming 'MSR'".format(aliaskind, context_string), file=sys.stderr)
+                aliaskind = "MSR"
+            elif all(item.physical_mnemonic.startswith("APICx") for item in x): # Work around AMD doc bug where "_aliasHOST" is missing
+                print("Note: Unknown access method {} in context {}--assuming 'HOST'".format(aliaskind, context_string), file=sys.stderr)
+                aliaskind = "HOST"
             else:
                 print("Warning: Unknown access method {} in context {}--the user probably won't be able to use the register".format(aliaskind, context_string), file=sys.stderr)
+                #print("X", x, file=sys.stderr)
             if aliaskind not in instances:
                 instances[aliaskind] = []
             instances[aliaskind] += x #.append(x)
