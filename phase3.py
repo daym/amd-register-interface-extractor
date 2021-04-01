@@ -273,6 +273,8 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
             aliaskind = row.split(";")[0].strip()
             if aliaskind.find("_alias") != -1:
                 aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
+            else:
+                print("Warning: Unknown aliaskind {}--the user probably won't be able to use the register".format(aliaskind), file=sys.stderr)
             if aliaskind not in instances:
                 instances[aliaskind] = []
             instances[aliaskind] += x #.append(x)
@@ -682,6 +684,9 @@ def traverse1(tree, path):
         if isinstance(vv, TableDefinition):
           if selected_access_method in vv.instances and vv.bits:
             process_TableDefinition(peripheral_path, kk, vv)
+          elif len(vv.instances) == 0:
+            print("Warning: register {} has no instances at all.  It thus cannot be accessed by the user.".format(path + [k, kk]), file=sys.stderr)
+
       finish_TableDefinition(peripheral_path)
     else:
       traverse1(v, path + [k])
