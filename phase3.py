@@ -274,7 +274,7 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
             if aliaskind.find("_alias") != -1:
                 aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
             else:
-                print("Warning: Unknown aliaskind {}--the user probably won't be able to use the register".format(aliaskind), file=sys.stderr)
+                print("Warning: Unknown access method {} in context {}--the user probably won't be able to use the register".format(aliaskind, context_string), file=sys.stderr)
             if aliaskind not in instances:
                 instances[aliaskind] = []
             instances[aliaskind] += x #.append(x)
