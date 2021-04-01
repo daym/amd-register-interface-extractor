@@ -113,6 +113,7 @@ def remove_cosmetic_line_breaks(header):
     header = replace_ul(header)
     # Remove newline inside parenthesized strings: "(fo\no)" => "(foo)"
     header, _ = re.subn(r"[(][^)]*[)]", lambda match: match.group(0).replace("\n", ""), header, flags=re.DOTALL)
+    header = header.replace(";\nDataPortCheck=", "; DataPortCheck=")
     return header
 
 current_table = None
