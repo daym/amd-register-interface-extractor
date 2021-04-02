@@ -368,8 +368,6 @@ def resolve_path(tree, path, create=False):
 names = sorted([((extract_nice_name(v) or v).split("::"), TableDefinition(getattr(phase2_result, k), v)) for k, v in __names.items()])
 #print(names)
 for path, table_definition in names:
-	#sys.stderr.write(repr(path))
-	#sys.stderr.write("\n")
 	leaf_name = path[-1].replace("AUDIO_AZ_", "AUDIOAZ").replace("AudioAZ", "AUDIOAZ").replace("Audio_Az", "AUDIOAZ").replace("IOMMU_MMIO", "IOMMUMMIO").replace("SATA_AHCI_P_", "SATA_PORT_").replace("AHCI_SGPIO_", "SATA_SGPIO_").replace("APICx", "Apicx")
 	#assert len(path) < 2 or path[1] != "SATA", (path, leaf_name)
 	for part in path[:-1]:
