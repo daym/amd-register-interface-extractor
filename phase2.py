@@ -177,7 +177,7 @@ for line in open("result.txt", "r"):
 					if (cells[0].find("Bits Description") == -1 and suffix.find("Bits Description") == -1) or cells[0].find("Bits Description") == 0:
 						pass
 					else:
-						#sys.stderr.write("Warning: Fixed up cell 0: {}\n".format(cells[0]))
+						#warning("Warning: Fixed up cell 0: {}".format(cells[0]))
 						cells[0] = suffix
 				start_table(current_table, prefix_metadata)
 			else: # ignore trivial "tables"
@@ -193,14 +193,12 @@ for line in open("result.txt", "r"):
 				too_early = mistaken_pattern_1.group(3)
 				assert too_early is not None, cells[0]
 				process_table_row(current_table, [OK1.strip(), OK2.strip()])
-				#sys.stderr.write("YEP " + current_table + "\n")
 				cells = [too_early] + cells[1:]
 			mistaken_pattern_2 = re_mistaken_pattern_2.match(cells[0]) if len(cells) >= 1 else None
 			assert not mistaken_pattern_2
 
 			# Handle case: '15:11 Reserved. Read-only. Reset: 00h.  10:9 Reserved.  8' (always "Reserved")
 			if len(cells) >= 1 and len(re_bit_ranges.findall(cells[0] + " ")) > 2:
-				#print("MULTI RANGE IN {}: {!r}".format(current_table, cells[0]), file=sys.stderr)
 				while True:
 					match = re_mistaken_pattern_reserved.match(cells[0].strip())
 					if match is None:
