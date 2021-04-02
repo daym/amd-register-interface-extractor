@@ -9,10 +9,14 @@ from phase2_result import __names, __model
 import os
 import pprint
 import traceback
+import logging
 from collections import namedtuple
 from rwops import strip_off_rwops
 from unroller import unroll_inst_pattern, RegisterInstanceSpec
 from hexcalculator import calculate_hex_instance_value as internal_calculate_hex_instance_value
+from logging import debug, info, warning, error, critical
+
+logging.basicConfig(level=logging.INFO)
 
 selected_access_method = "HOST"
 selected_data_port_write = "direct"
@@ -103,7 +107,7 @@ elif selected_access_method == "MSR":
 elif selected_access_method == "SMN":
 	_, memory_map = getattr(phase2_result, "Memory_Map___SMN_Physical_Mnemonic_Namespace", getattr(phase2_result, "Memory_Map___SMN", ("", None)))
 	if memory_map is None:
-		print("Warning: No 'Memory Map - SMN' section found in PDF.  Namespaces will be hard-coded", file=sys.stderr)
+		warning("No 'Memory Map - SMN' section found in PDF.  Namespaces will be hard-coded")
 		memory_map = []
 elif selected_access_method == "SMNCCD":
 	_, memory_map = getattr(phase2_result, "Memory_Map___SMNCCD_Physical_Mnemonic_Namespace", ("", []))
@@ -129,7 +133,7 @@ def calculate_namespaces():
 		try:
 			spec, namespace = row
 		except (TypeError, ValueError): # sometimes there are slight mistakes in the namespace map
-			print("Warning: malformed row in memory map: {}".format(row), file=sys.stderr)
+			warning("Malformed row in memory map: {}".format(row))
 			continue
 		addr, *spec = spec.split(":", 1)
 		if len(spec) > 0:
@@ -194,7 +198,6 @@ def extract_nice_name(spec, nuke_pattern=True):
 	#if spec.startswith("ENET") and spec.find("::") == -1:
 	#FIXME	assert False, spec
 	if spec.find("::") != -1 and spec.find(".") == -1 and spec.find("[") == -1 and spec.count("(") <= spec.count(")") and spec.count("(") > 0:
-		#print("SPEC", spec, file=sys.stderr)
 		_, name = spec.split("(", 1)
 		name, *_ = name.split(")", 1)
 		assert name.find("::") != -1
@@ -263,7 +266,7 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
         in_instance_part = False
         for row in prefix:
             _, row = strip_off_rwops(row) # TODO: check that rwops is only given once
-            #print("ROW", row, file=sys.stderr)
+            #info("ROW {}".format(row))
             if not in_instance_part:
                 if row.startswith("_"):
                     in_instance_part = True
@@ -274,14 +277,13 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
             if aliaskind.find("_alias") != -1:
                 aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
             elif all(item.physical_mnemonic.startswith("MSR") for item in x): # Work around AMD doc bug where "_aliasMSR" is missing
-                print("Note: Unknown access method {} in context {}--assuming 'MSR'".format(aliaskind, context_string), file=sys.stderr)
+                info("Unknown access method {} in context {}--assuming 'MSR'".format(aliaskind, context_string))
                 aliaskind = "MSR"
             elif all(item.physical_mnemonic.startswith("APICx") for item in x): # Work around AMD doc bug where "_aliasHOST" is missing
-                print("Note: Unknown access method {} in context {}--assuming 'HOST'".format(aliaskind, context_string), file=sys.stderr)
+                info("Unknown access method {} in context {}--assuming 'HOST'".format(aliaskind, context_string))
                 aliaskind = "HOST"
             else:
-                print("Warning: Unknown access method {} in context {}--the user probably won't be able to use the register".format(aliaskind, context_string), file=sys.stderr)
-                #print("X", x, file=sys.stderr)
+                warning("Unknown access method {} in context {}--the user probably won't be able to use the register".format(aliaskind, context_string))
             if aliaskind not in instances:
                 instances[aliaskind] = []
             instances[aliaskind] += x #.append(x)
@@ -308,8 +310,7 @@ class TableDefinition(object):
         if spec[0] == ["Bits", "Description"]: # and (context_string or "").find("D18F0x050") == -1 and context_string.find("D18F1x200") == -1:
             self.bits = []
             bitspecs = []
-            #print(spec, file=sys.stderr)
-            #print(context_string, spec, file=sys.stderr)
+            #info("context_string {}, spec {}".format(context_string, spec))
             unused_bits = None
             for bits, description in spec[1:]:
                 name, *_ = description.split(".")
@@ -343,13 +344,10 @@ class TableDefinition(object):
               # Problems:
               # * MSRC001_023[0...A] (subtable)
               # * MSRC001_0294 (subtables)
-              print("warning: {}: bits {} not specified.".format(context_string, unused_bits), file=sys.stderr)
+              warning("{}: bits {} not specified.".format(context_string, unused_bits))
         # context_string is a really complete spec, so use it to extract instance information, if possible.
         items = list(unroll_pattern(context_string))
         instance_specs = parse_RegisterInstanceSpecs(prefix, context_string)
-        #print("TABLE_DEFINITION", context_string, instance_specs)
-        #print("TABLE_DEFINITION {} ITEMS", items)
-        #print("PREFIX {}".format(prefix), file=sys.stderr)
         assert instance_specs != {} or (instance_specs == {} and (items is None or len(items) == 0)), (context_string, instance_specs, items)
         self.instances = instance_specs
     def __repr__(self):
@@ -390,7 +388,7 @@ for path, table_definition in names:
 
 for toplevel in tree.keys():
 	if toplevel.find("x") != -1:
-		print("Warning: {} is toplevel.".format(toplevel), file=sys.stderr)
+		warning("{} is toplevel.".format(toplevel))
 
 #sys.stdout.reconfigure(encoding='utf-8')
 #sys.stdin = sys.stdin.detach()
@@ -595,7 +593,7 @@ def process_TableDefinition(peripheral_path, name, vv):
             if "HOST" in vv.instances: # prefer HOST to SMN (i.e. suppress SMN)
                 if len(vv.instances["HOST"]) != len(instances):
                     #assert len(vv.instances["HOST"]) == len(instances), (path, vv.instances["HOST"], instances)
-                    print("Warning: register {} has different instances accessible via SMN vs HOST.  Therefore, providing both aliases.".format(path), file=sys.stderr)
+                    warning("Register {} has different instances accessible via SMN vs HOST.  Therefore, providing both aliases.".format(path))
                 else:
                     return
         elif selected_access_method == "IO":
@@ -615,7 +613,7 @@ def process_TableDefinition(peripheral_path, name, vv):
         # Assumption: all the data port write are the same for one register
         assert data_port_write == global_data_port_write
     if selected_data_port_write != global_data_port_write:
-        #print("info: Skipping {} because of different data port write".format(name), file=sys.stderr)
+        #info("Skipping {} because of different data port write".format(name))
         return
     data_port_encoder = data_port_encoders.get(selected_data_port_write, data_port_encode_error)
 
@@ -626,10 +624,10 @@ def process_TableDefinition(peripheral_path, name, vv):
         #import traceback
         #traceback.print_exc()
         addresses = []
-        print("Error: Could not calculate addresses of register {}: {}: {}.".format(name, e.__class__.__name__, e), file=sys.stderr)
+        error("Could not calculate addresses of register {}: {}: {}.".format(name, e.__class__.__name__, e))
         if selected_error_handling != "keep-registers-with-errors":
             return
-        print("Info: ^: Defaulting to nonsense (very low) value for a dummy entry.", file=sys.stderr)
+        info("^: Defaulting to nonsense (very low) value for a dummy entry.")
         offset += 4
         description = description + "\n(This register was misdetected--and for debugging, all the instances follow here in the description)\n{}\n".format(traceback.format_exc()) + ("\n".join(instance.resolve_physical_mnemonic(data_port_encode_ignore) for instance in instances))
         addressOffset = offset
@@ -692,7 +690,7 @@ def traverse1(tree, path):
           if selected_access_method in vv.instances and vv.bits:
             process_TableDefinition(peripheral_path, kk, vv)
           elif len(vv.instances) == 0:
-            print("Warning: register {} has no instances at all.  It thus cannot be accessed by the user.".format(path + [k, kk]), file=sys.stderr)
+            warning("Register {} has no instances at all.  It thus cannot be accessed by the user.".format(path + [k, kk]))
 
       finish_TableDefinition(peripheral_path)
     else:

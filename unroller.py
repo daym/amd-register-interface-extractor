@@ -4,9 +4,11 @@ import sys
 import pdb
 import re
 import sys
+import logging
 from io import StringIO
 from collections import namedtuple
 from settings import settings
+from logging import debug, info, warning, error, critical
 
 #RegisterInstanceSpec = namedtuple("RegisterInstanceSpec", ["logical_mnemonic", "physical_mnemonic", "variable_definitions"])
 
@@ -121,7 +123,7 @@ def unroll_inst_item_pattern(spec):
 						beginning = int(beginning, radix)
 						end = int(end, radix)
 					except ValueError:
-						print("spec: {}".format(spec), file=sys.stderr)
+						info("Spec for error below is: {}".format(spec))
 						raise
 					assert beginning >= end
 					for i in range(beginning, end - 1, -1):
@@ -196,7 +198,7 @@ def unroll_inst_pattern(spec):
 			try:
 				x = list(unroll_inst_item_pattern(item))
 			except:
-				print("ITEM", item, file=sys.stderr)
+				info("Item for failure below is: {}".format(item))
 				raise
 			def reinstate_implicit_patterns(item):
 				for implicit_pattern in implicit_patterns:
@@ -220,9 +222,7 @@ def unroll_inst_pattern(spec):
 		elif insts != [] and ps == []:
 			pass
 		else:
-			print("ERROR unrolling: logical instances are {!r} but physical instances are {!r} (raw: {!r})--which is impossible".format(insts, ps, physs), file=sys.stderr)
-		# else who knows
-	#print("PHYSS", physs, file=sys.stderr)
+			error("Unrolling did not work: logical instances are {!r} but physical instances are {!r} (raw: {!r})--which is impossible".format(insts, ps, physs))
 	phys_i = 0
 	for logical_mnemonic in insts:
 		physical_mnemonic_and_variables = []
@@ -235,7 +235,7 @@ def unroll_inst_pattern(spec):
 				phys_i += 1
 			yield RegisterInstanceSpec(logical_mnemonic=logical_mnemonic, physical_mnemonic=physical_mnemonic, variable_definitions=variable_definitions)
 		else:
-			print("WARNING: Not enough phys entries, log={!r}; Note: all_physs={!r}".format(logical_mnemonic, physs), file=sys.stderr)
+			warning("Not enough phys entries, log={!r}; Note: all_physs={!r}".format(logical_mnemonic, physs))
 
 if __name__ == "__main__":
 	import doctest
