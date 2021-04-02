@@ -5,6 +5,8 @@
 from lxml import etree
 import sys
 import settings
+import logging
+from logging import debug, info, warning, error, critical
 
 def eval_int(element):
     """ Given a SVD node, extracts the integer from its text. """
@@ -83,7 +85,7 @@ def traverse(source_root, parent_name, peripheral_name):
                             source_root.append(node)
                             cluster_name = cluster.find("name").text
                             if not cluster_name.endswith("_unsorted"):
-                                print("Info: Eliding cluster {!r} grouping because there's only one node in it".format(cluster_name), file=sys.stderr)
+                                info("Eliding cluster {!r} grouping because there's only one node in it".format(cluster_name))
                             else:
                                 # generated and then elided agai
                                 pass # no one cares
@@ -177,13 +179,12 @@ def fixup_cluster_baseAddress(root, container_node, indent=0):
             addressOffset.text = newAddressOffset.text
             root.remove(newAddressOffset)
     child = root
-    #print("child.tag", child.tag, file=sys.stderr)
     if child.tag in ["register", "cluster"]:
         try:
             child_addressOffset = child.find("addressOffset")
             addressOffset = eval_int(child_addressOffset)
         except:
-            print("Note: child for below: ", child.tag, child.find("name").text, file=sys.stderr)
+            info("Child for failure below is: {} {!r}".format(child.tag, child.find("name").text))
             raise
         if container_node is not None:
             container_addressOffset = container_node.find("baseAddress") if container_node.tag == "peripheral" else container_node.find("addressOffset")
@@ -195,6 +196,7 @@ def fixup_cluster_baseAddress(root, container_node, indent=0):
                 container_node.append(container_newAddressOffset)
             child_addressOffset.text = "0x{:X}".format(addressOffset - (eval_int(container_newAddressOffset) - container_addressOffset_value))
 
+logging.basicConfig(level=logging.INFO)
 tree = etree.parse(sys.stdin if len(sys.argv) == 1 else open(sys.argv[-1]))
 root = tree.getroot()
 
