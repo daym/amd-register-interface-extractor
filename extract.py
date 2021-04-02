@@ -3,6 +3,9 @@
 from lxml import etree
 import sys
 import re
+import logging
+logging.basicConfig(level=logging.INFO)
+from logging import debug, info, warning, error, critical
 
 fontspec_to_meaning = [
      ({'size': '10', 'family': 'GAAAAA+Carlito', 'color': '#000000'}, "itemization"),
@@ -128,7 +131,7 @@ def meaning_of_fontspec(fontspec, xx):
   try:
     meaning = fontspec_to_meaning[fontspec]
   except KeyError:
-    print("WARNING: font {!r} was unknown.  Assuming it's uninteresting.".format(dict(fontspec)), file=sys.stderr)
+    warning("Font {!r} was unknown.  Assuming it's uninteresting.".format(dict(fontspec)))
     meaning = None
   if meaning == "table-caption":
     if xx == {"b"}: # misdetected headline
@@ -398,7 +401,7 @@ def traverse(state, root, indent = 0, fontspecs = []): # fontspecs: [(id, node w
         try:
           attrib["meaning"] = meaning_of_fontspec(fontspec, xx)
         except KeyError as e:
-          print("Text was: {}".format(text), file=sys.stderr)
+          info("Text for failure below is: {}".format(text))
           raise e
         if not attrib["meaning"]:
           attrib["font"] = fontspec
