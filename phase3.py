@@ -688,7 +688,7 @@ def traverse1(tree, path):
           if selected_access_method in vv.instances and vv.bits:
             process_TableDefinition(peripheral_path, kk, vv)
           elif len(vv.instances) == 0:
-            warning("Register {} has no instances at all.  It thus cannot be accessed by the user.".format(path + [k, kk]))
+            warning("Register {} has no instances at all.  It thus cannot be accessed by the user.".format("::".join(path + [k, kk])))
 
       finish_TableDefinition(peripheral_path)
     else:
