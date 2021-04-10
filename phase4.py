@@ -87,9 +87,8 @@ def traverse(source_root, parent_name, peripheral_name):
                             if not cluster_name.endswith("_unsorted"):
                                 info("Eliding cluster {!r} grouping because there's only one node in it".format(cluster_name))
                             else:
-                                # generated and then elided agai
-                                pass # no one cares
-
+                                # We assume that if the user didn't configure groups (and thus the thing ends up in "_unsorted" cluster) then he doesn't care about the register and thus there's no need to spam him.
+                                pass
                             break
                         else:
                             assert False, node.tag
