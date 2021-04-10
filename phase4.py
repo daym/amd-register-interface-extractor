@@ -80,7 +80,7 @@ def traverse(source_root, parent_name, peripheral_name):
                     for node in cluster:
                         if node.tag == "name":
                             pass
-                        elif node.tag == "register":
+                        elif node.tag in ["cluster", "register"]:
                             cluster.remove(node)
                             source_root.append(node)
                             cluster_name = cluster.find("name").text
