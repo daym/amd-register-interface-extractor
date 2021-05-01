@@ -75,25 +75,27 @@ def traverse(source_root, parent_name, peripheral_name):
         def finish_cluster():
             nonlocal cluster
             nonlocal addressLimits
-            if cluster is not None and len([node for node in cluster if node.tag != "name"]) > 0:
-                if len([node for node in cluster if node.tag != "name"]) == 1:
-                    for node in cluster:
-                        if node.tag == "name":
-                            pass
-                        elif node.tag in ["cluster", "register"]:
-                            cluster.remove(node)
-                            source_root.append(node)
-                            cluster_name = cluster.find("name").text
-                            if not cluster_name.endswith("_unsorted"):
-                                info("Eliding cluster {!r} grouping because there's only one node in it".format(cluster_name))
-                            else:
-                                # We assume that if the user didn't configure groups (and thus the thing ends up in "_unsorted" cluster) then he doesn't care about the register and thus there's no need to spam him.
+            if cluster is not None:
+                members = [node for node in cluster if node.tag != "name"]
+                if len(members) > 0:
+                    if len(members) == 1:
+                        for node in cluster:
+                            if node.tag == "name":
                                 pass
-                            break
-                        else:
-                            assert False, node.tag
-                else:
-                    source_root.append(cluster)
+                            elif node.tag == "register":
+                                cluster.remove(node)
+                                source_root.append(node)
+                                cluster_name = cluster.find("name").text
+                                if not cluster_name.endswith("_unsorted"):
+                                    info("Eliding cluster {!r} grouping because there's only one node in it".format(cluster_name))
+                                else:
+                                    # We assume that if the user didn't configure groups (and thus the thing ends up in "_unsorted" cluster) then he doesn't care about the register and thus there's no need to spam him.
+                                    pass
+                                break
+                            else:
+                                assert False, node.tag
+                    else:
+                        source_root.append(cluster)
             cluster = etree.Element("cluster")
             addressLimits = []
         def calculate_cluster_name(name, fallback=True):
