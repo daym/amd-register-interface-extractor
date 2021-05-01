@@ -119,6 +119,8 @@ elif selected_access_method == "MSRLEGACY":
 	memory_map = []
 elif selected_access_method == "MSRLSLEGACY":
 	memory_map = []
+elif selected_access_method == "CPUID":
+	memory_map = []
 
 assert memory_map is not None, "Memory map for access_method={!r}, data_port_write={!r}".format(selected_access_method, selected_data_port_write)
 
@@ -282,6 +284,9 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
             elif all(item.physical_mnemonic.startswith("APICx") for item in x): # Work around AMD doc bug where "_aliasHOST" is missing
                 info("Unknown access method {} in context {}--assuming 'HOST'".format(aliaskind, context_string))
                 aliaskind = "HOST"
+            elif all(item.physical_mnemonic.startswith("CPUID_") for item in x): # Put "CPUID" into its own address space
+                info("Note: Unknown access method {} in context {}--assuming 'CPUID'".format(aliaskind, context_string))
+                aliaskind = "CPUID"
             else:
                 warning("Unknown access method {} in context {}--the user probably won't be able to use the register".format(aliaskind, context_string))
             if aliaskind not in instances:
