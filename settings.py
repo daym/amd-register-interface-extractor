@@ -36,6 +36,8 @@ The settings here are a lookup table and the assumption is that the firmware set
 0x1140_7018:0x00000000
 """
 
+import re
+
 settings = [
 # Note: Keep value in sync with IOHCMISC?x000002F4(IOHC::IOAPIC_BASE_ADDR_HI); _nbio0_aliasSMN; IOHCMISC0x000002F4; IOHCMISC0=13B1_0000h
 #   Ron: 0x13B1_02F4:0x00000000
@@ -385,3 +387,37 @@ phase4_cluster_names = {
 		"RMT_GPIO_MASTER_SWITCH": "MasterSwitch",
 	},
 }
+
+# Note: Recursion as in ".*_nbio0_instSST0$" is possible--will be automatically handled.
+# Note: What to do about "_nbio[0-9]*_instNTB", "_nbio0_instIOAGR", "_pcs10_instSERDESAG", "_gmi20_instPCS28TWIXM" suffixes?
+#       Best would be to handle it as a single instance (including emitting a cluster for it!), but then continue scanning for arrays in front.
+#       Since we have an optimization stage which gets rid of clusters with only one element anyway, we can also model those as single-member arrays.  That way, there will be at least a log message about it.
+phase4_array_inference_patterns = [
+	re.compile(r"(.*)(DEVINDCFG)([0-9]+)"), # Note: NO underline is in front
+	#re.compile(r"(.*_chiplet)([0-9]+)"),
+	#re.compile(r"(.*_cs)([0-9]+)"),
+	#re.compile(r"(.*_dev)([0-9]+)"),
+	#re.compile(r"(.*_dimm)([0-9]+)"),
+	#re.compile(r"(.*_func)([0-9]+)"),
+	#re.compile(r"(.*_g)([0-9]+)"),
+	#re.compile(r"(.*_gmi)([0-9]+)"),
+	# Note: This also matches "(_instSERDESAP)2", "(_instSERDESBP)0", "(_instPCS28TWIXM)", "(_instPCS28TWIXM)"--which isn't that bad, all things considered.
+	re.compile(r"(.*)(_inst[A-Z]+[0-9][A-Z0-9]*[A-Z]+)()?"),
+	# Note: Matches _instNBIF2.
+	re.compile(r"(.*)(_inst[A-Z][A-Z]+)([0-9]+)?"),
+	#re.compile(r"(.*_instNBIF)([0-9]+)"),
+	#re.compile(r"(.*_instPCIE)([0-9]+)"),
+	#re.compile(r"(.*_instPCIEHB)([0-9]+)"),
+	#re.compile(r"(.*_instSATA)([0-9]+)"),
+	#re.compile(r"(.*_instSST)([0-9]+)"),
+	#re.compile(r"(.*_instWAFL)([0-9]+)"),
+	#re.compile(r"(.*_link)([0-9]+)"),
+	re.compile(r"(.*)(_[a-z]+)([0-9]+)"),
+	#re.compile(r"(.*_nbio)([0-9]+)"),
+	#re.compile(r"(.*_pcs)([0-9]+)"),
+	#re.compile(r"(.*_port)([0-9]+)"),
+	#re.compile(r"(.*_reset)([0-9]+)"),
+	#re.compile(r"(.*_umc)([0-9]+)"),
+	#re.compile(r"(.*_mp)([0-9]+)"),
+	re.compile(r"(.*)(_USB)([0-9]+)"),
+]

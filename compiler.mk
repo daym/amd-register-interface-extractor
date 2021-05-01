@@ -107,38 +107,12 @@ phase3_smnccd_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py
 	#  Keep broken registers in phase3_smn_ficaa.svd (otherwise would be empty)
 	./phase3.py -a -m SMNCCD -d DF::FabricConfigAccessControl -k $< > $@.new && mv $@.new $@
 
-phase4_host.svd: phase3_host.svd phase2_result.py phase4.py settings.py
+phase4_%.svd: phase3_%.svd phase2_result.py phase4.py settings.py
 	./phase4.py < $< > $@.new && mv $@.new $@
 
-phase4_hostgpu.svd: phase3_hostgpu.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
+phase5_%.svd: phase3_%.svd phase5.py settings.py
+	./phase5.py < $< > $@.new && mv $@.new $@
 
-phase4_host_ficaa.svd: phase3_host_ficaa.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
+phase6_%.svd: phase5_%.svd phase6.py
+	./phase6.py < $< > $@.new && mv $@.new $@
 
-phase4_io.svd: phase3_io.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_io_ficaa.svd: phase3_io_ficaa.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_io_abindex.svd: phase3_io_abindex.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_msr.svd: phase3_msr.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_msr_ficaa.svd: phase3_msr_ficaa.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_smn.svd: phase3_smn.svd phase2_result.py phase4.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_smn_ficaa.svd: phase3_smn_ficaa.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_smnccd.svd: phase3_smnccd.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@
-
-phase4_smnccd_ficaa.svd: phase3_smnccd_ficaa.svd phase2_result.py phase4.py settings.py
-	./phase4.py < $< > $@.new && mv $@.new $@

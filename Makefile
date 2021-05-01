@@ -1,7 +1,7 @@
 
 .PHONY: all clean distclean validate3 validate4
 
-all: phase4_host.svd phase4_host_ficaa.svd phase4_io.svd phase4_io_abindex.svd phase4_msr.svd phase4_smn.svd phase4_smn_ficaa.svd phase4_smnccd.svd phase4_smnccd_ficaa.svd
+all: phase6_host.svd phase6_host_ficaa.svd phase6_io.svd phase6_io_abindex.svd phase6_msr.svd phase6_smn.svd phase6_smn_ficaa.svd phase6_smnccd.svd phase6_smnccd_ficaa.svd
 
 include config.mk
 include compiler.mk
@@ -31,6 +31,24 @@ validate4: phase4_host.svd phase4_host_ficaa.svd phase4_io.svd phase4_io_abindex
 	xmllint --schema CMSIS-SVD.xsd phase4_msr.svd
 	xmllint --schema CMSIS-SVD.xsd phase4_smn.svd
 	xmllint --schema CMSIS-SVD.xsd phase4_smnccd.svd
+
+validate5: phase5_host.svd phase5_host_ficaa.svd phase5_io.svd phase5_io_abindex.svd phase5_msr.svd phase5_smn.svd phase5_smnccd.svd CMSIS-SVD.xsd
+	xmllint --schema CMSIS-SVD.xsd phase5_host.svd
+	xmllint --schema CMSIS-SVD.xsd phase5_host_ficaa.svd
+	xmllint --schema CMSIS-SVD.xsd phase5_io.svd
+	xmllint --schema CMSIS-SVD.xsd phase5_io_abindex.svd
+	xmllint --schema CMSIS-SVD.xsd phase5_msr.svd
+	xmllint --schema CMSIS-SVD.xsd phase5_smn.svd
+	xmllint --schema CMSIS-SVD.xsd phase5_smnccd.svd
+
+validate6: phase6_host.svd phase6_host_ficaa.svd phase6_io.svd phase6_io_abindex.svd phase6_msr.svd phase6_smn.svd phase6_smnccd.svd CMSIS-SVD.xsd
+	xmllint --schema CMSIS-SVD.xsd phase6_host.svd
+	xmllint --schema CMSIS-SVD.xsd phase6_host_ficaa.svd
+	xmllint --schema CMSIS-SVD.xsd phase6_io.svd
+	xmllint --schema CMSIS-SVD.xsd phase6_io_abindex.svd
+	xmllint --schema CMSIS-SVD.xsd phase6_msr.svd
+	xmllint --schema CMSIS-SVD.xsd phase6_smn.svd
+	xmllint --schema CMSIS-SVD.xsd phase6_smnccd.svd
 
 svd_viewer: svd_viewer.c
 	$(CC) -g3 -o $@ $< `pkg-config --cflags --libs gtk+-3.0 libxml-2.0`

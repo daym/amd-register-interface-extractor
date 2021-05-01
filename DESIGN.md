@@ -91,7 +91,7 @@ After that, you can use `svd2rust` or similar tools to generate header files or 
 There's also files `phase3_host_ficaa.svd` and `phase3_smn_ficaa.svd` which can't be used with `svd2rust` but which list data fabric registers that are beind a FICAA indirect access.  The field `addressOffset` already contains the FICAA field as it is supposed to be programmed.
 Because of the way this indirect access is to be done, it's not possible to represent any of those peripherals as a continuous (bigger than 32 bit long) struct in memory.
 
-## Phase 4: Identifying register blocks
+## Phase 4: Identifying register blocks (not used anymore)
 
 Phase 4 identifies register blocks and collects those into clusters.
 
@@ -106,6 +106,16 @@ It's a good idea to edit `phase4_cluster_names` in `settings.py` to set up which
 
 Finally, if a cluster contains only one register, the cluster level is elided and the register is represented without extra cluster.
 
+## Phase 5: Grouping register block instances into clusters
+
+This phase filters the phase3 result such that a register block is represented
+as cluster.
+
+## Phase 6: Making all the addressOffsets relative to the respective cluster
+
+This phase makes all the addressOffsets relative to the cluster they are in.
+Some tools expect this--but it's harder for a human to understand the resulting SVD file than if it was just absolute addresses.
+
 ## Collecting it all together
 
-This is all automated using GNU Make, so just `make` is enough to make it go through all the phases.
+This is all automated using GNU Make, so just `make` is enough to make it go through all the necessary phases.
