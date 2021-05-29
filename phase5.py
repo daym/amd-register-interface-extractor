@@ -139,9 +139,11 @@ def infer_arrays(root):
 
     for shape, registers in similar_shape_groups.items():
         for register in registers:
-            name, indices = isolate_array_spec(register.find("name").text)
+            raw_name = register.find("name").text
+            name, indices = isolate_array_spec(raw_name)
             assert register.find("displayName") is None, register
-            register.append(create_displayName(name))
+            if name != raw_name:
+                register.append(create_displayName(name))
             cluster = resolve_indices(indices)
             cluster.append(register)
 

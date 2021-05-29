@@ -108,8 +108,8 @@ Finally, if a cluster contains only one register, the cluster level is elided an
 
 ## Phase 5: Grouping register block instances into clusters
 
-This phase filters the phase3 result such that a register block is represented
-as cluster.
+This phase filters the phase3 result such that a register block is represented as a cluster.
+It also adds `<displayName>` nodes with a more human-readable name if it's different (i.e. shorter) than the original register name.
 
 ## Phase 6: Making all the addressOffsets relative to the respective cluster
 
