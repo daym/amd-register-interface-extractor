@@ -17,12 +17,31 @@ def eval_int(element):
     else:
         return int(s)
 
+def extract_addressOffset_rec(root):
+    """ Extract addressOffset of ROOT.  If that's not possible, finds a child register that has it, recursively.  A cluster without addressOffset is thus represented by its lowest-addressOffset child register """
+    attr_node = root.find("addressOffset")
+    if attr_node is None:
+        attr_node = root.find("baseAddress")
+    if attr_node is not None:
+        addressOffset = eval_int(attr_node)
+    else:
+        try:
+            addressOffset = min(o for o in [extract_addressOffset_rec(child) for child in root if child.tag not in ["name"]] if o is not None)
+        except ValueError:
+            print(etree.tostring(root).decode("utf-8"), file=sys.stderr)
+            raise
+    return addressOffset
+
 def fixup_cluster_baseAddress(root, container_node, indent=0):
-    """ Given a tree with a lot of registers and clusters, moves up the addressOffset of the first register to the containing cluster (or peripheral if there is no cluster).  This is done recursively, depth-first.  Assumption is that the clusters and peripherals don't have an address yet. """
+    """ Given a tree with a lot of registers and clusters, moves up the addressOffset of the lowest-addressOffset register to the containing cluster (or peripheral if there is no cluster).  This is done recursively, depth-first.  Assumption is that the clusters and peripherals don't have an address yet. """
     if root.tag != "register": # not leaf
-        for child in root:
+        nodes = root
+        if root.tag in ["registers", "cluster"]:
+            nodes = list(sorted([c for c in root if c.tag not in ["name"]], key=extract_addressOffset_rec))
+        for child in nodes:
             fixup_cluster_baseAddress(child, root if root.tag in ["cluster", "peripheral"] else container_node, indent + 2)
         if root.tag in ["cluster", "peripheral"]:
+            # if <newAddressOffset> exists, move it into <addressOffset> instead.
             newAddressOffset = root.find("newAddressOffset")
             if newAddressOffset is not None:
                 addressOffset = root.find("baseAddress" if root.tag == "peripheral" else "addressOffset")
@@ -44,10 +63,13 @@ def fixup_cluster_baseAddress(root, container_node, indent=0):
             container_addressOffset_value = eval_int(container_addressOffset) if container_addressOffset is not None else 0
             container_newAddressOffset = container_node.find("newAddressOffset")
             if container_newAddressOffset is None:
+                # Default the container'\s <newAddressOffset> to the child's addressOffset [possibly relative]
                 container_newAddressOffset = etree.Element("newAddressOffset")
                 container_newAddressOffset.text = "0x{:X}".format(container_addressOffset_value + addressOffset)
                 container_node.append(container_newAddressOffset)
+            # Make our own addressOffset relative to that container <newAddressOffset> instead of that container <addressOffset> like it was
             child_addressOffset.text = "0x{:X}".format(addressOffset - (eval_int(container_newAddressOffset) - container_addressOffset_value))
+            assert not child_addressOffset.text.startswith("0x-"), etree.tostring(child)
 
 logging.basicConfig(level=logging.INFO)
 tree = etree.parse(sys.stdin if len(sys.argv) == 1 else open(sys.argv[-1]))
