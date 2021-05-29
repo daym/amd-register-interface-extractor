@@ -107,6 +107,10 @@ phase3_smnccd_ficaa.svd: phase2_result.py phase3.py hexcalculator.py unroller.py
 	#  Keep broken registers in phase3_smn_ficaa.svd (otherwise would be empty)
 	./phase3.py -a -m SMNCCD -d DF::FabricConfigAccessControl -k $< > $@.new && mv $@.new $@
 
+# unfinished
+phase3_cpuid.svd: phase2_result.py phase3.py hexcalculator.py unroller.py rwops.py settings.py
+	./phase3.py -a -m CPUID $< > $@.new && mv $@.new $@
+
 phase4_%.svd: phase3_%.svd phase2_result.py phase4.py settings.py
 	./phase4.py < $< > $@.new && mv $@.new $@
 
