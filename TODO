@@ -1,0 +1,31 @@
+* Maybe use <displayName> more (svd2rust issue?)
+* Check that absolute <addressOffset>s in phase3 are unique; grep '<addressOffset>' phase3_host.svd  |sort |uniq -d |wc -l: Stats:
+	Rome:
+		phase3_host: 4148 are not unique
+		phase3_host_ficaa: 5 are not unique
+		phase3_smn: 18 are not unique
+		Others are unique
+* Maybe also generate CPUID accessors (easy to add)
+  Right now, we get:
+    ERROR:root:Could not calculate addresses of register ApmInfoEcx: SyntaxError: CPUID_Fn80000007_ECX[_x...].
+  since we do not have a scheme to convert from CPUID register numbers and contents to addresses yet
+* Array inference (recursive, depth-first)
+	cluster name startswith "_" denotes a possibly-array-like cluster; its children names are maybe numeric (although that is not strictly necessary for us)
+	sort by addressOffset
+	try to infer dimIncrement
+	Check that everything else is equal
+	Sanify names (X_link0, X_link1, X_link2 -> X); only handle the last _thing since the recursion will handle the rest
+	Maybe whitelist, blacklist by (raw) reg name pattern
+
+	<cluster>
+		<dim>6</dim>
+		<dimIncrement>4</dimIncrement>
+		<dimIndex>A,B,C,D,E,Z</dimIndex>
+		<name>GPIO_%s_CTRL</name>
+	</cluster>
+	Compare enum-generating construct:
+	<dimArrayIndex>
+		<headerEnumName>...</headerEnumName>
+		<enumeratedValue><name>X</name><description>foo</description><value>0</value></enumeratedValue>
+		<enumeratedValue>...</enumeratedValue>
+	</dimArrayIndex>
