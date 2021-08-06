@@ -86,7 +86,7 @@ def flatten(root):
         flatten(child)
     return root
 
-def create_array_cluster(addressOffset, displayName):
+def create_array_cluster(addressOffset, displayName, dim, dimIncrement, dimIndex, name):
     result = etree.Element("cluster")
     addressOffset_node = etree.Element("addressOffset")
     addressOffset_node.text = "0x{:x}".format(addressOffset)
@@ -95,7 +95,30 @@ def create_array_cluster(addressOffset, displayName):
     assert displayName is None
     displayName_node.text = "QQQ" # displayName # FIXME if that's None, it does not fail.
     result.append(displayName_node)
+    dim_node = etree.Element("dim")
+    dim_node.text = str(dim)
+    result.append(dim_node)
+    dimIncrement_node = etree.Element("dimIncrement")
+    dimIncrement_node.text = "0x{:x}".format(dimIncrement)
+    result.append(dimIncrement_node)
+    dimIndex_node = etree.Element("dimIndex")
+    dimIndex_node.text = dimIndex
+    result.append(dimIndex_node)
+    name_node = etree.Element("name")
+    name_node.text = name
+    result.append(name_node)
     return result
+
+def calculate_increments(items):
+    reference = None
+    dimIncrements = []
+    for item in items:
+        if reference is None:
+             reference = item
+        dimIncrement = item - reference
+        reference = item
+        dimIncrements.append(dimIncrement)
+    return dimIncrements[1:]
 
 def infer_arrays(root):
     name_node = root.find("name")
@@ -120,7 +143,7 @@ def infer_arrays(root):
             index = int(name)
             child_addressOffset = eval_int(child.find("addressOffset"))
             if child_addressOffset in indexed_stuff:
-                logging.warning("Same value for addressOffset is used multiple times, among others in {!r}".format(path_string(child)))
+                logging.warning("Same value for addressOffset ({!r}) is used multiple times, among others at {!r}".format(child.find("addressOffset").text, path_string(child)))
                 addresses_disjunct = False
             indexed_stuff[child_addressOffset] = normalize(flatten(child)), index
         else:
@@ -145,21 +168,26 @@ def infer_arrays(root):
             #print(etree.tostring(contents, pretty_print=True).decode("utf-8"))
         if all_similar:
             child_addressOffsets = [child_addressOffset for child_addressOffset, _ in sorted(indexed_stuff.items())]
-            indices = [index for child_addressOffset, (croot, index) in sorted(indexed_stuff.items())]
-            print("FOO", child_addressOffsets, indices)
-            # FIXME: Check child_addressOffsets to infer dimIncrement
-            logging.info("Inferring array for {!r}.".format(path_string(root)))
-            # Remove the array elements from XML; FIXME: Insert array element to correct place.
-            array_cluster = create_array_cluster(eval_int(root.find("addressOffset")), root.find("displayName"))
-            for child in reference_element:
-                array_cluster.append(child)
-            first = True
-            for child_addressOffset, (croot, index) in sorted(indexed_stuff.items()):
-                if first:
-                    first = False
-                    # Insert array_cluster before where the elements were
-                    croot.addprevious(array_cluster)
-                root.remove(croot)
+            increments = calculate_increments(child_addressOffsets)
+            if len(set(increments)) == 1:
+                dimIncrement = increments[0]
+                dimIndex = [index for child_addressOffset, (croot, index) in sorted(indexed_stuff.items())]
+                assert len(dimIndex) == len(set(dimIndex))
+                logging.info("Inferring array for {!r}.".format(path_string(root)))
+                # Remove the array elements from XML; FIXME: Insert array element to correct place.
+                array_cluster = create_array_cluster(eval_int(root.find("addressOffset")), root.find("displayName"), dim=len(dimIndex), dimIncrement=dimIncrement, dimIndex=",".join([str(x) for x in dimIndex]), name="[%s]")
+                for child in reference_element:
+                    assert child.tag != "name"
+                    array_cluster.append(child)
+                first = True
+                for child_addressOffset, (croot, index) in sorted(indexed_stuff.items()):
+                    if first:
+                        first = False
+                        # Insert array_cluster before where the elements were
+                        croot.addprevious(array_cluster)
+                    root.remove(croot)
+            else:
+                logging.warning("Not inferring {!r} since there are different increments between consecutive addressOffsets of the array elements ({!r}).".format(path_string(root), increments))
         else:
             logging.warning("Not inferring {!r} since there are too many differences between the array elements.".format(path_string(root)))
 
