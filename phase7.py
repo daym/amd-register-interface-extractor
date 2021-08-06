@@ -91,10 +91,10 @@ def create_array_cluster(addressOffset, displayName, dim, dimIncrement, dimIndex
     addressOffset_node = etree.Element("addressOffset")
     addressOffset_node.text = "0x{:x}".format(addressOffset)
     result.append(addressOffset_node)
-    displayName_node = etree.Element("displayName")
+    #displayName_node = etree.Element("displayName")
     assert displayName is None
-    displayName_node.text = "QQQ" # displayName # FIXME if that's None, it does not fail.
-    result.append(displayName_node)
+    #displayName_node.text = "QQQ" # displayName # FIXME if that's None, it does not fail.
+    #result.append(displayName_node)
     dim_node = etree.Element("dim")
     dim_node.text = str(dim)
     result.append(dim_node)
@@ -119,6 +119,16 @@ def calculate_increments(items):
         reference = item
         dimIncrements.append(dimIncrement)
     return dimIncrements[1:]
+
+def add_default_names(root):
+    displayName_node = root.find("displayName")
+    name_node = root.find("name")
+    if displayName_node is not None and name_node is None:
+        name_node = etree.Element("name")
+        name_node.text = displayName_node.text
+        root.append(name_node)
+    for child in root:
+        add_default_names(child)
 
 def infer_arrays(root):
     name_node = root.find("name")
@@ -175,9 +185,10 @@ def infer_arrays(root):
                 assert len(dimIndex) == len(set(dimIndex))
                 logging.info("Inferring array for {!r}.".format(path_string(root)))
                 # Remove the array elements from XML; FIXME: Insert array element to correct place.
-                array_cluster = create_array_cluster(eval_int(root.find("addressOffset")), root.find("displayName"), dim=len(dimIndex), dimIncrement=dimIncrement, dimIndex=",".join([str(x) for x in dimIndex]), name="[%s]")
+                array_cluster = create_array_cluster(eval_int(root.find("addressOffset")), root.find("displayName"), dim=len(dimIndex), dimIncrement=dimIncrement, dimIndex=",".join([str(x) for x in dimIndex]), name="items[%s]")
                 for child in reference_element:
                     assert child.tag != "name"
+                    add_default_names(child)
                     array_cluster.append(child)
                 first = True
                 for child_addressOffset, (flattened_child, index, child) in sorted(indexed_stuff.items()):
