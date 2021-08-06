@@ -120,3 +120,5 @@ phase5_%.svd: phase3_%.svd phase5.py settings.py
 phase6_%.svd: phase5_%.svd phase6.py
 	./phase6.py < $< > $@.new && mv $@.new $@
 
+phase7_%.svd: phase6_%.svd phase7.py
+	./phase7.py < $< > $@.new && mv $@.new $@
