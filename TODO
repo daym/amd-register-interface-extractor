@@ -9,14 +9,7 @@
   Right now, we get:
     ERROR:root:Could not calculate addresses of register ApmInfoEcx: SyntaxError: CPUID_Fn80000007_ECX[_x...].
   since we do not have a scheme to convert from CPUID register numbers and contents to addresses yet
-* Array inference (recursive, depth-first)
-	cluster name startswith "_" denotes a possibly-array-like cluster; its children names are maybe numeric (although that is not strictly necessary for us)
-	sort by addressOffset
-	try to infer dimIncrement
-	Check that everything else is equal
-	Sanify names (X_link0, X_link1, X_link2 -> X); only handle the last _thing since the recursion will handle the rest
-	Maybe whitelist, blacklist by (raw) reg name pattern
-
+* Array inference
 	<cluster>
 		<dim>6</dim>
 		<dimIncrement>4</dimIncrement>
