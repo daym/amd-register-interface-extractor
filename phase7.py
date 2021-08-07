@@ -169,7 +169,6 @@ def infer_arrays(root):
                 dimIndex = [index for child_addressOffset, (flattened_child, index, child) in sorted(indexed_stuff.items())]
                 assert len(dimIndex) == len(set(dimIndex))
                 logging.info("Inferring array for {!r}.".format(path_string(root)))
-                # Remove the array elements from XML; FIXME: Insert array element to correct place.
                 assert child_addressOffsets[0] == 0
                 assert root.tag == "cluster" and root.find("dim") is None and root.find("dimIncrement") is None and root.find("dimIndex") is None, path_string(root)
                 root.append(create_element_and_text("dim", str(len(dimIndex))))
