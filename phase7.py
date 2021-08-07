@@ -187,7 +187,10 @@ def infer_arrays(root):
                         # Insert array_cluster before where the elements were
                     root.remove(child)
             else:
-                logging.warning("Not inferring {!r} since there are different increments between consecutive addressOffsets of the array elements ({!r}).".format(path_string(root), increments))
+                if len(set(increments)) == 0: # Array with one element?  Err... okay then
+                    pass
+                else:
+                    logging.warning("Not inferring {!r} since there are different increments between consecutive addressOffsets of the array elements ({!r}).".format(path_string(root), increments))
         else:
             logging.warning("Not inferring {!r} since there are too many differences between the array elements.".format(path_string(root)))
 
