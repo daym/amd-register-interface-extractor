@@ -168,13 +168,17 @@ def infer_arrays(root):
                 dimIncrement = increments[0]
                 dimIndex = [index for child_addressOffset, (flattened_child, index, child) in sorted(indexed_stuff.items())]
                 assert len(dimIndex) == len(set(dimIndex))
-                logging.info("Inferring array for {!r}.".format(path_string(root)))
                 assert child_addressOffsets[0] == 0
                 assert root.tag == "cluster" and root.find("dim") is None and root.find("dimIncrement") is None and root.find("dimIndex") is None, path_string(root)
                 root.append(create_element_and_text("dim", str(len(dimIndex))))
                 root.append(create_element_and_text("dimIncrement", "0x{:x}".format(dimIncrement)))
-                root.append(create_element_and_text("dimIndex", ",".join([str(x) for x in dimIndex])))
-                root.find("name").text = "{}[%s]".format(root.find("name").text)
+                if dimIndex == [x for x in range(len(dimIndex))]: # If using "[%s]", dimIndex is not allowed--so I guess it needs to be the default [0,1,2,..,N-1]
+                    root.find("name").text = "{}[%s]".format(root.find("name").text)
+                    logging.info("Inferring array for {!r}.".format(path_string(root)))
+                else:
+                    root.append(create_element_and_text("dimIndex", ",".join([str(x) for x in dimIndex])))
+                    root.find("name").text = "{}_%s".format(root.find("name").text)
+                    logging.info("Inferring list for {!r}.".format(path_string(root)))
                 for child in reference_element:
                     assert child.tag != "name"
                     add_default_names(child)
