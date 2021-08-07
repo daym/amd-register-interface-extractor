@@ -201,7 +201,6 @@ parser = etree.XMLParser(remove_blank_text=True)
 tree = etree.parse(sys.stdin if len(sys.argv) == 1 else open(sys.argv[-1]), parser=parser)
 root = tree.getroot()
 
-# Make all the offsets relative.
 register_registers(root)
 infer_arrays(root)
 
