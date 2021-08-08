@@ -50,5 +50,14 @@ validate6: phase6_host.svd phase6_host_ficaa.svd phase6_io.svd phase6_io_abindex
 	xmllint --schema CMSIS-SVD.xsd phase6_smn.svd
 	xmllint --schema CMSIS-SVD.xsd phase6_smnccd.svd
 
+validate7: phase7_host.svd phase7_host_ficaa.svd phase7_io.svd phase7_io_abindex.svd phase7_msr.svd phase7_smn.svd phase7_smnccd.svd CMSIS-SVD.xsd
+	xmllint --schema CMSIS-SVD.xsd phase7_host.svd
+	xmllint --schema CMSIS-SVD.xsd phase7_host_ficaa.svd
+	xmllint --schema CMSIS-SVD.xsd phase7_io.svd
+	xmllint --schema CMSIS-SVD.xsd phase7_io_abindex.svd
+	xmllint --schema CMSIS-SVD.xsd phase7_msr.svd
+	xmllint --schema CMSIS-SVD.xsd phase7_smn.svd
+	xmllint --schema CMSIS-SVD.xsd phase7_smnccd.svd
+
 svd_viewer: svd_viewer.c
 	$(CC) -g3 -o $@ $< `pkg-config --cflags --libs gtk+-3.0 libxml-2.0`
