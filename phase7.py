@@ -72,7 +72,7 @@ def xml_elements_eqP(a, b):
     return etree.tostring(a, pretty_print=False) == etree.tostring(b, pretty_print=False)
 
 def flatten(root):
-    """ If there's a derivedFrom, resolves it.  FIXME: Recursively """
+    """ If there's a derivedFrom, resolves it.  """
     derivedFrom = root.attrib.get("derivedFrom")
     if derivedFrom is not None:
         reference = registers[derivedFrom]
@@ -199,6 +199,13 @@ def infer_arrays(root):
                     logging.warning("Not inferring {!r} since there are different increments between consecutive addressOffsets of the array elements ({!r}).".format(path_string(root), increments))
         else:
             logging.warning("Not inferring {!r} since there are too many differences between the array elements.".format(path_string(root)))
+            # Make the output document validate using CMSIS SVD
+            #for _, (_, _, cluster) in indexed_stuff.items():
+            #    assert cluster.tag == "cluster"
+            #    for child in cluster:
+            #        displayName_node = child.find("displayName")
+            #        if displayName_node is not None:
+            #            child.remove(displayName_node)
 
 logging.basicConfig(level=logging.INFO)
 parser = etree.XMLParser(remove_blank_text=True)
