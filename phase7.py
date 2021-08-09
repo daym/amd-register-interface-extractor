@@ -40,16 +40,16 @@ def register_registers(root):
         register_registers(child)
 
 def normalize(root):
-    # TODO: Normalize (at least down to the actual registers)
-    # TODO: Order tags in a standard way (any way)
-    # TODO: If <displayName> exists, get rid of <name>
-    for tag in reversed(["name", "displayName", "description", "addressOffset", "size"]):
+    if root.tag == "register":
+        return root
+    for tag in reversed(["dim", "dimIncrement", "dimIndex", "name", "displayName", "description", "alternateRegister", "addressOffset", "size"]):
         orig = root.find(tag)
         if orig is not None:
             # Re-inserts the Element at a reordered location.  This makes it easier to compare--and also it pacifies CMSIS.
             root.remove(orig)
             root.insert(0, orig)
     if root.find("displayName") is not None:
+        # Name would be something like "FOO_link0" which would not match "FOO_link1".  Previous phases ensured that there's a displayName="FOO" in that case.
         name_node = root.find("name")
         if name_node is not None:
             root.remove(name_node)
@@ -111,6 +111,7 @@ def add_default_names(root):
         name_node = etree.Element("name")
         name_node.text = displayName_node.text
         root.append(name_node)
+        root.remove(displayName_node)
     for child in root:
         add_default_names(child)
 
@@ -172,15 +173,15 @@ def infer_arrays(root):
                 assert len(dimIndex) == len(set(dimIndex))
                 assert child_addressOffsets[0] == 0
                 assert root.tag == "cluster" and root.find("dim") is None and root.find("dimIncrement") is None and root.find("dimIndex") is None, path_string(root)
-                root.append(create_element_and_text("dim", str(len(dimIndex))))
-                root.append(create_element_and_text("dimIncrement", "0x{:x}".format(dimIncrement)))
                 if dimIndex == [x for x in range(len(dimIndex))]: # If using "[%s]", dimIndex is not allowed--so I guess it needs to be the default [0,1,2,..,N-1]
                     root.find("name").text = "{}[%s]".format(root.find("name").text)
                     logging.info("Inferring array for {!r}.".format(path_string(root)))
                 else:
-                    root.append(create_element_and_text("dimIndex", ",".join([str(x) for x in dimIndex])))
+                    root.insert(0, create_element_and_text("dimIndex", ",".join([str(x) for x in dimIndex])))
                     root.find("name").text = "{}_%s".format(root.find("name").text)
                     logging.info("Inferring list for {!r}.".format(path_string(root)))
+                root.insert(0, create_element_and_text("dimIncrement", "0x{:x}".format(dimIncrement)))
+                root.insert(0, create_element_and_text("dim", str(len(dimIndex))))
                 for child in reference_element:
                     assert child.tag != "name"
                     add_default_names(child)
