@@ -146,7 +146,7 @@ def infer_arrays(root):
             name, indices = isolate_array_spec(raw_name)
             assert register.find("displayName") is None, register
             if name != raw_name:
-                register.append(create_displayName(name))
+                register.find("name").addnext(create_displayName(name))
             cluster = resolve_indices(indices)
             cluster.append(register)
 
