@@ -24,12 +24,17 @@ def extract_addressOffset_rec(root):
         attr_node = root.find("baseAddress")
     if attr_node is not None:
         addressOffset = eval_int(attr_node)
-    else:
-        try:
-            addressOffset = min(o for o in [extract_addressOffset_rec(child) for child in root if child.tag not in ["name"]] if o is not None)
-        except ValueError:
-            print(etree.tostring(root).decode("utf-8"), file=sys.stderr)
-            raise
+        if root.tag == "cluster":
+            # Assume that we don't yet have any offsets in the cluster.
+            assert addressOffset == 0
+        else:
+            return addressOffset
+    #print(etree.tostring(root, pretty_print=True), file=sys.stderr)
+    try:
+        addressOffset = min(o for o in [extract_addressOffset_rec(child) for child in root if child.tag not in ["name", "addressOffset"]] if o is not None)
+    except ValueError:
+        print(etree.tostring(root).decode("utf-8"), file=sys.stderr)
+        raise
     return addressOffset
 
 def fixup_cluster_baseAddress(root, container_node, indent=0):
@@ -37,7 +42,7 @@ def fixup_cluster_baseAddress(root, container_node, indent=0):
     if root.tag != "register": # not leaf
         nodes = root
         if root.tag in ["registers", "cluster"]:
-            nodes = list(sorted([c for c in root if c.tag not in ["name"]], key=extract_addressOffset_rec))
+            nodes = list(sorted([c for c in root if c.tag not in ["name", "addressOffset"]], key=extract_addressOffset_rec))
         for child in nodes:
             fixup_cluster_baseAddress(child, root if root.tag in ["cluster", "peripheral"] else container_node, indent + 2)
         if root.tag in ["cluster", "peripheral"]:

@@ -90,6 +90,9 @@ def create_cluster(name):
     name_node = etree.Element("name")
     name_node.text = name
     cluster.append(name_node)
+    addressOffset_node = etree.Element("addressOffset") # it is mandatory
+    addressOffset_node.text = "0x0"
+    cluster.append(addressOffset_node)
     return cluster
 
 def create_displayName(name):
