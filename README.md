@@ -31,3 +31,7 @@ These tables are then read in the next stage in order to generate SVD files with
 This is then processed in the next stage, trying to infer arrays where possible (in order to reduce the amount of SVD nodes).
 
 So, in your further development steps, if you want a very close analog to the PPRs use `phase3*.svd`--and if you want a human-readable, maintainable, version, use `phase6*.svd`.
+
+# svd2rust tips
+
+If you do use `svd2rust`, it is recommended to use at least version `0.17.0` and give it the `--const-generic` option so that it will emit an ArrayProxy instead of array if the respective address space is sparsely populated in hardware.
