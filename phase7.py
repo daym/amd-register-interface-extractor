@@ -43,10 +43,12 @@ def normalize(root):
     # TODO: Normalize (at least down to the actual registers)
     # TODO: Order tags in a standard way (any way)
     # TODO: If <displayName> exists, get rid of <name>
-    for tag in ["name", "displayName", "description", "addressOffset", "size"]:
+    for tag in reversed(["name", "displayName", "description", "addressOffset", "size"]):
         orig = root.find(tag)
         if orig is not None:
-            root.append(orig) # This re-inserts the Element at an ordered location
+            # Re-inserts the Element at a reordered location.  This makes it easier to compare--and also it pacifies CMSIS.
+            root.remove(orig)
+            root.insert(0, orig)
     if root.find("displayName") is not None:
         name_node = root.find("name")
         if name_node is not None:
