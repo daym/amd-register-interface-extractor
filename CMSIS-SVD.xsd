@@ -511,7 +511,7 @@
     <xs:sequence>
       <xs:group   ref="dimElementGroup" minOccurs="0"/>
       <xs:element name="name" type="dimableIdentifierType"/>
-      <xs:element name="description" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
       <!-- V1.1: alternateCluster specifies an alternative description for a cluster address range that is
                  already fully described. In this case the cluster name must be unique within the peripheral -->
       <xs:element name="alternateCluster" type="dimableIdentifierType" minOccurs="0"/>
