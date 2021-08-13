@@ -15,12 +15,12 @@ Then invoke something like (using the name of the first PDF file as argument):
     ./configure 54945_ppr_ZP_B2_specl_nda.pdf
     make
 
-The result is in `phase6_host.svd`.
+The result is in `phase7_host.svd`.
 It's also useful to `import phase2_result` in a Python interpreter and look around.
 
-A rudimentary SVD viewer is also included, so you can inspect the result graphically using `./svd_viewer phase6_host.svd` (after `make svd_viewer`) or similar.
+A rudimentary SVD viewer is also included, so you can inspect the result graphically using `./svd_viewer phase7_host.svd` (after `make svd_viewer`) or similar.
 
-There are phase6 results for all the different access methods--one file per access method and `DataPortWrite` (named `phase6_io.svd` and so on).
+There are phase7 results for all the different access methods--one file per access method and `DataPortWrite` (for example `phase7_io.svd` and so on).
 
 # What does it do
 
@@ -30,7 +30,7 @@ These tables are then read in the next stage in order to generate SVD files with
 
 This is then processed in the next stage, trying to infer arrays where possible (in order to reduce the amount of SVD nodes).
 
-So, in your further development steps, if you want a very close analog to the PPRs use `phase3*.svd`--and if you want a human-readable, maintainable, version, use `phase6*.svd`.
+So, in your further development steps, if you want a very close analog to the PPRs use `phase3*.svd`--and if you want a human-readable, maintainable, version, use `phase7*.svd`.
 
 # svd2rust tips
 
