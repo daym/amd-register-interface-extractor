@@ -128,12 +128,10 @@ for line in open("result.txt", "r"):
 		model = line[len("//      text PPR for "):].strip()
 		model, *rest = model.split("{", 1)
 		model = model.strip()
-		print("__model = {!r}".format(model))
 	elif model is None and line.startswith("//      text PPR Vol 1 for "):
 		model = line[len("//      text PPR Vol 1 for "):].strip()
 		model, *rest = model.split("{", 1)
 		model = model.strip()
-		print("__model = {!r}".format(model))
 	if line.startswith("// FINISH:"): # or line.startswith("//   cell:"):
 		row = eval(line[len("// FINISH:"):])
 		if len(row) == 1:
@@ -231,5 +229,6 @@ for line in open("result.txt", "r"):
 			current_table = None
 #grep -E '\<(FINISH:|cell:)' result.txt
 finish_table(current_table)
+if model:
+	print("__model = {!r}".format(model))
 print("__names = %r" % (resulting_name_to_full_name_map, ))
-
