@@ -196,9 +196,9 @@ def infer_arrays(root):
                 if len(set(increments)) == 0: # Array with one element?  Err... okay then
                     pass
                 else:
-                    logging.warning("Not inferring {!r} since there are different increments between consecutive addressOffsets of the array elements ({!r}).".format(path_string(root), increments))
+                    logging.warning("Not inferring array from element {!r} since there are different increments between consecutive addressOffsets of the array elements ({!r}).".format(path_string(root), increments))
         else:
-            logging.warning("Not inferring {!r} since there are too many differences between the array elements.".format(path_string(root)))
+            logging.warning("Not inferring array from element {!r} since there are too many differences between the array elements.".format(path_string(root)))
             for _, (_, _, cluster) in indexed_stuff.items():
                 assert cluster.tag == "cluster"
 
