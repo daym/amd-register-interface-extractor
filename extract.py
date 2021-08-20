@@ -215,7 +215,7 @@ class State(object):
           #    self.in_table = True
           #    self.in_table_prefix = False
           #    self.in_table_header = True
-          assert not re_bits_description_broken_header.match(text), (text, self.in_table_prefix, self.in_table_header, self.headline)
+          assert not re_bits_description_broken_header.match(text), (text, self.in_table_prefix, self.in_table_header, self.headline, self.in_table)
     return self.in_table
   def finish_this_table(self):
     if self.in_table:
@@ -303,6 +303,10 @@ class State(object):
           attrib["meaning"] = "headline"
         else:
           attrib["meaning"] = "bitfield-description"
+      if not attrib['meaning'] and re_table_caption.match(text) and xx == {"i"} and int(attrib["left"]) == 54: # Milan
+        # That will explicitly match register descriptions that start with "Table "... those have probably been written differently for a reason? Who knows.  Even if not, still good to be able to process those.
+        attrib['meaning'] = 'table-caption'
+
       meaning = attrib.get("meaning")
       if meaning == "headline" \
       or meaning == "italic-headline" \
