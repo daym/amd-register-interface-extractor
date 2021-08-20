@@ -199,7 +199,12 @@ def extract_nice_name(spec, nuke_pattern=True):
 				spec = "{} ({}".format(spec, nice_name[0])
 	#if spec.startswith("ENET") and spec.find("::") == -1:
 	#FIXME	assert False, spec
-	if spec.find("::") != -1 and spec.find(".") == -1 and spec.find("[") == -1 and spec.count("(") <= spec.count(")") and spec.count("(") > 0:
+	if spec.startswith("Table "):
+		if spec.find("::") != -1 and spec.find(".") == -1 and spec.find("[") == -1 and spec.count("(") <= spec.count(")") and spec.count("(") > 0:
+			# TODO: Warn once
+			warning("Disregarding '::' name in {!r} even though it kinda looks like a register".format(spec))
+		return spec
+	elif spec.find("::") != -1 and spec.find(".") == -1 and spec.find("[") == -1 and spec.count("(") <= spec.count(")") and spec.count("(") > 0:
 		_, name = spec.split("(", 1)
 		name, *_ = name.split(")", 1)
 		assert name.find("::") != -1
