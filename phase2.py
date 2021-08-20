@@ -39,6 +39,9 @@ def start_table(current_table, prefix):
 		_, name = name.split("(", 1)
 		name, *_ = name.split(")", 1)
 		assert name.find("::") != -1
+	if current_table.startswith("Table "):
+		# Sometimes these have a naming conflict with non-tables otherwise (Example: IOHC::NB_SMN_INDEX_3 on Milan)
+		name = "Table_{}".format(name)
 	escaped_name = "".join(c if c in string.ascii_letters + string.digits else "_" for c in name.replace(" ", "_"))
 	# FIXME: Fix those.
 	assert escaped_name not in resulting_name_to_full_name_map or escaped_name in ["D18F0x050", "D18F1x200"] or escaped_name.startswith("UARTx_9___F_"), (escaped_name, name)
