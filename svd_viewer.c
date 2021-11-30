@@ -95,6 +95,7 @@ static xmlNodePtr find_register_by_name(xmlNodePtr root, const char* name) {
 }
 
 static GHashTable* register_by_name; /* contains a map from register name to xml node of the register */
+static GHashTable* peripheral_by_name; /* contains a map from peripheral name to xml node of the peripheral */
 
 /* If ROOT has a 'derivedFrom' attribute, find an element with that name and copy all its children--except for the ones ROOT already has.
    This implements the SVD inheritance functionality.
@@ -104,7 +105,10 @@ static GHashTable* register_by_name; /* contains a map from register name to xml
 static void resolve_derivedFrom(xmlNodePtr root) {
 	xmlChar* derivedFrom = xmlGetProp(root, "derivedFrom");
 	if (derivedFrom) {
-		xmlNodePtr sibling = g_hash_table_lookup(register_by_name, derivedFrom);
+		const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : "?";
+		int reg = strcmp(type, "register") == 0;
+		int peripheral = strcmp(type, "peripheral") == 0;
+		xmlNodePtr sibling = (reg || peripheral) ? g_hash_table_lookup(reg ? register_by_name : peripheral_by_name, derivedFrom) : NULL;
 		if (sibling) { // If the sibling to be derived from has been found
 			resolve_derivedFrom(sibling);
 			xmlNodePtr child;
@@ -121,7 +125,7 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 				}
 			}
 		} else {
-			g_warning("Could not find register referenced: '%s'", derivedFrom);
+			g_warning("Could not find %s referenced: '%s'", reg ? "register " : peripheral ? "peripheral" : "element", derivedFrom);
 		}
 		xmlFree(derivedFrom);
 	}
@@ -175,20 +179,22 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
 /** Registers all registers in register_by_name.
     Side effects: Fills global variable register_by_name.
   */
-static void register_registers(xmlNodePtr root) {
+static void register_elements(xmlNodePtr root) {
 	xmlNodePtr child;
 	const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : "?";
-	if (root->type == XML_ELEMENT_NODE && strcmp(type, "register") == 0) {
+	int reg = strcmp(type, "register") == 0;
+	int peripheral = strcmp(type, "peripheral") == 0;
+	if (root->type == XML_ELEMENT_NODE && (reg || peripheral)) {
 		xmlChar* xml_name = child_element_text(root, "name");
 		if (xml_name) {
-			g_hash_table_insert(register_by_name, xml_name, root);
+			g_hash_table_insert(reg ? register_by_name : peripheral_by_name, xml_name, root);
 		}
 	}
 	for (child = root->children; child; child = child->next) {
 		if (child->type == XML_ELEMENT_NODE && pseudo_attribute_P(type, child->name)) {
 			//g_warning("ignore %s", child->name);
 		} else if (child->type == XML_ELEMENT_NODE) {
-			register_registers(child);
+			register_elements(child);
 		}
 	}
 }
@@ -304,7 +310,8 @@ int main(int argc, char* argv[]) {
 	gtk_widget_show_all(GTK_WIDGET(window));
 
 	register_by_name = g_hash_table_new(g_str_hash, g_str_equal);
-	register_registers(xmlDocGetRootElement(input_document));
+	peripheral_by_name = g_hash_table_new(g_str_hash, g_str_equal);
+	register_elements(xmlDocGetRootElement(input_document));
 	traverse(xmlDocGetRootElement(input_document), NULL, 0);
 
 	gtk_main();
