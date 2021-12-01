@@ -19,6 +19,7 @@ static const char* register_keys[] = {"name", "displayName", "alternateRegister"
 static const char* cluster_keys[] = {"name", "addressOffset", "size", "dim", "dimIncrement", "dimIndex", "dimName", "dimArrayIndex", "access", "resetValue", "resetMask", "alternateCluster", "description", NULL};
 static const char* field_keys[] = {"name", "bitOffset", "bitWidth", "access", "bitRange", "msb", "lsb", "description", NULL};
 static const char* interrupt_keys[] = {"name", "value", "description", NULL};
+static const char* enumeratedValue_keys[] = {"name", "value", "description", "isDefault", NULL};
 static const char* no_keys[] = { NULL };
 
 /* Returns a null-terminated list of keys that are supposed to be SVD attributes rather than child nodes.
@@ -39,6 +40,8 @@ static const char** keys_of_element_type(const char* type) {
 		return field_keys;
 	} else if (strcmp(type, "interrupt") == 0) {
 		return interrupt_keys;
+	} else if (strcmp(type, "enumeratedValue") == 0) {
+		return enumeratedValue_keys;
 	} else {
 		return no_keys;
 	}
