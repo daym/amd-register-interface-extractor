@@ -30,14 +30,19 @@ def path_string(node):
 
 registers = {}
 
-def register_registers(root):
-    """ Starting at ROOT, finds all <register>s and registers them in REGISTERS, recursively. """
-    if root.tag == "register":
+def register_registers(root, peripheral_name):
+    """ Starting at ROOT, finds all <register>s and registers them in REGISTERS, recursively.
+        Note: PERIPHERAL_NAME is internal state. Pass the empty string initially. """
+    if root.tag == "peripheral":
         name_node = root.find("name")
         name = name_node.text if name_node is not None else None
-        registers[name] = root
+        peripheral_name = name
+    elif root.tag == "register":
+        name_node = root.find("name")
+        name = name_node.text if name_node is not None else None
+        registers["{}.{}".format(peripheral_name, name)] = root
     for child in root:
-        register_registers(child)
+        register_registers(child, peripheral_name)
 
 def normalize(root):
     if root.tag == "register":
@@ -212,7 +217,7 @@ parser = etree.XMLParser(remove_blank_text=True)
 tree = etree.parse(sys.stdin if len(sys.argv) == 1 else open(sys.argv[-1]), parser=parser)
 root = tree.getroot()
 
-register_registers(root)
+register_registers(root, "")
 infer_arrays(root)
 
 tree.write(sys.stdout.buffer, pretty_print=True)

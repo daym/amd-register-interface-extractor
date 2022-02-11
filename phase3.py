@@ -659,9 +659,10 @@ def process_TableDefinition(peripheral_path, name, vv):
     svd_register = create_register(vv, name, addressOffset, description=description)
     svd_registers.append(svd_register)
 
+    reference_peripheral_name = "_".join(peripheral_path)
     for instance, addressOffset in zip(instances[1:], addresses[1:]):
         derived_register = etree.Element("register")
-        derived_register.attrib["derivedFrom"] = basename
+        derived_register.attrib["derivedFrom"] = "{}.{}".format(reference_peripheral_name, basename)
         name = "{}_{}".format(prefixname, clean_up_logical_name(instance.logical_mnemonic))
         derived_register.append(text_element("name", name))
         #derived_register.append(text_element("description", description)

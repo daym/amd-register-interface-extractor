@@ -77,46 +77,44 @@ static xmlChar* child_element_text(xmlNodePtr root, const char* key) {
 	return NULL;
 }
 
-static xmlNodePtr find_register_by_name(xmlNodePtr root, const char* name) {
-	xmlNodePtr child;
-	if (root->type == XML_ELEMENT_NODE && root->name && strcmp(root->name, "register") == 0) {
-		xmlChar* x_name = child_element_text(root, "name");
-		if (x_name && strcmp(x_name, name) == 0) {
-			xmlFree(x_name);
-			return root;
-		}
-		xmlFree(x_name);
-	}
-	for(child = root->children; child; child = child->next) {
-		if (child->type == XML_ELEMENT_NODE) {
-			xmlNodePtr match = find_register_by_name(child, name);
-			if (match)
-				return match;
-		}
-	}
-	return NULL;
-}
+// TODO: Similar for <field> (PERIPHERAL.REGISTER.FIELD), <cluster> (PERIPHERAL.CLUSTER)
 
-static GHashTable* register_by_name; /* contains a map from register name to xml node of the register */
+static GHashTable* register_by_name; /* contains a map from PERIPHERAL.REGISTER to xml node of the register */
 static GHashTable* peripheral_by_name; /* contains a map from peripheral name to xml node of the peripheral */
 
 /* If ROOT has a 'derivedFrom' attribute, find an element with that name and copy all its children--except for the ones ROOT already has.
    This implements the SVD inheritance functionality.
    @param root The node that is to be checked for the 'derivedFrom' attribute (and whose children are to be mutated)
+   @param PERIPHERAL_NAME The peripheral the element WITH the derivedFrom attribute is in.
    Side effect: Mutates ROOT.
  */
-static void resolve_derivedFrom(xmlNodePtr root) {
+static void resolve_derivedFrom(xmlNodePtr root, const char* peripheral_name) {
 	xmlChar* derivedFrom = xmlGetProp(root, "derivedFrom");
 	if (derivedFrom) {
 		const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : "?";
 		int reg = strcmp(type, "register") == 0;
 		int peripheral = strcmp(type, "peripheral") == 0;
-		xmlNodePtr sibling = (reg || peripheral) ? g_hash_table_lookup(reg ? register_by_name : peripheral_by_name, derivedFrom) : NULL;
-		if (sibling) { // If the sibling to be derived from has been found
-			resolve_derivedFrom(sibling);
+		xmlNodePtr reference = NULL;
+		const char* fq_derivedFrom = derivedFrom;
+		const char* reference_peripheral_name = peripheral_name;
+		if (reg) {
+			xmlChar* q = strchr(derivedFrom, '.');
+			if (q) { // FQ
+				fq_derivedFrom = g_strdup(derivedFrom);
+				*q = 0;
+				reference_peripheral_name = derivedFrom;
+			} else {
+				fq_derivedFrom = g_strdup_printf("%s.%s", peripheral_name, derivedFrom);
+			}
+			reference  = g_hash_table_lookup(register_by_name, fq_derivedFrom);
+		} else if (peripheral) {
+			reference  = g_hash_table_lookup(peripheral_by_name, derivedFrom);
+		}
+		if (reference) { // If the reference to be derived from has been found
+			resolve_derivedFrom(reference, reference_peripheral_name);
 			xmlNodePtr child;
 			// Copy all the pseudo attributes over that we don't already have
-			for(child = sibling->children; child; child = child->next) {
+			for(child = reference->children; child; child = child->next) {
 				if (child->type == XML_ELEMENT_NODE) {
 					const char* child_key = child->name;
 					xmlChar* our_value = child_element_text(root, child_key);
@@ -128,7 +126,7 @@ static void resolve_derivedFrom(xmlNodePtr root) {
 				}
 			}
 		} else {
-			g_warning("Could not find %s referenced: '%s'", reg ? "register " : peripheral ? "peripheral" : "element", derivedFrom);
+			g_warning("Could not find %s referenced: '%s'", reg ? "register" : peripheral ? "peripheral" : "element", derivedFrom);
 		}
 		xmlFree(derivedFrom);
 	}
@@ -182,22 +180,32 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
 /** Registers all registers in register_by_name.
     Side effects: Fills global variable register_by_name.
   */
-static void register_elements(xmlNodePtr root) {
+static void register_elements(xmlNodePtr root, const char* peripheral_name) {
 	xmlNodePtr child;
 	const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : "?";
 	int reg = strcmp(type, "register") == 0;
 	int peripheral = strcmp(type, "peripheral") == 0;
 	if (root->type == XML_ELEMENT_NODE && (reg || peripheral)) {
 		xmlChar* xml_name = child_element_text(root, "name");
+		if (peripheral) {
+			assert(xml_name);
+			peripheral_name = xml_name ? xml_name : "?";
+		}
 		if (xml_name) {
-			g_hash_table_insert(reg ? register_by_name : peripheral_by_name, xml_name, root);
+			if (peripheral) {
+				g_hash_table_insert(peripheral_by_name, xml_name, root);
+			} else if (reg) {
+				char* q = g_strdup_printf("%s.%s", peripheral_name, xml_name);
+				g_hash_table_insert(register_by_name, q, root);
+				g_free(q);
+			}
 		}
 	}
 	for (child = root->children; child; child = child->next) {
 		if (child->type == XML_ELEMENT_NODE && pseudo_attribute_P(type, child->name)) {
 			//g_warning("ignore %s", child->name);
 		} else if (child->type == XML_ELEMENT_NODE) {
-			register_elements(child);
+			register_elements(child, peripheral_name);
 		}
 	}
 }
@@ -208,11 +216,11 @@ static void register_elements(xmlNodePtr root) {
     @param store_parent destination (in a GtkTreeStore)
     @param base_address base address to use for calculations
  */
-static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_address) {
+static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_address, const char* peripheral_name) {
 	xmlNodePtr child;
 	const char* type = (root->type == XML_ELEMENT_NODE) ? root->name : "?";
 	if (root->type == XML_ELEMENT_NODE)
-		resolve_derivedFrom(root);
+		resolve_derivedFrom(root, peripheral_name);
 	char* name;
 	{
 		xmlChar* xml_name = child_element_text(root, "name");
@@ -252,7 +260,12 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 		if (child->type == XML_ELEMENT_NODE && pseudo_attribute_P(type, child->name)) {
 			//g_warning("ignore %s", child->name);
 		} else if (child->type == XML_ELEMENT_NODE) {
-			traverse(child, &iter, base_address);
+			int peripheral = strcmp(child->name, "peripheral") == 0;
+			xmlChar* xml_name = child_element_text(root, "name");
+			if (peripheral) {
+				peripheral_name = xml_name ? xml_name : "?";
+			}
+			traverse(child, &iter, base_address, peripheral_name);
 		}
 	}
 }
@@ -314,8 +327,8 @@ int main(int argc, char* argv[]) {
 
 	register_by_name = g_hash_table_new(g_str_hash, g_str_equal);
 	peripheral_by_name = g_hash_table_new(g_str_hash, g_str_equal);
-	register_elements(xmlDocGetRootElement(input_document));
-	traverse(xmlDocGetRootElement(input_document), NULL, 0);
+	register_elements(xmlDocGetRootElement(input_document), "");
+	traverse(xmlDocGetRootElement(input_document), NULL, 0, "");
 
 	gtk_main();
 	return 0;
