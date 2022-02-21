@@ -197,7 +197,7 @@ static void register_elements(xmlNodePtr root, const char* peripheral_name) {
 			} else if (reg) {
 				char* q = g_strdup_printf("%s.%s", peripheral_name, xml_name);
 				g_hash_table_insert(register_by_name, q, root);
-				g_free(q);
+				//g_free(q);
 			}
 		}
 	}
@@ -261,7 +261,7 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 			//g_warning("ignore %s", child->name);
 		} else if (child->type == XML_ELEMENT_NODE) {
 			int peripheral = strcmp(child->name, "peripheral") == 0;
-			xmlChar* xml_name = child_element_text(root, "name");
+			xmlChar* xml_name = child_element_text(child, "name");
 			if (peripheral) {
 				peripheral_name = xml_name ? xml_name : "?";
 			}
