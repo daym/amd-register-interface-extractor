@@ -116,6 +116,8 @@ static void resolve_derivedFrom(xmlNodePtr root, const char* peripheral_name) {
 			// Copy all the pseudo attributes over that we don't already have
 			for(child = reference->children; child; child = child->next) {
 				if (child->type == XML_ELEMENT_NODE) {
+					// Note: Here, we should also recursively call derivedFrom (for all the children of CHILD, too).
+					// Note: What's more, if that one isn't an absolute reference, it has to be completed by adding the OLD peripheral reference.
 					const char* child_key = child->name;
 					xmlChar* our_value = child_element_text(root, child_key);
 					if (our_value == NULL) {
@@ -270,6 +272,14 @@ static void traverse(xmlNodePtr root, GtkTreeIter* store_parent, uint64_t base_a
 	}
 }
 
+static void go_up_cb(GtkButton* button, GtkTreeView* tree_view) {
+	GtkTreePath* path = NULL;
+	gtk_tree_view_get_cursor(tree_view, &path, NULL);
+	if (gtk_tree_path_up(path)) {
+		gtk_tree_view_set_cursor(tree_view, path, NULL, FALSE);
+	}
+}
+
 static void expand_all_cb(GtkButton* button, GtkTreeView* tree_view) {
 	gtk_tree_view_expand_all(tree_view);
 }
@@ -303,6 +313,9 @@ int main(int argc, char* argv[]) {
 	gtk_tree_view_append_column(tree_view, col0);
 	gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(tree_view));
 
+	GtkButton* go_up_button = GTK_BUTTON(gtk_button_new_with_label("Go up"));
+	g_signal_connect(G_OBJECT(go_up_button), "clicked", G_CALLBACK(go_up_cb), tree_view);
+
 	GtkButton* expand_all_button = GTK_BUTTON(gtk_button_new_with_label("Expand all"));
 	g_signal_connect(G_OBJECT(expand_all_button), "clicked", G_CALLBACK(expand_all_cb), tree_view);
 
@@ -310,6 +323,7 @@ int main(int argc, char* argv[]) {
 	g_signal_connect(G_OBJECT(collapse_all_button), "clicked", G_CALLBACK(collapse_all_cb), tree_view);
 
 	GtkButtonBox* buttons = GTK_BUTTON_BOX(gtk_button_box_new(GTK_ORIENTATION_VERTICAL));
+	gtk_box_pack_start(GTK_BOX(buttons), GTK_WIDGET(go_up_button), FALSE, FALSE, 7);
 	gtk_box_pack_start(GTK_BOX(buttons), GTK_WIDGET(expand_all_button), FALSE, FALSE, 7);
 	gtk_box_pack_start(GTK_BOX(buttons), GTK_WIDGET(collapse_all_button), FALSE, FALSE, 7);
 
