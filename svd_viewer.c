@@ -164,7 +164,6 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
 	}
 	for (i = 0; keys[i]; ++i) {
 		if (strcmp(keys[i], "addressBlock") == 0) {
-			/* TODO */
 			char* value = g_strdup_printf("");
 			xmlNodePtr q = NULL;
 			for (q = root->children; q; q = q->next) {
