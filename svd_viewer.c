@@ -163,10 +163,29 @@ static char* calculate_tooltip(const char* type, xmlNodePtr root, uint64_t base_
 		}
 	}
 	for (i = 0; keys[i]; ++i) {
-		xmlChar* value = child_element_text(root, keys[i]);
-		if (value) {
+		if (strcmp(keys[i], "addressBlock") == 0) {
+			/* TODO */
+			char* value = g_strdup_printf("");
+			xmlNodePtr q = NULL;
+			for (q = root->children; q; q = q->next) {
+				if (q->type == XML_ELEMENT_NODE && strcmp(q->name, keys[i]) == 0) {
+					break;
+				}
+			}
+
+			if (q) for (xmlNodePtr child = q->children; child; child = child->next) {
+				if (child->type == XML_ELEMENT_NODE) {
+					value = g_strdup_printf("%s, %s: %s", value, child->name, xmlNodeListGetString(input_document, child->children, 1));
+				}
+			}
 			g_string_append_printf(result, "\n%s: %s", keys[i], value);
-			xmlFree(value);
+			continue;
+		} else {
+			xmlChar* value = child_element_text(root, keys[i]);
+			if (value) {
+				g_string_append_printf(result, "\n%s: %s", keys[i], value);
+				xmlFree(value);
+			}
 		}
 	}
 	{
