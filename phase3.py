@@ -207,6 +207,11 @@ def calculate_namespaces():
 					# prefix 'WAFLC1' namespace 'WAFLC::WAFL1' (spec 'WAFLC1x00000000...x00010000')
 					# prefix 'WAFLC1' namespace 'AESCTR' (spec 'WAFLC1x00020000...x000200A4')
 					result["WAFLC1x0002"] = namespace
+				elif spec.startswith("RSMUMP1MMIOx"):
+					# prefix 'RSMUMP1MMIO' namespace 'SMU::RSMU::RSMU::MP1::MMIO' (spec 'RSMUMP1MMIOx00000004...x000003C4') 
+					# prefix 'RSMUMP1MMIO' namespace 'SMU::RSMU::RSMU::MP1::MMIOEXT' (spec 'RSMUMP1MMIOx000007B8...x000007C4') 
+					# prefix 'RSMUMP1MMIO' namespace 'SMU::RSMU::RSMU::MP1::MMIO' (spec 'RSMUMP1MMIOx00000800...x00000DD8') 
+					result[spec] = namespace # That's way too specific--but it will work.
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
