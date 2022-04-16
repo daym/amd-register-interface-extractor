@@ -199,6 +199,14 @@ def calculate_namespaces():
 					# ['00000000: FCHI3Cx02DE5000...x02DE52E8', 'FCH::I3C']
 					# ['00000000: FCHI3Cx02DE5600...x02DE5610', 'FCHI3C']
 					result[spec] = namespace
+				elif spec.startswith("WAFLC0x0002"):
+					# prefix 'WAFLC0' namespace 'WAFLC::WAFL0' (spec 'WAFLC0x00000000...x00010000')
+					# prefix 'WAFLC0' namespace 'AESCTR' (spec 'WAFLC0x00020000...x000200A4')
+					result["WAFLC0x0002"] = namespace
+				elif spec.startswith("WAFLC1x0002"):
+					# prefix 'WAFLC1' namespace 'WAFLC::WAFL1' (spec 'WAFLC1x00000000...x00010000')
+					# prefix 'WAFLC1' namespace 'AESCTR' (spec 'WAFLC1x00020000...x000200A4')
+					result["WAFLC1x0002"] = namespace
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
