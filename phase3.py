@@ -399,7 +399,7 @@ for path, table_definition in names:
 	leaf_name = path[-1].replace("AUDIO_AZ_", "AUDIOAZ").replace("AudioAZ", "AUDIOAZ").replace("Audio_Az", "AUDIOAZ").replace("IOMMU_MMIO", "IOMMUMMIO").replace("SATA_AHCI_P_", "SATA_PORT_").replace("AHCI_SGPIO_", "SATA_SGPIO_").replace("APICx", "Apicx")
 	#assert len(path) < 2 or path[1] != "SATA", (path, leaf_name)
 	for part in path[:-1]:
-		if leaf_name.startswith(part):
+		if leaf_name.startswith(part) and leaf_name != "PCS_PERF_COUNTER_DEBUG": # the latter would not be unique after truncation (in Genoa)
 			leaf_name = leaf_name[len(part):]
 		if leaf_name.startswith("_"):
 			leaf_name = leaf_name[1:]
