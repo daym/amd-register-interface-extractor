@@ -208,47 +208,31 @@ def calculate_namespaces():
 					# prefix 'WAFLC1' namespace 'WAFLC::WAFL1' (spec 'WAFLC1x00000000...x00010000')
 					# prefix 'WAFLC1' namespace 'AESCTR' (spec 'WAFLC1x00020000...x000200A4')
 					result["WAFLC1x0002"] = namespace
-				elif spec.startswith("RSMUMP1MMIOx"):
+				elif prefix.startswith("RSMU") and prefix.endswith("MMIO"):
 					# prefix 'RSMUMP1MMIO' namespace 'SMU::RSMU::RSMU::MP1::MMIO' (spec 'RSMUMP1MMIOx00000004...x000003C4')
 					# prefix 'RSMUMP1MMIO' namespace 'SMU::RSMU::RSMU::MP1::MMIOEXT' (spec 'RSMUMP1MMIOx000007B8...x000007C4')
 					# prefix 'RSMUMP1MMIO' namespace 'SMU::RSMU::RSMU::MP1::MMIO' (spec 'RSMUMP1MMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif spec.startswith("RSMUTHMMMIOx"):
 					# prefix 'RSMUTHMMMIO' namespace 'SMU::RSMU::RSMU::THM::MMIO' (spec 'RSMUTHMMMIOx00000004...x000003C4')
 					# prefix 'RSMUTHMMMIO' namespace 'SMU::RSMU::RSMU::THM::MMIOEXT' (spec 'RSMUTHMMMIOx000007B8...x000007C4')
 					# prefix 'RSMUTHMMMIO' namespace 'SMU::RSMU::RSMU::THM::MMIO' (spec 'RSMUTHMMMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif spec.startswith("RSMUSMUIOMMIOx"):
 					# prefix 'RSMUSMUIOMMIO' namespace 'SMU::RSMU::RSMU::SMUIO::MMIO' (spec 'RSMUSMUIOMMIOx00000004...x000003C4')
 					# prefix 'RSMUSMUIOMMIO' namespace 'SMU::RSMU::RSMU::SMUIO::MMIOEXT' (spec 'RSMUSMUIOMMIOx00000794...x000007C4')
 					# prefix 'RSMUSMUIOMMIO' namespace 'SMU::RSMU::RSMU::SMUIO::MMIO' (spec 'RSMUSMUIOMMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif spec.startswith("RSMUFUSEMMIOx"):
 					# prefix 'RSMUFUSEMMIO' namespace 'SMU::RSMU::RSMU::FUSE::MMIO' (spec 'RSMUFUSEMMIOx00000004...x000003C4')
 					# prefix 'RSMUFUSEMMIO' namespace 'SMU::RSMU::RSMU::FUSE::MMIOEXT' (spec 'RSMUFUSEMMIOx000007B8...x000007C4')
 					# prefix 'RSMUFUSEMMIO' namespace 'SMU::RSMU::RSMU::FUSE::MMIO' (spec 'RSMUFUSEMMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif spec.startswith("RSMUSMUIO1MMIOx"):
 					# prefix 'RSMUSMUIO1MMIO' namespace 'SMU::RSMU::RSMU::SMUIO1::MMIO' (spec 'RSMUSMUIO1MMIOx00000004...x000003C4')
 					# prefix 'RSMUSMUIO1MMIO' namespace 'SMU::RSMU::RSMU::SMUIO1::MMIOEXT' (spec 'RSMUSMUIO1MMIOx000007B8...x000007C4')
 					# prefix 'RSMUSMUIO1MMIO' namespace 'SMU::RSMU::RSMU::SMUIO1::MMIO' (spec 'RSMUSMUIO1MMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif re_smu_clk.match(spec):
 					# prefix 'RSMUCLKA00MMIO' namespace 'SMU::RSMU::RSMU::CLKA::MMIO' (spec 'RSMUCLKA00MMIOx00000018...x000003C4')
 					# prefix 'RSMUCLKA00MMIO' namespace 'SMU::RSMU::RSMU::CLKA::MMIOEXT' (spec 'RSMUCLKA00MMIOx000007B8...x000007D0')
 					# prefix 'RSMUCLKA00MMIO' namespace 'SMU::RSMU::RSMU::CLKA::MMIO' (spec 'RSMUCLKA00MMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif spec.startswith("RSMUACPMMIOx"):
 					# prefix 'RSMUACPMMIO' namespace 'SMU::RSMU::RSMU::ACP::MMIO' (spec 'RSMUACPMMIOx00000008...x000003C4')
 					# prefix 'RSMUACPMMIO' namespace 'SMU::RSMU::RSMU::ACP::MMIOEXT' (spec 'RSMUACPMMIOx000007B8...x000007C4')
 					# prefix 'RSMUACPMMIO' namespace 'SMU::RSMU::RSMU::ACP::MMIO' (spec 'RSMUACPMMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif spec.startswith("RSMUSDPMUX0MMIOx"):
 					# prefix 'RSMUSDPMUX0MMIO' namespace 'SMU::RSMU::RSMU::SDPMUX::MMIO' (spec 'RSMUSDPMUX0MMIOx00000004...x000003C4')
 					# prefix 'RSMUSDPMUX0MMIO' namespace 'SMU::RSMU::RSMU::SDPMUX::MMIOEXT' (spec 'RSMUSDPMUX0MMIOx00000784...x000007C4')
 					# prefix 'RSMUSDPMUX0MMIO' namespace 'SMU::RSMU::RSMU::SDPMUX::MMIO' (spec 'RSMUSDPMUX0MMIOx00000800...x00000DD8')
-					result[spec] = namespace # That's way too specific--but it will work.
-				elif spec.startswith("RSMUNTB0MMIOx"):
 					# prefix 'RSMUNTB0MMIO' namespace 'SMU::RSMU::RSMU::NTB::MMIO' (spec 'RSMUNTB0MMIOx00000004...x000003C4')
 					# prefix 'RSMUNTB0MMIO' namespace 'SMU::RSMU::RSMU::NTB::MMIOEXT' (spec 'RSMUNTB0MMIOx000007B8...x000007C4')
 					# prefix 'RSMUNTB0MMIO' namespace 'SMU::RSMU::RSMU::NTB::MMIO' (spec 'RSMUNTB0MMIOx00000800...x00000DD8')
