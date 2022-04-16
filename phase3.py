@@ -127,6 +127,8 @@ assert memory_map is not None, "Memory map for access_method={!r}, data_port_wri
 if memory_map != [] and memory_map[-1] == []:
 	memory_map = memory_map[:-1]
 
+re_umc_ctl = re.compile(r"(UMC[0-9][0-9]CTLx00000804_)")
+
 def calculate_namespaces():
 	# For now, this assumes that the part of the name before the "x" is unique enough.
 	# If necessary, this can be adapted to unroll the spec pattern in the map and register all of those instances in the map (with the respective namespace)--but for now, that's overkill.
@@ -159,6 +161,22 @@ def calculate_namespaces():
 					result[spec[:spec.find("x") + 1]] = "OSS"
 				elif spec.startswith("ACPMMIOx"):
 					result[spec[:spec.find("x") + 1]] = "ACP" # way too complicated otherwise
+				elif spec.startswith("D18F5x000002"): # those are in a more specific namespace than just "DF". (Milan A0)
+					# ['0001D400: D18F5x00000200_x0000_0001..._x000B_0001', 'MCA::CS']
+					# ['0001_D400h: D18F5x00000200_x001E_0001', 'MCA::PIE']
+					result[spec] = namespace # sigh. Way too specific--but it will work.
+				elif m := re_umc_ctl.match(spec): # -> UMC::Phy; Genoa
+					result[m.group(1)] = namespace
+				elif spec.startswith("FCHI3Cx"):
+					# ['00000000: FCHI3Cx02DE2000...x02DE22E8', 'FCH::I3C']
+					# ['00000000: FCHI3Cx02DE2600...x02DE2610', 'FCHI3C']
+					# ['00000000: FCHI3Cx02DE3000...x02DE32E8', 'FCH::I3C']
+					# ['00000000: FCHI3Cx02DE3600...x02DE3610', 'FCHI3C']
+					# ['00000000: FCHI3Cx02DE4000...x02DE42E8', 'FCH::I3C']
+					# ['00000000: FCHI3Cx02DE4600...x02DE4610', 'FCHI3C']
+					# ['00000000: FCHI3Cx02DE5000...x02DE52E8', 'FCH::I3C']
+					# ['00000000: FCHI3Cx02DE5600...x02DE5610', 'FCHI3C']
+					result[spec] = namespace
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
@@ -220,7 +238,7 @@ def extract_nice_name(spec, nuke_pattern=True):
 			return "FCH::PM::RTCEXT::{}".format(spec)
 		elif spec.startswith("USBCONTAINER0x0007") or spec.startswith("USBCONTAINER1x0007"):
 			return "USB31::USBCONTAINERS0REGCNTR0::{}".format(spec)
-		for prefix, namespace in namespace_by_prefix.items():
+		for prefix, namespace in reverse(sorted(namespace_by_prefix.items())): # this makes sure that longer matches are tried first
 			if spec.startswith(prefix):
 				return "{}::{}".format(namespace, spec)
 		# These are for the old (2017) public PPRs which don't always have a namespace map
