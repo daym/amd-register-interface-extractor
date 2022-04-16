@@ -58,6 +58,10 @@ def unroll_inst_item_pattern(spec):
 	['_instINTSBDEVINDCFG0_aliasSMN', '_instNBIF1DEVINDCFG0_aliasSMN', '_instNBIF0DEVINDCFG0_aliasSMN', '_instPCIE1DEVINDCFG7_aliasSMN', '_instPCIE1DEVINDCFG6_aliasSMN', '_instPCIE1DEVINDCFG5_aliasSMN', '_instPCIE1DEVINDCFG4_aliasSMN', '_instPCIE1DEVINDCFG3_aliasSMN', '_instPCIE1DEVINDCFG2_aliasSMN', '_instPCIE1DEVINDCFG1_aliasSMN', '_instPCIE1DEVINDCFG0_aliasSMN', '_instPCIE0DEVINDCFG7_aliasSMN', '_instPCIE0DEVINDCFG6_aliasSMN', '_instPCIE0DEVINDCFG5_aliasSMN', '_instPCIE0DEVINDCFG4_aliasSMN', '_instPCIE0DEVINDCFG3_aliasSMN', '_instPCIE0DEVINDCFG2_aliasSMN', '_instPCIE0DEVINDCFG1_aliasSMN', '_instPCIE0DEVINDCFG0_aliasSMN']
 	>>> list(unroll_inst_item_pattern("IOHCDEVINDx[0000_C004,0000_9004,0000_8004,0000_[[4:1][C,8,4,0]]04]"))
 	['IOHCDEVINDx0000_C004', 'IOHCDEVINDx0000_9004', 'IOHCDEVINDx0000_8004', 'IOHCDEVINDx0000_4C04', 'IOHCDEVINDx0000_4804', 'IOHCDEVINDx0000_4404', 'IOHCDEVINDx0000_4004', 'IOHCDEVINDx0000_3C04', 'IOHCDEVINDx0000_3804', 'IOHCDEVINDx0000_3404', 'IOHCDEVINDx0000_3004', 'IOHCDEVINDx0000_2C04', 'IOHCDEVINDx0000_2804', 'IOHCDEVINDx0000_2404', 'IOHCDEVINDx0000_2004', 'IOHCDEVINDx0000_1C04', 'IOHCDEVINDx0000_1804', 'IOHCDEVINDx0000_1404', 'IOHCDEVINDx0000_1004']
+	>>> list(unroll_inst_item_pattern("_c2t1[UMCWPHY[A:0]]_aliasSMN"))
+	['_c2t1UMCWPHYA_aliasSMN', '_c2t1UMCWPHY9_aliasSMN', '_c2t1UMCWPHY8_aliasSMN', '_c2t1UMCWPHY7_aliasSMN', '_c2t1UMCWPHY6_aliasSMN', '_c2t1UMCWPHY5_aliasSMN', '_c2t1UMCWPHY4_aliasSMN', '_c2t1UMCWPHY3_aliasSMN', '_c2t1UMCWPHY2_aliasSMN', '_c2t1UMCWPHY1_aliasSMN', '_c2t1UMCWPHY0_aliasSMN']
+	>>> list(unroll_inst_item_pattern("_ccd11_instGMIC13KPXSLV_lane[BC,15:0]_aliasSMN"))
+	['_ccd11_instGMIC13KPXSLV_laneBC_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane15_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane14_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane13_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane12_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane11_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane10_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane9_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane8_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane7_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane6_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane5_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane4_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane3_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane2_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane1_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane0_aliasSMN']
 	"""
 	class Scanner(object):
 		def __init__(self, input_data):
@@ -69,6 +73,7 @@ def unroll_inst_item_pattern(spec):
 	if not spec:
 		return []
 	scanner = Scanner("{}".format(spec))
+	logical_context = spec.startswith("_")
 	def parse_item(): # "02432432foo[2:1] -> [02432432foo2, 02432432foo1]",  "5:[2,1]"
 		item = StringIO("")
 		while scanner.c and scanner.c not in ":,]=":
@@ -115,7 +120,7 @@ def unroll_inst_item_pattern(spec):
 					short = len(beginning) == 1 and len(end) == 1 # cannot be misinterpreted
 					# The idea is to prefer to interpret things as decimal, but fall back to hexadecimal if we must.
 					radix = 16
-					if spec.startswith("_"):
+					if logical_context:
 						radix = 10
 					else:
 						radix = 16
@@ -137,11 +142,19 @@ def unroll_inst_item_pattern(spec):
 		else:
 			return a_s
 	def parse_alternatives(): # "a,b" or "a";    a+b
+		nonlocal logical_context
+		old_logical_context = logical_context
+		if scanner.c and scanner.c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ": # physical
+			# This is AMD using "FOO[15:3]" as a physical subexpression in the logical expression "_bla[FOO[15:3]]".
+			# Note: It's also possible that they use "BC,15:0" and then it should mean "BC", "15", "14", "13", ..., "0"--i.e. "BC" is a literal (and not a reference to a physical register).
+			logical_context = False
 		a = parse_range()
+		logical_context = old_logical_context # Note: First alternative is special
 		while scanner.c == ",":
 			scanner.consume()
 			b = parse_range()
 			a = a + b
+		logical_context = old_logical_context
 		return a
 	def parse_toplevel():
 		result = []
@@ -222,7 +235,7 @@ def unroll_inst_pattern(spec):
 		elif insts != [] and ps == []:
 			pass
 		else:
-			error("Unrolling did not work: logical instances are {!r} but physical instances are {!r} (raw: {!r})--which is impossible".format(insts, ps, physs))
+			error("Unrolling did not work: logical instances are {!r} but physical instances are {!r} (raw: {!r})--which is impossible (lengths {} vs {}). Original pattern: {}".format(insts, ps, physs, len(insts), len(ps), spec))
 	phys_i = 0
 	for logical_mnemonic in insts:
 		physical_mnemonic_and_variables = []
