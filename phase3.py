@@ -222,6 +222,11 @@ def calculate_namespaces():
 					# prefix 'RSMUSMUIOMMIO' namespace 'SMU::RSMU::RSMU::SMUIO::MMIOEXT' (spec 'RSMUSMUIOMMIOx00000794...x000007C4') 
 					# prefix 'RSMUSMUIOMMIO' namespace 'SMU::RSMU::RSMU::SMUIO::MMIO' (spec 'RSMUSMUIOMMIOx00000800...x00000DD8') 
 					result[spec] = namespace # That's way too specific--but it will work.
+				elif spec.startswith("RSMUFUSEMMIOx"):
+					# prefix 'RSMUFUSEMMIO' namespace 'SMU::RSMU::RSMU::FUSE::MMIO' (spec 'RSMUFUSEMMIOx00000004...x000003C4') 
+					# prefix 'RSMUFUSEMMIO' namespace 'SMU::RSMU::RSMU::FUSE::MMIOEXT' (spec 'RSMUFUSEMMIOx000007B8...x000007C4') 
+					# prefix 'RSMUFUSEMMIO' namespace 'SMU::RSMU::RSMU::FUSE::MMIO' (spec 'RSMUFUSEMMIOx00000800...x00000DD8') 
+					result[spec] = namespace # That's way too specific--but it will work.
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
@@ -357,10 +362,18 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
             elif len(x) > 0 and all(item.physical_mnemonic.startswith("CPUID_") for item in x): # Put "CPUID" into its own address space
                 info("Note: Unknown access method {} in context {}--assuming 'CPUID'".format(aliaskind, context_string))
                 aliaskind = "CPUID"
-            #elif len(x) > 0 and all(item.physical_mnemonic.startswith("D18") for item in x) and aliaskind.startswith("FabricIndirectConfigAccessAddress"):
-            #    aliaskind = "FICAA"
+            #elif len(x) > 0 and all(item.physical_mnemonic.startswith("D18") for item in x) and aliaskind.startswith("FabricIndirectConfigAccessAddress"): # Genoa
+            #    assert False, x
+            #    aliaskind = "HOST" # FIXME:could also be SMN
+            #    # TODO: We could process a lot more of aliaskind.
+            #    # (Format: "FabricIndirectConfigAccessAddress[CfgRegInstID=0x2C, IndCfgAccFuncNum=0, IndCfgAccRegNum=0x024]")
+            #    # Synth Milan-style DataPortWrite for now
+            #    row.append("DataPortWrite=DF::FabricConfigAccessControl")
             else:
-                warning("Unknown access method {} in context {}--the user probably won't be able to use the register".format(aliaskind, context_string))
+                warning("Unknown access method {} in context {}--the user probably won't be able to use the register. Prefix: {!r}".format(aliaskind, context_string, prefix))
+                #if aliaskind.startswith("FabricIndirectConfigAccessAddress"): # Genoa
+                #    import pdb
+                #    pdb.set_trace()
             if aliaskind not in instances:
                 instances[aliaskind] = []
             instances[aliaskind] += x #.append(x)
