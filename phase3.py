@@ -338,15 +338,17 @@ def parse_RegisterInstanceSpecs(prefix, context_string):
             aliaskind = row.split(";")[0].strip()
             if aliaskind.find("_alias") != -1:
                 aliaskind = aliaskind[aliaskind.find("_alias") + len("_alias"):]
-            elif all(item.physical_mnemonic.startswith("MSR") for item in x): # Work around AMD doc bug where "_aliasMSR" is missing
+            elif len(x) > 0 and all(item.physical_mnemonic.startswith("MSR") for item in x): # Work around AMD doc bug where "_aliasMSR" is missing
                 info("Unknown access method {} in context {}--assuming 'MSR'".format(aliaskind, context_string))
                 aliaskind = "MSR"
-            elif all(item.physical_mnemonic.startswith("APICx") for item in x): # Work around AMD doc bug where "_aliasHOST" is missing
+            elif len(x) > 0 and all(item.physical_mnemonic.startswith("APICx") for item in x): # Work around AMD doc bug where "_aliasHOST" is missing
                 info("Unknown access method {} in context {}--assuming 'HOST'".format(aliaskind, context_string))
                 aliaskind = "HOST"
-            elif all(item.physical_mnemonic.startswith("CPUID_") for item in x): # Put "CPUID" into its own address space
+            elif len(x) > 0 and all(item.physical_mnemonic.startswith("CPUID_") for item in x): # Put "CPUID" into its own address space
                 info("Note: Unknown access method {} in context {}--assuming 'CPUID'".format(aliaskind, context_string))
                 aliaskind = "CPUID"
+            #elif len(x) > 0 and all(item.physical_mnemonic.startswith("D18") for item in x) and aliaskind.startswith("FabricIndirectConfigAccessAddress"):
+            #    aliaskind = "FICAA"
             else:
                 warning("Unknown access method {} in context {}--the user probably won't be able to use the register".format(aliaskind, context_string))
             if aliaskind not in instances:
