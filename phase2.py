@@ -63,6 +63,8 @@ def remove_cosmetic_line_breaks(header):
     if header.find("\n") == -1:
         return header
 
+    header = header.replace(",\n", ",")
+
     # First, remove newlines inside hex numerals and in lists of numbers
 
     for i in range(16):
