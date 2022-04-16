@@ -129,6 +129,26 @@ if memory_map != [] and memory_map[-1] == []:
 
 re_umc_ctl = re.compile(r"(UMC[0-9][0-9]CTLx00000804_)")
 
+def raise_namespace_error(problematic_prefix):
+	error("Cannot determine unique namespace for prefix {!r}".format(problematic_prefix + "x"))
+	info("Context for the error above:")
+	for row in memory_map:
+		try:
+			spec, namespace = row
+		except (TypeError, ValueError): # sometimes there are slight mistakes in the namespace map
+			warning("Malformed row in memory map: {}".format(row))
+			continue
+
+		addr, *spec = spec.split(":", 1)
+		if len(spec) > 0:
+			spec = spec[0]
+			spec = spec.strip()
+			prefix, *b = spec.split("x", 1)
+			if len(b) > 0:
+				if prefix == problematic_prefix:
+					info(" prefix {!r} namespace {!r} (spec {!r}) ".format(prefix, namespace, spec))
+	raise Exception("Cannot determine unique namespace for prefix {!r}".format(problematic_prefix + "x"))
+
 def calculate_namespaces():
 	# For now, this assumes that the part of the name before the "x" is unique enough.
 	# If necessary, this can be adapted to unroll the spec pattern in the map and register all of those instances in the map (with the respective namespace)--but for now, that's overkill.
@@ -167,6 +187,8 @@ def calculate_namespaces():
 					result[spec] = namespace # sigh. Way too specific--but it will work.
 				elif m := re_umc_ctl.match(spec): # -> UMC::Phy; Genoa
 					result[m.group(1)] = namespace
+				elif spec.startswith("SMNSCFx"): # in Genoa
+					result[spec] = namespace # That's way too specific--but it will work.
 				elif spec.startswith("FCHI3Cx"):
 					# ['00000000: FCHI3Cx02DE2000...x02DE22E8', 'FCH::I3C']
 					# ['00000000: FCHI3Cx02DE2600...x02DE2610', 'FCHI3C']
@@ -180,6 +202,8 @@ def calculate_namespaces():
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
+						if x_namespace != namespace:
+							raise_namespace_error(prefix)
 						assert x_namespace == namespace, (prefix, namespace, x_namespace)
 					result[prefix + "x"] = namespace
 	return result
