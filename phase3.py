@@ -237,6 +237,11 @@ def calculate_namespaces():
 					# prefix 'RSMUNTB0MMIO' namespace 'SMU::RSMU::RSMU::NTB::MMIOEXT' (spec 'RSMUNTB0MMIOx000007B8...x000007C4')
 					# prefix 'RSMUNTB0MMIO' namespace 'SMU::RSMU::RSMU::NTB::MMIO' (spec 'RSMUNTB0MMIOx00000800...x00000DD8')
 					result[spec] = namespace # That's way too specific--but it will work.
+				elif spec.startswith("NBIO0NBIFMISC0x000008") or spec.startswith("NBIO0NBIFMISC1x000008") or spec.startswith("NBIO1NBIFMISC0x000008") or spec.startswith("NBIO1NBIFMISC1x000008"):
+					# prefix 'NBIO0NBIFMISC0' namespace 'NBIFMM' (spec 'NBIO0NBIFMISC0x00000000...x00000600')
+					# prefix 'NBIO0NBIFMISC0' namespace 'SYSHUBMM' (spec 'NBIO0NBIFMISC0x00000800...x000008F4')
+					# prefix 'NBIO0NBIFMISC0' namespace 'NBIFMM' (spec 'NBIO0NBIFMISC0x00000900...x0000094C')
+					result[spec] = namespace
 				else:
 					if (prefix + "x") in result:
 						x_namespace = result[prefix + "x"]
