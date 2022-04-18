@@ -765,16 +765,26 @@ def process_TableDefinition(peripheral_path, name, vv):
                 return
 
     global_data_port_write = None
+    selected_instances = []
     for instance in instances:
         vars = dict(definition.split("=", 1) for definition in instance.variable_definitions)
+        FabricIndirectConfigAccessAddresses = [(k, v) for k, v in vars.items() if k.startswith("FabricIndirectConfigAccessAddress")]
         data_port_write = vars.get("DataPortWrite", "direct")
+        if data_port_write == "direct" and len(FabricIndirectConfigAccessAddresses) == 1: # Genoa: Fake a data port write so our handling picks it up.
+            data_port_write = "DF::FabricConfigAccessControl"
+            if selected_data_port_write != data_port_write:
+                continue
+            global_data_port_write = data_port_write # WORKAROUND for the fact that BCST_aliasHOST is NOT ficaa, but the other instances are, for the same register; very bad
+            # TODO: We could also check FabricIndirectConfigAccessAddresses[0] for sanity.
         if global_data_port_write is None:
             global_data_port_write = data_port_write
         # Assumption: all the data port write are the same for one register
-        assert data_port_write == global_data_port_write
+        assert data_port_write == global_data_port_write, (data_port_write, global_data_port_write, path)
+        selected_instances.append(instance)
     if selected_data_port_write != global_data_port_write:
         #info("Skipping {} because of different data port write".format(name))
         return
+    instances = selected_instances
     data_port_encoder = data_port_encoders.get(selected_data_port_write, data_port_encode_error)
 
     try:
