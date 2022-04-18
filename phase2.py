@@ -115,6 +115,17 @@ def remove_cosmetic_line_breaks(header):
             else:
                 j = i + 1
         return header
+    header = header.replace(";\nFabricIndirectConfigAccessAddress", "; FabricIndirectConfigAccessAddress") # Genoa INTCUST
+    header = header.replace("\n; D18F", "; D18F") # Genoa INTCUST
+    header = header.replace(";\nCCD", "; CCD") # Genoa INTCUST
+    header = header.replace(";\nWAFLCNTR", "; WAFLCNTR") # Genoa INTCUST
+    header = header.replace(";\nGMICNTR", "; GMICNTR") # Genoa INTCUST
+    header = header.replace("_l\nane", "_lane") # Genoa INTCUST
+    header = header.replace("_la\nne", "_lane") # Genoa INTCUST
+    header = header.replace("aliasH\nOST", "_aliasHOST") # Genoa INTCUST
+    header = header.replace("aliasHOS\nT", "_aliasHOST") # Genoa INTCUST
+    header = header.replace("aliasS\nMN", "_aliasSMN") # Genoa INTCUST
+    header = header.replace("_\nalias", "_alias") # Genoa INTCUST
     header = replace_ul(header)
     # Remove newline inside parenthesized strings: "(fo\no)" => "(foo)"
     header, _ = re.subn(r"[(][^)]*[)]", lambda match: match.group(0).replace("\n", ""), header, flags=re.DOTALL)
