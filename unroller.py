@@ -18,7 +18,11 @@ class RegisterInstanceSpec(namedtuple("RegisterInstanceSpec", ["logical_mnemonic
 	def resolve_physical_mnemonic(self, data_port_encoder):
 		physical_mnemonic = self.physical_mnemonic
 		for definition in self.variable_definitions:
-			lhs_spec, rhs_spec = definition.split("=", 1)
+			if definition.startswith("FabricIndirectConfigAccessAddress["):
+				lhs_spec = "FabricIndirectConfigAccessAddress" # TODO: keep sanitized definition (spec)
+				rhs_spec = "0" # dummy
+			else:
+				lhs_spec, rhs_spec = definition.split("=", 1)
 			lhs = unroll_inst_item_pattern(lhs_spec.replace("::", "**"))
 			if rhs_spec.find("::") != -1 or rhs_spec.find("{") != -1:
 				rhs = unroll_inst_item_pattern("=" + rhs_spec.replace("::", "**"))
@@ -63,6 +67,8 @@ def unroll_inst_item_pattern(spec):
 	>>> list(unroll_inst_item_pattern("_ccd11_instGMIC13KPXSLV_lane[BC,15:0]_aliasSMN"))
 	['_ccd11_instGMIC13KPXSLV_laneBC_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane15_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane14_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane13_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane12_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane11_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane10_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane9_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane8_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane7_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane6_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane5_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane4_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane3_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane2_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane1_aliasSMN', '_ccd11_instGMIC13KPXSLV_lane0_aliasSMN']
 	"""
+	#>>> list(unroll_inst_item_pattern("_inst[TCDX[15:0],SPF[15:0],PFX[7:0],CNLI[3:0],CAKE[7:0],PIE0,ICNG[3:0],IOS[3:0],IOM[3:0],NCM[3:0],ACM[3:0],CCM[7:0],CMP[3:0],CS[11:0]]_n1__aliasSMN"))
+	#[]
 	class Scanner(object):
 		def __init__(self, input_data):
 			self.input_data = input_data
@@ -173,10 +179,7 @@ def unroll_inst_item_pattern(spec):
 	return [choice for choice in parse_toplevel()]
 
 def unroll_inst_pattern(spec):
-	#"""
-	#>>> unroll_inst_pattern("_inst[INTSBDEVINDCFG0,NBIF[1:0]DEVINDCFG0,PCIE1DEVINDCFG[7:0],PCIE0DEVINDCFG[7:0]]_aliasSMN; IOHCDEVINDx[0000_C004,0000_9004,0000_8004,0000_[[4:1][C,8,4,0]]04]; IOHCDEVIND=13B3_0000h")
-	#"""
-	variable_definitions = []
+	# list(unroll_inst_pattern("_inst[TCDX[15:0],SPF[15:0],PFX[7:0],CNLI[3:0],CAKE[7:0],PIE0,ICNG[3:0],IOS[3:0],IOM[3:0],NCM[3:0],ACM[3:0],CCM[7:0],CMP[3:0],CS[11:0]]_n1__aliasSMN; D18F3x00000834_x[60:00]; D18F3=4900_3000h; FabricIndirectConfigAccessAddress[CfgRegInstID=0x[60:00], IndCfgAccFuncNum=0,IndCfgAccRegNum=0x20D]"))
 	insts = []
 	physs = []
 	for item in spec.split(";"):
