@@ -462,7 +462,16 @@ class TableDefinition(object):
         self.access = extra.get("access")
         self.resetValue = extra.get("Reset")
         # Note: strip_off_rwops also strips off the access mode and reset value.
-        self.description = ("\n".join(line for line in prefix.split("\n") if not strip_off_rwops(line.strip())[1].strip().startswith("_"))).strip()
+        # ("\n".join(line for line in prefix.split("\n") if not strip_off_rwops(line.strip())[1].strip().startswith("_"))).strip()
+        description = []
+        for line in prefix.split("\n"):
+            q = strip_off_rwops(line.strip())[1]
+            if q.strip().startswith("_"):
+                if q.find("MSR") != -1: # it's useful to know whether those are per-thread, per-core or whatever.
+                    description.append(q)
+            else:
+                description.append(line)
+        self.description = "\n".join(description).strip()
         if spec[-1:] == [[]]:
           spec = spec[:-1]
         self.spec = spec
