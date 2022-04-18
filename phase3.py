@@ -774,7 +774,6 @@ def process_TableDefinition(peripheral_path, name, vv):
             data_port_write = "DF::FabricConfigAccessControl"
             if selected_data_port_write != data_port_write:
                 continue
-            global_data_port_write = data_port_write # WORKAROUND for the fact that BCST_aliasHOST is NOT ficaa, but the other instances are, for the same register; very bad
             # TODO: We could also check FabricIndirectConfigAccessAddresses[0] for sanity.
         if global_data_port_write is None:
             global_data_port_write = data_port_write
