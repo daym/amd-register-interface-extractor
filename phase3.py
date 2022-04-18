@@ -764,7 +764,6 @@ def process_TableDefinition(peripheral_path, name, vv):
                 assert len(vv.instances["SMN"]) == len(instances)
                 return
 
-    global_data_port_write = None
     selected_instances = []
     for instance in instances:
         vars = dict(definition.split("=", 1) for definition in instance.variable_definitions)
@@ -772,15 +771,11 @@ def process_TableDefinition(peripheral_path, name, vv):
         data_port_write = vars.get("DataPortWrite", "direct")
         if data_port_write == "direct" and len(FabricIndirectConfigAccessAddresses) == 1: # Genoa: Fake a data port write so our handling picks it up.
             data_port_write = "DF::FabricConfigAccessControl"
-            if selected_data_port_write != data_port_write:
-                continue
             # TODO: We could also check FabricIndirectConfigAccessAddresses[0] for sanity.
-        if global_data_port_write is None:
-            global_data_port_write = data_port_write
         # Assumption: all the data port write are the same for one register
-        assert data_port_write == global_data_port_write, (data_port_write, global_data_port_write, path)
-        selected_instances.append(instance)
-    if selected_data_port_write != global_data_port_write:
+        if selected_data_port_write == data_port_write:
+            selected_instances.append(instance)
+    if selected_instances == []:
         #info("Skipping {} because of different data port write".format(name))
         return
     instances = selected_instances
