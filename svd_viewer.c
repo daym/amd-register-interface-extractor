@@ -111,7 +111,11 @@ static void resolve_derivedFrom(xmlNodePtr root, const char* peripheral_name) {
 			reference  = g_hash_table_lookup(peripheral_by_name, derivedFrom);
 		}
 		if (reference) { // If the reference to be derived from has been found
-			resolve_derivedFrom(reference, reference_peripheral_name);
+			if (strcmp(reference_peripheral_name, peripheral_name) == 0) { /* shitty trivial cycle detector */
+				fprintf(stderr, "Warning: Ignoring cycle between %s and %s\n", peripheral_name, reference_peripheral_name);
+			} else {
+				resolve_derivedFrom(reference, reference_peripheral_name);
+			}
 			xmlNodePtr child;
 			// Copy all the pseudo attributes over that we don't already have
 			for(child = reference->children; child; child = child->next) {
