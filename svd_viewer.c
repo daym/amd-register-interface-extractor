@@ -111,8 +111,9 @@ static void resolve_derivedFrom(xmlNodePtr root, const char* peripheral_name) {
 			reference  = g_hash_table_lookup(peripheral_by_name, derivedFrom);
 		}
 		if (reference) { // If the reference to be derived from has been found
-			if (strcmp(reference_peripheral_name, peripheral_name) == 0) { /* shitty trivial cycle detector */
-				fprintf(stderr, "Warning: Ignoring cycle between %s and %s\n", peripheral_name, reference_peripheral_name);
+			if (root == reference) { /* shitty trivial cycle detector */
+				xmlChar* xml_name = child_element_text(root, "name");
+				fprintf(stderr, "Warning: Ignoring cycle between %s.%s and %s.%s\n", peripheral_name, xml_name, peripheral_name, xml_name);
 			} else {
 				resolve_derivedFrom(reference, reference_peripheral_name);
 			}
